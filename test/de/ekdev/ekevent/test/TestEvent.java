@@ -8,7 +8,6 @@ import de.ekdev.ekevent.EventListenerList;
 
 /**
  * @author ekDev
- * 
  */
 public class TestEvent extends Event
 {

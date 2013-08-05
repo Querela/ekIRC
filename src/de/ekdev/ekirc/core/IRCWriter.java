@@ -33,7 +33,7 @@ public class IRCWriter implements Runnable
 
     public boolean isRunning()
     {
-        this.isRunning = (this.thread != null) && this.thread.isAlive();
+        this.isRunning = (this.thread != null) && ! this.thread.isInterrupted();
         return this.isRunning;
     }
 
@@ -76,7 +76,7 @@ public class IRCWriter implements Runnable
 
         try
         {
-            while (true)
+            while (!this.thread.isInterrupted())
             {
                 String line2send = this.queue.take();
                 if (line2send != null && this.con.isConnected())
@@ -88,7 +88,6 @@ public class IRCWriter implements Runnable
         }
         catch (InterruptedException e)
         {
-
         }
 
         System.out.println(">>> STOPPING WRITER ---");
@@ -118,6 +117,17 @@ public class IRCWriter implements Runnable
     // {
     // }
     // }
+
+    public void send(AsIRCMessage ircMessage)
+    {
+        // TODO: check length?
+        this.sendLine(ircMessage.asIRCMessageString());
+    }
+
+    public void sendImmediate(AsIRCMessage ircMessage)
+    {
+        this.sendLineNow(ircMessage.asIRCMessageString());
+    }
 
     public void sendLine(String line)
     {

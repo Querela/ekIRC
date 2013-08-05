@@ -11,21 +11,23 @@ import de.ekdev.ekevent.EventManager;
 public class IRCManager
 {
     protected EventManager eventManager;
-    
+
     public IRCManager()
     {
         this.eventManager = this.createDefaultEventManager();
     }
-    
+
     // ------------------------------------------------------------------------
-    
+
+    // ------------------------------------------------------------------------
+
     protected EventManager createDefaultEventManager()
     {
         return new EventManager();
     }
-    
+
     // ------------------------------------------------------------------------
-    
+
     public EventManager getEventManager()
     {
         return this.eventManager;

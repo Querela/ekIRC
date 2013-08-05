@@ -80,7 +80,7 @@ public class IRCReader implements Runnable
     {
         System.out.println(">>> STARTING READER ---");
 
-        while (true)
+        while (!this.thread.isInterrupted())
         {
             String line = null;
             try
@@ -107,6 +107,7 @@ public class IRCReader implements Runnable
             }
             catch (Exception e)
             {
+                // SocketException: socket closed
                 e.printStackTrace();
                 line = null;
             }

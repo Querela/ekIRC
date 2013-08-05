@@ -1,7 +1,7 @@
 /**
  * IRCEvent.java
  */
-package de.ekdev.ekirc.event;
+package de.ekdev.ekirc.core.event;
 
 import de.ekdev.ekevent.Event;
 

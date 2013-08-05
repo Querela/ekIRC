@@ -36,11 +36,13 @@ public class EventManager
     {
         EventListenerList.unregisterAll(listener);
     }
-    
+
     // ------------------------------------------------------------------------
 
     public void dispatch(Event event)
     {
+        if (event == null) return;
+
         // TODO: async?
         synchronized (this)
         {
