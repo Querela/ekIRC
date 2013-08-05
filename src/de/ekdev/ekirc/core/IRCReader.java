@@ -13,18 +13,24 @@ import java.io.InterruptedIOException;
  */
 public class IRCReader implements Runnable
 {
-    private IRCConnection con;
+    private final IRCConnection con;
+    private final IRCMessageProcessor msgProc;
     private BufferedReader reader;
     private boolean isRunning;
     private Thread thread;
 
-    public IRCReader(IRCConnection con) throws IllegalArgumentException
+    public IRCReader(IRCConnection con, IRCMessageProcessor msgProc) throws IllegalArgumentException
     {
         if (con == null)
         {
             throw new IllegalArgumentException("Argument con is null!");
         }
+        if (msgProc == null)
+        {
+            throw new IllegalArgumentException("Argument msgProc is null!");
+        }
 
+        this.msgProc = msgProc;
         this.con = con;
     }
 
@@ -95,6 +101,7 @@ public class IRCReader implements Runnable
             // }
             catch (InterruptedIOException e)
             {
+                System.out.println(">>> READ INTERRUPT");
                 // send a ping
                 continue;
             }
@@ -109,6 +116,8 @@ public class IRCReader implements Runnable
             {
                 break;
             }
+
+            msgProc.handleLine(line);
 
             // TODO: handle line -> event
             System.out.println(">>>" + line);

@@ -13,7 +13,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class IRCWriter implements Runnable
 {
-    private IRCConnection con;
+    private final IRCConnection con;
     private BufferedWriter writer;
     private boolean isRunning;
     private Thread thread;

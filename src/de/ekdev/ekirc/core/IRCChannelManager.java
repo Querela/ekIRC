@@ -8,5 +8,22 @@ package de.ekdev.ekirc.core;
  */
 public class IRCChannelManager
 {
-
+    private final IRCServerContext serverContext;
+    
+    public IRCChannelManager(IRCServerContext serverContext)
+    {
+        if (serverContext == null)
+        {
+            throw new IllegalArgumentException("Argument serverContext is null!");
+        }
+        
+        this.serverContext = serverContext;
+    }
+    
+    // ------------------------------------------------------------------------
+    
+    public final IRCServerContext getIRCServerContext()
+    {
+        return this.serverContext;
+    }
 }
