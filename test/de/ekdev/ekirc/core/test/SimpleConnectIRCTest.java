@@ -11,7 +11,7 @@ import de.ekdev.ekirc.core.IRCConnection;
 import de.ekdev.ekirc.core.IRCManager;
 import de.ekdev.ekirc.core.IRCMessageProcessor;
 import de.ekdev.ekirc.core.IRCReader;
-import de.ekdev.ekirc.core.IRCServerContext;
+import de.ekdev.ekirc.core.IRCNetwork;
 import de.ekdev.ekirc.core.IRCWriter;
 
 /**
@@ -25,8 +25,8 @@ public class SimpleConnectIRCTest
         c.connect();
 
         IRCManager imngr = new IRCManager();
-        IRCServerContext isc = new IRCServerContext(imngr);
-        IRCMessageProcessor imp = new IRCMessageProcessor(imngr, isc);
+        IRCNetwork inet = new IRCNetwork(imngr);
+        IRCMessageProcessor imp = new IRCMessageProcessor(imngr, inet);
 
         IRCReader r = new IRCReader(c, imp);
         IRCWriter w = new IRCWriter(c);

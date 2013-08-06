@@ -8,22 +8,22 @@ package de.ekdev.ekirc.core;
  */
 public class IRCChannelManager
 {
-    private final IRCServerContext serverContext;
+    private final IRCNetwork ircNetwork;
     
-    public IRCChannelManager(IRCServerContext serverContext)
+    public IRCChannelManager(IRCNetwork ircNetwork)
     {
-        if (serverContext == null)
+        if (ircNetwork == null)
         {
-            throw new IllegalArgumentException("Argument serverContext is null!");
+            throw new IllegalArgumentException("Argument ircNetwork is null!");
         }
         
-        this.serverContext = serverContext;
+        this.ircNetwork = ircNetwork;
     }
     
     // ------------------------------------------------------------------------
     
-    public final IRCServerContext getIRCServerContext()
+    public final IRCNetwork getIRCNetwork()
     {
-        return this.serverContext;
+        return this.ircNetwork;
     }
 }

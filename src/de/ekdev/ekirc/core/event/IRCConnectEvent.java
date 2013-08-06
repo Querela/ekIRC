@@ -4,7 +4,7 @@
 package de.ekdev.ekirc.core.event;
 
 import de.ekdev.ekevent.EventListenerList;
-import de.ekdev.ekirc.core.IRCServerContext;
+import de.ekdev.ekirc.core.IRCNetwork;
 
 /**
  * @author ekDev
@@ -13,14 +13,14 @@ public class IRCConnectEvent extends IRCEvent
 {
     private final static EventListenerList listeners = new EventListenerList();
 
-    public IRCConnectEvent(IRCServerContext source)
+    public IRCConnectEvent(IRCNetwork source)
     {
         super(source);
     }
 
-    public IRCServerContext getIRCServerContext()
+    public IRCNetwork getIRCNetwork()
     {
-        return (IRCServerContext) super.getSource();
+        return (IRCNetwork) super.getSource();
     }
 
     // ------------------------------------------------------------------------

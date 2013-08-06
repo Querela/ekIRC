@@ -1,5 +1,5 @@
 /**
- * IRCServerContext.java
+ * IRCNetwork.java
  */
 package de.ekdev.ekirc.core;
 
@@ -12,7 +12,7 @@ import de.ekdev.ekirc.core.event.IRCConnectEvent;
 /**
  * @author ekDev
  */
-public class IRCServerContext
+public class IRCNetwork
 {
     public final static int MAX_SERVER_NAME_LENGTH = 63;
 
@@ -27,7 +27,7 @@ public class IRCServerContext
     protected IRCReader ircReader;
     protected IRCWriter ircWriter;
 
-    public IRCServerContext(IRCManager ircManager)
+    public IRCNetwork(IRCManager ircManager)
     {
         if (ircManager == null)
         {

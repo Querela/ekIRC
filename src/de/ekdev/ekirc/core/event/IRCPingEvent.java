@@ -4,7 +4,7 @@
 package de.ekdev.ekirc.core.event;
 
 import de.ekdev.ekevent.EventListenerList;
-import de.ekdev.ekirc.core.IRCServerContext;
+import de.ekdev.ekirc.core.IRCNetwork;
 
 /**
  * @author ekDev
@@ -14,15 +14,15 @@ public class IRCPingEvent extends IRCEvent
     private final static EventListenerList listeners = new EventListenerList();
     private final String pingValue;
 
-    public IRCPingEvent(IRCServerContext source, String pingValue)
+    public IRCPingEvent(IRCNetwork source, String pingValue)
     {
         super(source);
         this.pingValue = pingValue;
     }
 
-    public IRCServerContext getIRCServerContext()
+    public IRCNetwork getIRCNetwork()
     {
-        return (IRCServerContext) super.getSource();
+        return (IRCNetwork) super.getSource();
     }
 
     public String getPingValue()

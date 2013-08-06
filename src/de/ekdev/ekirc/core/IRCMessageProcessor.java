@@ -11,23 +11,23 @@ import de.ekdev.ekirc.core.event.IRCPingEvent;
 public class IRCMessageProcessor
 {
     private final IRCManager ircManager;
-    private final IRCServerContext serverContext;
+    private final IRCNetwork ircNetwork;
 
     protected final IRCMessageParser parser;
 
-    public IRCMessageProcessor(IRCManager ircManager, IRCServerContext serverContext)
+    public IRCMessageProcessor(IRCManager ircManager, IRCNetwork ircNetwork)
     {
         if (ircManager == null)
         {
             throw new IllegalArgumentException("Argument ircManager is null!");
         }
-        if (serverContext == null)
+        if (ircNetwork == null)
         {
-            throw new IllegalArgumentException("Argument serverContext is null!");
+            throw new IllegalArgumentException("Argument ircNetwork is null!");
         }
 
         this.ircManager = ircManager;
-        this.serverContext = serverContext;
+        this.ircNetwork = ircNetwork;
         this.parser = this.createDefaultIRCMessageParser();
     }
 
@@ -75,7 +75,7 @@ public class IRCMessageProcessor
     {
         if ("PING".equals(im.getCommand()))
         {
-            this.ircManager.getEventManager().dispatch(new IRCPingEvent(this.serverContext, im.getParams().get(0)));
+            this.ircManager.getEventManager().dispatch(new IRCPingEvent(this.ircNetwork, im.getParams().get(0)));
         }
     }
 
