@@ -11,7 +11,7 @@ import de.ekdev.ekevent.EventException;
 import de.ekdev.ekevent.EventHandler;
 import de.ekdev.ekevent.EventListener;
 import de.ekdev.ekirc.core.IRCManager;
-import de.ekdev.ekirc.core.IRCServerContext;
+import de.ekdev.ekirc.core.IRCNetwork;
 import de.ekdev.ekirc.core.commands.connection.IRCNickCommand;
 import de.ekdev.ekirc.core.commands.connection.IRCUserCommand;
 import de.ekdev.ekirc.core.commands.misc.IRCPongCommand;
@@ -31,7 +31,7 @@ public class SimpleIRCServerContextTest
     {
 
         IRCManager ircManager = new IRCManager();
-        IRCServerContext isc = new IRCServerContext(ircManager);
+        IRCNetwork inet = new IRCNetwork(ircManager);
 
         try
         {
@@ -40,7 +40,7 @@ public class SimpleIRCServerContextTest
                 public void onConnect(IRCConnectEvent ice)
                 {
                     System.out.println("Connect - EventHandler");
-                    ice.getIRCServerContext().send(new IRCNickCommand("nickles"),
+                    ice.getIRCNetwork().send(new IRCNickCommand("nickles"),
                             new IRCUserCommand("userles", true, "realles"));
 
                 }
@@ -55,13 +55,18 @@ public class SimpleIRCServerContextTest
         {
             ircManager.getEventManager().register(new EventListener() {
                 private int counter = 0;
+                private long lastTime = 0;
 
                 @EventHandler
                 public void doThePong(IRCPingEvent ipe)
                 {
-                    System.out.println("Ping - EventHandler (" + ++counter + ")");
-                    ipe.getIRCServerContext().sendImmediate(new IRCPongCommand(ipe.getPingValue()));
+                    long now = System.currentTimeMillis();
+                    String time = ((lastTime != 0) ? "delta: " + ((now - lastTime) / 1000.0) + " sec."
+                            : ("First ping: " + now / 1000 + "." + (now - (now / 1000) * 1000)));
+                    System.out.println("Ping - EventHandler (" + ++counter + ") - " + time);
+                    lastTime = now;
 
+                    ipe.getIRCNetwork().sendImmediate(new IRCPongCommand(ipe.getPingValue()));
                 }
             });
         }
@@ -72,14 +77,14 @@ public class SimpleIRCServerContextTest
 
         try
         {
-            Thread.sleep(3000);
+            Thread.sleep(1000);
         }
         catch (InterruptedException e)
         {
         }
 
         // isc.connect("irc.irchighway.net", 6667, "pass");
-        isc.connect("irc.chatzona.org", 6667, "pass");
+        inet.connect("irc.chatzona.org", 6667, "pass");
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         try
@@ -94,7 +99,7 @@ public class SimpleIRCServerContextTest
         {
         }
 
-        isc.quit("-)");
+        inet.quit("-)");
 
         try
         {
@@ -104,7 +109,6 @@ public class SimpleIRCServerContextTest
         {
         }
 
-        isc.disconnect();
+        inet.disconnect();
     }
-
 }
