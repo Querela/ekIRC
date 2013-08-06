@@ -51,38 +51,6 @@ public class SimpleIRCServerContextTest
             e.printStackTrace();
         }
 
-        try
-        {
-            ircManager.getEventManager().register(new EventListener() {
-                private int counter = 0;
-                private long lastTime = 0;
-
-                @EventHandler
-                public void doThePong(IRCPingEvent ipe)
-                {
-                    long now = System.currentTimeMillis();
-                    String time = ((lastTime != 0) ? "delta: " + ((now - lastTime) / 1000.0) + " sec."
-                            : ("First ping: " + now / 1000 + "." + (now - (now / 1000) * 1000)));
-                    System.out.println("Ping - EventHandler (" + ++counter + ") - " + time);
-                    lastTime = now;
-
-                    ipe.getIRCNetwork().sendImmediate(new IRCPongCommand(ipe.getPingValue()));
-                }
-            });
-        }
-        catch (EventException e)
-        {
-            e.printStackTrace();
-        }
-
-        try
-        {
-            Thread.sleep(1000);
-        }
-        catch (InterruptedException e)
-        {
-        }
-
         // isc.connect("irc.irchighway.net", 6667, "pass");
         inet.connect("irc.chatzona.org", 6667, "pass");
 
@@ -90,6 +58,13 @@ public class SimpleIRCServerContextTest
         try
         {
             String line;
+            while ((line = br.readLine()) != null)
+            {
+                if (line.equals("")) break;
+            }
+            
+            inet.send(new IRCNickCommand("nick"));
+            
             while ((line = br.readLine()) != null)
             {
                 if (line.equals("")) break;

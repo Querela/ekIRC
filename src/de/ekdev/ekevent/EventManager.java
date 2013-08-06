@@ -69,6 +69,8 @@ public class EventManager
 
     // ------------------------------------------------------------------------
 
+    // ------------------------------------------------------------------------
+
     private EventListenerList getEventListeners(Class<? extends Event> type) throws EventException
     {
         try
