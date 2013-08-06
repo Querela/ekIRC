@@ -9,18 +9,13 @@ import de.ekdev.ekirc.core.IRCNetwork;
 /**
  * @author ekDev
  */
-public class IRCConnectEvent extends IRCEvent
+public class IRCConnectEvent extends IRCNetworkEvent
 {
     private final static EventListenerList listeners = new EventListenerList();
 
     public IRCConnectEvent(IRCNetwork source)
     {
         super(source);
-    }
-
-    public IRCNetwork getIRCNetwork()
-    {
-        return (IRCNetwork) super.getSource();
     }
 
     // ------------------------------------------------------------------------

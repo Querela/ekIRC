@@ -40,8 +40,8 @@ public class SimpleIRCServerContextTest
                 public void onConnect(IRCConnectEvent ice)
                 {
                     System.out.println("Connect - EventHandler");
-                    ice.getIRCNetwork().send(new IRCNickCommand("nickles"),
-                            new IRCUserCommand("userles", true, "realles"));
+                    ice.getIRCNetwork()
+                            .send(new IRCNickCommand("nick"), new IRCUserCommand("userles", true, "realles"));
 
                 }
             });
@@ -62,9 +62,23 @@ public class SimpleIRCServerContextTest
             {
                 if (line.equals("")) break;
             }
-            
+
+            inet.send(new IRCNickCommand("nickles"));
+
+            while ((line = br.readLine()) != null)
+            {
+                if (line.equals("")) break;
+            }
+
             inet.send(new IRCNickCommand("nick"));
-            
+
+            while ((line = br.readLine()) != null)
+            {
+                if (line.equals("")) break;
+            }
+
+            inet.send(new IRCNickCommand("nickles3"));
+
             while ((line = br.readLine()) != null)
             {
                 if (line.equals("")) break;

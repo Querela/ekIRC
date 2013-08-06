@@ -9,7 +9,7 @@ import de.ekdev.ekirc.core.IRCNetwork;
 /**
  * @author ekDev
  */
-public class IRCPingEvent extends IRCEvent
+public class IRCPingEvent extends IRCNetworkEvent
 {
     private final static EventListenerList listeners = new EventListenerList();
     private final String pingValue;
@@ -18,11 +18,6 @@ public class IRCPingEvent extends IRCEvent
     {
         super(source);
         this.pingValue = pingValue;
-    }
-
-    public IRCNetwork getIRCNetwork()
-    {
-        return (IRCNetwork) super.getSource();
     }
 
     public String getPingValue()
