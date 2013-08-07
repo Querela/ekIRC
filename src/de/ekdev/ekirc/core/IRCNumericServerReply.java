@@ -16,6 +16,7 @@ public enum IRCNumericServerReply
     // http://datatracker.ietf.org/doc/rfc2812/?include_text=1
     // http://www.networksorcery.com/enp/protocol/irc.htm
 
+    // --------------------------------
     // Replies in the range from 001 to 099 are used for client-server connections only and should never travel between
     // servers:
     RPL_WELCOME(001), // "Welcome to the Internet Relay Network <nick>!<user>@<host>"
@@ -24,6 +25,7 @@ public enum IRCNumericServerReply
     RPL_MYINFO(004), // "<servername> <version> <available user modes> <available channel modes>"
     RPL_BOUNCE(005), // "Try server <server name>, port <port number>" // never used like this ...
 
+    // --------------------------------
     // Error replies are found in the range from 400 to 599:
     ERR_NOSUCHNICK(401), // "<nickname> :No such nick/channel"
     ERR_NOSUCHSERVER(402), // "<server name> :No such server"
@@ -79,6 +81,7 @@ public enum IRCNumericServerReply
     ERR_UMODEUNKNOWNFLAG(501), // ":Unknown MODE flag"
     ERR_USERSDONTMATCH(502), // ":Cannot change mode for other users"
 
+    // --------------------------------
     // Replies generated in the response to commands are found in the range from 200 to 399:
     RPL_USERHOST(302), // ":*1<reply> *( " " <reply> )", reply = nickname [ "*" ] "=" ( "+" / "-" ) hostname
     RPL_ISON(303), // ":*1<nick> *( " " <nick> )"
@@ -160,6 +163,7 @@ public enum IRCNumericServerReply
     RPL_ADMINEMAIL(259), // ":<admin info>"
     RPL_TRYAGAIN(263), // "<command> :Please wait a while and try again."
 
+    // --------------------------------
     // Reserved numerics
     RPL_SERVICEINFO(231), //
     RPL_ENDOFSERVICES(232), //
@@ -222,6 +226,7 @@ public enum IRCNumericServerReply
 
     public static IRCNumericServerReply byCode(int code)
     {
+        // TODO: throw exception if not found? (like valueOf(..)?)
         return IRCNumericServerReply.lookup.get(code);
     }
 

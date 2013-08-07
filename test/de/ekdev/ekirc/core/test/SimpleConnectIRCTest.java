@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import de.ekdev.ekirc.core.IRCConnection;
+import de.ekdev.ekirc.core.IRCConnectionLog;
 import de.ekdev.ekirc.core.IRCManager;
 import de.ekdev.ekirc.core.IRCMessageProcessor;
 import de.ekdev.ekirc.core.IRCReader;
@@ -28,8 +29,10 @@ public class SimpleConnectIRCTest
         IRCNetwork inet = new IRCNetwork(imngr);
         IRCMessageProcessor imp = new IRCMessageProcessor(imngr, inet);
 
-        IRCReader r = new IRCReader(c, imp);
-        IRCWriter w = new IRCWriter(c);
+        IRCConnectionLog icl = new IRCConnectionLog(System.out);
+
+        IRCReader r = new IRCReader(c, icl, imp);
+        IRCWriter w = new IRCWriter(c, icl);
 
         r.start();
         w.start();

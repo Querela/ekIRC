@@ -4,6 +4,7 @@
 package de.ekdev.ekirc.core;
 
 import de.ekdev.ekirc.core.event.IRCPingEvent;
+import de.ekdev.ekirc.core.event.IRCUnknownServerCommandEvent;
 
 /**
  * @author ekDev
@@ -39,11 +40,10 @@ public class IRCMessageProcessor
         try
         {
             im = this.parser.parseRawLine(line);
-            System.out.println(im);
         }
         catch (IRCMessageFormatException e)
         {
-            e.printStackTrace();
+            this.ircNetwork.getIRCConnectionLog().exception(e);
         }
         catch (Exception e)
         {
@@ -51,6 +51,7 @@ public class IRCMessageProcessor
             e.printStackTrace();
         }
 
+        // silently ignore empty messages
         if (im == null) return;
 
         if (im.isNumericReply())
@@ -65,9 +66,26 @@ public class IRCMessageProcessor
 
     protected void processServerResponse(IRCMessage im)
     {
-        if (im.getNumericReply() == 433)
+        IRCNumericServerReply code = IRCNumericServerReply.byCode(im.getNumericReply());
+
+        if (code == null)
         {
-            // autorename?
+            this.ircManager.getEventManager().dispatch(new IRCUnknownServerCommandEvent(this.ircNetwork, im));
+            return;
+        }
+
+        switch (code)
+        {
+            case ERR_NICKNAMEINUSE:
+            {
+                // autorename?
+                break;
+            }
+            default:
+            {
+                this.ircNetwork.getIRCConnectionLog().message(im.getCommand() + " Handler not yet implemented.");
+                break;
+            }
         }
     }
 

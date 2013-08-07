@@ -14,26 +14,33 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class IRCWriter implements Runnable
 {
     private final IRCConnection con;
+    private final IRCConnectionLog log;
+
     private BufferedWriter writer;
     private boolean isRunning;
     private Thread thread;
     private LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>(); // TODO: add limit?
 
-    public IRCWriter(IRCConnection con) throws IllegalArgumentException
+    public IRCWriter(IRCConnection con, IRCConnectionLog log) throws IllegalArgumentException
     {
         if (con == null)
         {
             throw new IllegalArgumentException("Argument con is null!");
         }
+        if (log == null)
+        {
+            throw new IllegalArgumentException("Argument log is null!");
+        }
 
         this.con = con;
+        this.log = log;
     }
 
     // ------------------------------------------------------------------------
 
     public boolean isRunning()
     {
-        this.isRunning = (this.thread != null) && ! this.thread.isInterrupted();
+        this.isRunning = (this.thread != null) && !this.thread.isInterrupted();
         return this.isRunning;
     }
 
@@ -72,7 +79,7 @@ public class IRCWriter implements Runnable
     @Override
     public void run()
     {
-        System.out.println(">>> STARTING WRITER ---");
+        this.log.message("WRITER THREAD STARTED ---");
 
         try
         {
@@ -90,7 +97,7 @@ public class IRCWriter implements Runnable
         {
         }
 
-        System.out.println(">>> STOPPING WRITER ---");
+        this.log.message("WRITER THREAD STOPPED ---");
     }
 
     // ------------------------------------------------------------------------
@@ -138,7 +145,7 @@ public class IRCWriter implements Runnable
         catch (InterruptedException e)
         {
             // TODO: abort?
-            e.printStackTrace();
+            this.log.exception(e);
         }
     }
 
@@ -155,13 +162,14 @@ public class IRCWriter implements Runnable
                 this.writer.write(line);
                 this.writer.write(IRCMessage.IRC_LINE_ENDING);
                 this.writer.flush();
-                System.out.println("<<<" + line);
+
+                this.log.out(line);
             }
             catch (Exception e)
             {
                 // IOException
                 // TODO: abort here?
-                e.printStackTrace();
+                this.log.exception(e);
             }
         }
     }

@@ -8,6 +8,7 @@ import de.ekdev.ekevent.EventHandler;
 import de.ekdev.ekevent.EventListener;
 import de.ekdev.ekevent.EventManager;
 import de.ekdev.ekirc.core.event.IRCPingEvent;
+import de.ekdev.ekirc.core.event.IRCUnknownServerCommandEvent;
 
 /**
  * @author ekDev
@@ -37,6 +38,15 @@ public class IRCManager
         {
             e.printStackTrace();
         }
+
+        try
+        {
+            this.eventManager.register(this.createDefaultUnknownCommandEventListener());
+        }
+        catch (EventException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     // ------------------------------------------------------------------------
@@ -53,6 +63,27 @@ public class IRCManager
             public void onPingEvent(IRCPingEvent ipe)
             {
                 ipe.getIRCNetwork().sendPong(ipe.getPingValue());
+            }
+        };
+    }
+
+    protected EventListener createDefaultUnknownCommandEventListener()
+    {
+        return new EventListener() {
+            @EventHandler
+            public void onUnknownCommandEvent(IRCUnknownServerCommandEvent iusce)
+            {
+                try
+                {
+                    iusce.getIRCNetwork()
+                            .getIRCConnectionLog()
+                            .message(
+                                    iusce.getUnknownCommand() + " - Unknown Server Reply code! [Network: "
+                                            + iusce.getIRCNetwork().getName() + "]");
+                }
+                catch (Exception e)
+                {
+                }
             }
         };
     }

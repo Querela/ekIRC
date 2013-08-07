@@ -14,16 +14,23 @@ import java.io.InterruptedIOException;
 public class IRCReader implements Runnable
 {
     private final IRCConnection con;
+    private final IRCConnectionLog log;
     private final IRCMessageProcessor msgProc;
+
     private BufferedReader reader;
     private boolean isRunning;
     private Thread thread;
 
-    public IRCReader(IRCConnection con, IRCMessageProcessor msgProc) throws IllegalArgumentException
+    public IRCReader(IRCConnection con, IRCConnectionLog log, IRCMessageProcessor msgProc)
+            throws IllegalArgumentException
     {
         if (con == null)
         {
             throw new IllegalArgumentException("Argument con is null!");
+        }
+        if (log == null)
+        {
+            throw new IllegalArgumentException("Argument log is null!");
         }
         if (msgProc == null)
         {
@@ -32,6 +39,7 @@ public class IRCReader implements Runnable
 
         this.msgProc = msgProc;
         this.con = con;
+        this.log = log;
     }
 
     // ------------------------------------------------------------------------
@@ -78,7 +86,7 @@ public class IRCReader implements Runnable
     @Override
     public void run()
     {
-        System.out.println(">>> STARTING READER ---");
+        this.log.message("READER THREAD STARTED ---");
 
         while (!this.thread.isInterrupted())
         {
@@ -101,14 +109,14 @@ public class IRCReader implements Runnable
             // }
             catch (InterruptedIOException e)
             {
-                System.out.println(">>> READ INTERRUPT");
+                this.log.message("READ INTERRUPT ---");
                 // send a ping
                 continue;
             }
             catch (Exception e)
             {
                 // SocketException: socket closed
-                e.printStackTrace();
+                this.log.exception(e);
                 line = null;
             }
 
@@ -118,13 +126,11 @@ public class IRCReader implements Runnable
                 break;
             }
 
+            this.log.in(line);
             msgProc.handleLine(line);
-
-            // TODO: handle line -> event
-            System.out.println(">>>" + line);
         }
 
-        System.out.println(">>> STOPPING READER ---");
+        this.log.message("READER THREAD STOPPED ---");
         this.isRunning = false;
         this.con.disconnect();
     }

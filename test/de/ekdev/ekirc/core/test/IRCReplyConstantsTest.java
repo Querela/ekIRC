@@ -54,6 +54,8 @@ public class IRCReplyConstantsTest
 
         insr1 = IRCNumericServerReply.byCode(insr1.getCode());
 
+        // insr1 = null; // have to check for null pointers ...
+
         switch (insr1)
         {
             case ERR_NICKNAMEINUSE:
@@ -67,6 +69,8 @@ public class IRCReplyConstantsTest
                 break;
             }
         }
+
+        System.out.println("ERROR == " + IRCNumericServerReply.valueOf("ERROR"));
 
         System.out.println(IRCNumericServerReply.byCode("324"));
         System.out.println(IRCNumericServerReply.byCode(null));

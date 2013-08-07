@@ -52,7 +52,8 @@ public class SimpleIRCServerContextTest
         }
 
         // isc.connect("irc.irchighway.net", 6667, "pass");
-        inet.connect("irc.chatzona.org", 6667, "pass");
+        // inet.connect("irc.chatzona.org", 6667, "pass");
+        inet.connect("irc.webchat.org", 6667, "pass");
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         try
@@ -69,6 +70,8 @@ public class SimpleIRCServerContextTest
             {
                 if (line.equals("")) break;
             }
+
+            inet.getIRCConnectionLog().moveLogFile("src/newlog.txt");
 
             inet.send(new IRCNickCommand("nick"));
 
