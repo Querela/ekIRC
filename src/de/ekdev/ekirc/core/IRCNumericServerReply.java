@@ -3,6 +3,9 @@
  */
 package de.ekdev.ekirc.core;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author ekDev
  */
@@ -183,12 +186,13 @@ public enum IRCNumericServerReply
     RPL_STATSBLINE(247), //
     RPL_STATSDLINE(250), //
 
-    ERR_NOSERVICEHOST(492), //
-    ;
+    ERR_NOSERVICEHOST(492); //
 
     // ------------------------------------------------------------------------
 
     private final int code;
+
+    private final static Map<Integer, IRCNumericServerReply> lookup;
 
     // ------------------------------------------------------------------------
 
@@ -202,5 +206,44 @@ public enum IRCNumericServerReply
     public int getCode()
     {
         return this.code;
+    }
+
+    // ------------------------------------------------------------------------
+
+    // public IRCNumericServerReply byCode(int code)
+    // {
+    // for (IRCNumericServerReply reply : IRCNumericServerReply.values())
+    // {
+    // if (reply.getCode() == code) return reply;
+    // }
+    //
+    // return null;
+    // }
+
+    public static IRCNumericServerReply byCode(int code)
+    {
+        return IRCNumericServerReply.lookup.get(code);
+    }
+
+    public static IRCNumericServerReply byCode(String codeStr)
+    {
+        try
+        {
+            return IRCNumericServerReply.lookup.get(Integer.valueOf(codeStr));
+        }
+        catch (NumberFormatException e)
+        {
+        }
+
+        return null;
+    }
+
+    static
+    {
+        lookup = new HashMap<Integer, IRCNumericServerReply>(IRCNumericServerReply.values().length);
+        for (IRCNumericServerReply reply : IRCNumericServerReply.values())
+        {
+            lookup.put(reply.getCode(), reply);
+        }
     }
 }
