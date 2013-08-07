@@ -20,13 +20,18 @@ public class EventListenerList
     public EventListenerList()
     {
         this.listeners = new ArrayList<RegisteredEventListener>();
+
+        synchronized (allLists)
+        {
+            allLists.add(this);
+        }
     }
 
     public List<RegisteredEventListener> getListeners()
     {
         return Collections.unmodifiableList(this.listeners);
     }
-    
+
     public static List<EventListenerList> getEventListenerLists()
     {
         return Collections.unmodifiableList(allLists);
@@ -67,9 +72,9 @@ public class EventListenerList
     {
         this.listeners.clear();
     }
-    
+
     // ------------------------------------------------------------------------
-    
+
     public static void unregisterAll()
     {
         synchronized (allLists)
@@ -80,7 +85,7 @@ public class EventListenerList
             }
         }
     }
-    
+
     public static void unregisterAll(EventListener listener)
     {
         synchronized (allLists)
