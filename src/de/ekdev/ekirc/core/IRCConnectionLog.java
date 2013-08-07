@@ -94,15 +94,18 @@ public class IRCConnectionLog
 
     public void close()
     {
-        this.writer.flush();
-        this.writer.close();
+        if (this.writer != null)
+        {
+            this.writer.flush();
+            this.writer.close();
+        }
 
         this.canWrite = false;
     }
 
     public boolean canWrite()
     {
-        this.canWrite = this.writer.checkError();
+        this.canWrite = (this.writer != null && this.writer.checkError());
 
         return this.canWrite;
     }
@@ -112,8 +115,20 @@ public class IRCConnectionLog
         return this.file;
     }
 
-    public synchronized boolean moveLogFile(String newFilename) throws FileAlreadyExistsException
+    public final boolean canMoveLogFile()
     {
+        return (this.file != null);
+    }
+
+    public synchronized boolean moveLogFile(String newFilename) throws FileAlreadyExistsException,
+            UnsupportedOperationException
+    {
+        if (this.canMoveLogFile())
+        {
+            throw new UnsupportedOperationException(
+                    "moveLogFile(String) can only be called if a valid File object exists - not for streams!");
+        }
+
         final File newfile = new File(newFilename);
         if (newfile.isFile())
         {
@@ -247,6 +262,20 @@ public class IRCConnectionLog
         }
         catch (IOException e)
         {
+        }
+    }
+
+    public void object(String varName, Object object)
+    {
+        if (varName == null) return; // ignore because we want a variable name!
+
+        if (object == null)
+        {
+            this.message(varName + " = null");
+        }
+        else
+        {
+            this.message(varName + " = " + object.toString());
         }
     }
 
