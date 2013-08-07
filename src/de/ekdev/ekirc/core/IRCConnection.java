@@ -136,7 +136,7 @@ public class IRCConnection
 
     // ------------------------------------------------------------------------
 
-    public boolean connect()
+    public boolean connect() throws UnknownHostException
     {
         // if already connected
         if (this.isConnected())
@@ -160,32 +160,25 @@ public class IRCConnection
             }
             catch (IOException e)
             {
-                e.printStackTrace();
+                // should not happen if it worked before ...
             }
         }
 
         // connect new
-        try
+        for (InetAddress tia : InetAddress.getAllByName(this.host))
         {
-            for (InetAddress tia : InetAddress.getAllByName(this.host))
+            try
             {
-                try
-                {
-                    this.sock = IRCConnection.getSocket(tia, this.port);
-                    this.isConnected = true;
-                    this.ia = tia;
+                this.sock = IRCConnection.getSocket(tia, this.port);
+                this.isConnected = true;
+                this.ia = tia;
 
-                    return true;
-                }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
+                return true;
             }
-        }
-        catch (UnknownHostException e)
-        {
-            e.printStackTrace();
+            catch (IOException e)
+            {
+                // ignore
+            }
         }
 
         return false;
@@ -202,7 +195,7 @@ public class IRCConnection
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            // ignore
         }
     }
 }

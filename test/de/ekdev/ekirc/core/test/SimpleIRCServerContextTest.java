@@ -71,7 +71,7 @@ public class SimpleIRCServerContextTest
                 if (line.equals("")) break;
             }
 
-            inet.getIRCConnectionLog().moveLogFile("src/newlog.txt");
+            inet.getIRCConnectionLog().tryMoveLogFile("src/newlog.txt");
 
             inet.send(new IRCNickCommand("nick"));
 
@@ -101,6 +101,6 @@ public class SimpleIRCServerContextTest
         {
         }
 
-        inet.disconnect();
+        // inet.disconnect();
     }
 }

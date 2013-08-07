@@ -16,17 +16,22 @@ public class IRCReader implements Runnable
     private final IRCConnection con;
     private final IRCConnectionLog log;
     private final IRCMessageProcessor msgProc;
+    private final IRCNetwork net;
 
     private BufferedReader reader;
     private boolean isRunning;
     private Thread thread;
 
-    public IRCReader(IRCConnection con, IRCConnectionLog log, IRCMessageProcessor msgProc)
+    public IRCReader(IRCConnection con, IRCNetwork net, IRCConnectionLog log, IRCMessageProcessor msgProc)
             throws IllegalArgumentException
     {
         if (con == null)
         {
             throw new IllegalArgumentException("Argument con is null!");
+        }
+        if (net == null)
+        {
+            throw new IllegalArgumentException("Argument net is null!");
         }
         if (log == null)
         {
@@ -40,6 +45,7 @@ public class IRCReader implements Runnable
         this.msgProc = msgProc;
         this.con = con;
         this.log = log;
+        this.net = net;
     }
 
     // ------------------------------------------------------------------------
@@ -133,5 +139,6 @@ public class IRCReader implements Runnable
         this.log.message("READER THREAD STOPPED ---");
         this.isRunning = false;
         this.con.disconnect();
+        this.net.disconnect();
     }
 }

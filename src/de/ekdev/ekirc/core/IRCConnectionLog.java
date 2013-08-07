@@ -123,8 +123,13 @@ public class IRCConnectionLog
     public synchronized boolean moveLogFile(String newFilename) throws FileAlreadyExistsException,
             UnsupportedOperationException
     {
-        if (this.canMoveLogFile())
+        if (! this.canMoveLogFile())
         {
+            this.line(IRCConnectionLog.PREFIX_MESSAGE + IRCConnectionLog.SEP);
+            this.line(IRCConnectionLog.PREFIX_MESSAGE + "! Attempt to move log file to '" + newFilename + "' !");
+            this.line(IRCConnectionLog.PREFIX_MESSAGE + "! Failed due to having no valid File object !");
+            this.line(IRCConnectionLog.PREFIX_MESSAGE + IRCConnectionLog.SEP);
+            
             throw new UnsupportedOperationException(
                     "moveLogFile(String) can only be called if a valid File object exists - not for streams!");
         }
@@ -132,6 +137,11 @@ public class IRCConnectionLog
         final File newfile = new File(newFilename);
         if (newfile.isFile())
         {
+            this.line(IRCConnectionLog.PREFIX_MESSAGE + IRCConnectionLog.SEP);
+            this.line(IRCConnectionLog.PREFIX_MESSAGE + "! Attempt to move log file to '" + newFilename + "' !");
+            this.line(IRCConnectionLog.PREFIX_MESSAGE + "! Failed because destination file already exists !");
+            this.line(IRCConnectionLog.PREFIX_MESSAGE + IRCConnectionLog.SEP);
+            
             throw new FileAlreadyExistsException(newFilename, null, "Can't rename file if already existing!");
         }
 
@@ -178,6 +188,23 @@ public class IRCConnectionLog
         return ret;
     }
 
+    public boolean tryMoveLogFile(String newFilename)
+    {
+        if (! this.canMoveLogFile()) return false;
+        
+        boolean ret = false;
+        try
+        {
+            ret = this.moveLogFile(newFilename);
+        }
+        catch(Exception e)
+        {
+            return false;
+        }
+        
+        return ret;
+    }
+    
     // ------------------------------------------------------------------------
 
     public void header(String name, String note)

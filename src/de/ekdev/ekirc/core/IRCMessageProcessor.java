@@ -48,7 +48,7 @@ public class IRCMessageProcessor
         catch (Exception e)
         {
             // index, null ?
-            e.printStackTrace();
+            this.ircNetwork.getIRCConnectionLog().exception(e);
         }
 
         // silently ignore empty messages
@@ -83,7 +83,7 @@ public class IRCMessageProcessor
             }
             default:
             {
-                this.ircNetwork.getIRCConnectionLog().message(im.getCommand() + " Handler not yet implemented.");
+                this.ircNetwork.getIRCConnectionLog().message(im.getCommand() + "-Handler not yet implemented.");
                 break;
             }
         }
@@ -91,9 +91,37 @@ public class IRCMessageProcessor
 
     protected void processCommand(IRCMessage im)
     {
-        if ("PING".equals(im.getCommand()))
+        // TODO: EnumMap ?
+        IRCServerCommand isc = null;;
+        try
         {
-            this.ircManager.getEventManager().dispatch(new IRCPingEvent(this.ircNetwork, im.getParams().get(0)));
+            isc = IRCServerCommand.valueOf(im.getCommand());
+        }
+        catch (Exception e)
+        {
+        }
+
+        if (isc == null)
+        {
+            this.ircManager.getEventManager().dispatch(new IRCUnknownServerCommandEvent(this.ircNetwork, im));
+            return;
+        }
+
+        switch (isc)
+        {
+            case PING:
+            {
+                this.ircManager.getEventManager().dispatch(new IRCPingEvent(this.ircNetwork, im.getParams().get(0)));
+                break;
+            }
+            case ERROR:
+            {
+            }
+            default:
+            {
+                this.ircNetwork.getIRCConnectionLog().message(im.getCommand() + "-Handler not yet implemented.");
+                break;
+            }
         }
     }
 
@@ -106,7 +134,7 @@ public class IRCMessageProcessor
 
     // ------------------------------------------------------------------------
 
-    public final IRCManager getIRCManager()
+    protected final IRCManager getIRCManager()
     {
         return this.ircManager;
     }
