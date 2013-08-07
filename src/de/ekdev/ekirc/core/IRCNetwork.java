@@ -3,6 +3,7 @@
  */
 package de.ekdev.ekirc.core;
 
+import java.net.UnknownHostException;
 import java.util.List;
 
 import de.ekdev.ekirc.core.commands.connection.IRCPassCommand;
@@ -18,6 +19,7 @@ public class IRCNetwork
     public final static int MAX_SERVER_NAME_LENGTH = 63;
 
     private String name;
+    // private IRCNetworkInfo ircNetworkInfo;
 
     private final IRCManager ircManager;
 
@@ -67,12 +69,19 @@ public class IRCNetwork
         this.name = host;
 
         // create reader, writer threads
-        this.ircReader = new IRCReader(this.ircConnection, this.ircLog, this.createDefaultIRCMessageProcessor());
+        this.ircReader = new IRCReader(this.ircConnection, this, this.ircLog, this.createDefaultIRCMessageProcessor());
         this.ircWriter = new IRCWriter(this.ircConnection, this.ircLog);
 
         // start connection
         this.ircLog.message("Connecting to network ...");
-        this.ircConnection.connect();
+        try
+        {
+            this.ircConnection.connect();
+        }
+        catch (UnknownHostException e)
+        {
+            this.ircLog.exception(e);
+        }
         if (this.ircConnection.isConnected())
         {
             this.ircReader.start();
@@ -85,6 +94,12 @@ public class IRCNetwork
 
             // raise an identification / socket opened / connection established event
             this.ircManager.getEventManager().dispatch(new IRCConnectEvent(this));
+        }
+        else
+        {
+            this.ircLog.message("Couldn't connect to network!");
+
+            this.disconnect();
         }
     }
 
@@ -108,6 +123,7 @@ public class IRCNetwork
         this.ircConnection.disconnect();
         this.ircConnection = null;
 
+        // close log if connection is closed
         this.ircLog.close();
         this.ircLog = null;
     }
@@ -118,6 +134,11 @@ public class IRCNetwork
     {
         return this.name;
     }
+
+    // public IRCNetworkInfo getIRCNetworkInfo()
+    // {
+    // return this.ircNetworkInfo;
+    // }
 
     // ------------------------------------------------------------------------
 
