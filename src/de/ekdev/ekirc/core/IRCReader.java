@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author ekDev
@@ -21,6 +22,7 @@ public class IRCReader implements Runnable
     private BufferedReader reader;
     private boolean isRunning;
     private Thread thread;
+    private final static AtomicInteger threadCount = new AtomicInteger();
 
     public IRCReader(IRCConnection con, IRCNetwork net, IRCConnectionLog log, IRCMessageProcessor msgProc)
             throws IllegalArgumentException
@@ -74,6 +76,7 @@ public class IRCReader implements Runnable
 
         // run asynchronously
         this.thread = new Thread(this);
+        this.thread.setName(this.getClass().getSimpleName() + "-Thread-" + threadCount.getAndIncrement());
         this.thread.start();
         this.isRunning = true;
 

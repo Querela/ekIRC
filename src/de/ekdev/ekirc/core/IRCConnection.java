@@ -129,6 +129,11 @@ public class IRCConnection
         return this.host;
     }
 
+    public InetAddress getInetAddress()
+    {
+        return this.ia;
+    }
+
     public int getPort()
     {
         return this.port;

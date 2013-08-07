@@ -7,6 +7,7 @@ import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author ekDev
@@ -20,6 +21,7 @@ public class IRCWriter implements Runnable
     private boolean isRunning;
     private Thread thread;
     private LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>(); // TODO: add limit?
+    private final static AtomicInteger threadCount = new AtomicInteger();
 
     public IRCWriter(IRCConnection con, IRCConnectionLog log) throws IllegalArgumentException
     {
@@ -61,6 +63,7 @@ public class IRCWriter implements Runnable
 
         // run asynchronously
         this.thread = new Thread(this);
+        this.thread.setName(this.getClass().getSimpleName() + "-Thread-" + threadCount.getAndIncrement());
         this.thread.start();
         this.isRunning = true;
 

@@ -21,6 +21,8 @@ public class IRCNetwork
     private String name;
     // private IRCNetworkInfo ircNetworkInfo;
 
+    // protected IRCIdentity myIRCIdentity;
+
     private final IRCManager ircManager;
 
     protected final IRCChannelManager ircChannelManager;
@@ -103,6 +105,11 @@ public class IRCNetwork
         }
     }
 
+    public boolean isConnected()
+    {
+        return (this.ircConnection != null && this.ircConnection.isConnected());
+    }
+
     public void quit(String reason)
     {
         if (this.ircWriter != null && this.ircWriter.isRunning())
@@ -134,6 +141,32 @@ public class IRCNetwork
     {
         return this.name;
     }
+
+    public String getHostname()
+    {
+        if (this.isConnected())
+        {
+            return this.ircConnection.getHost();
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public int getPort()
+    {
+        if (this.isConnected())
+        {
+            return this.ircConnection.getPort();
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
+    // ------------------------------------------------------------------------
 
     // public IRCNetworkInfo getIRCNetworkInfo()
     // {

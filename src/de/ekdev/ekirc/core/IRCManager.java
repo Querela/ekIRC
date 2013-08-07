@@ -3,6 +3,9 @@
  */
 package de.ekdev.ekirc.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.ekdev.ekevent.EventException;
 import de.ekdev.ekevent.EventHandler;
 import de.ekdev.ekevent.EventListener;
@@ -17,9 +20,13 @@ public class IRCManager
 {
     protected EventManager eventManager;
 
+    protected List<IRCNetwork> networks;
+
     public IRCManager()
     {
         this.eventManager = this.createDefaultEventManager();
+
+        this.networks = new ArrayList<IRCNetwork>();
 
         this.initializeEventSystem();
     }
@@ -56,6 +63,8 @@ public class IRCManager
         return new EventManager();
     }
 
+    // ------------------------------------------------------------------------
+    
     protected EventListener createDefaultPingEventListener()
     {
         return new EventListener() {

@@ -14,9 +14,8 @@ import de.ekdev.ekirc.core.IRCManager;
 import de.ekdev.ekirc.core.IRCNetwork;
 import de.ekdev.ekirc.core.commands.connection.IRCNickCommand;
 import de.ekdev.ekirc.core.commands.connection.IRCUserCommand;
-import de.ekdev.ekirc.core.commands.misc.IRCPongCommand;
 import de.ekdev.ekirc.core.event.IRCConnectEvent;
-import de.ekdev.ekirc.core.event.IRCPingEvent;
+import de.ekdev.ekirc.core.event.listener.IncrementalAutoNickRenamer;
 
 /**
  * @author ekDev
@@ -33,6 +32,8 @@ public class SimpleIRCServerContextTest
         IRCManager ircManager = new IRCManager();
         IRCNetwork inet = new IRCNetwork(ircManager);
 
+        final String nick = "coor";
+
         try
         {
             ircManager.getEventManager().register(new EventListener() {
@@ -40,8 +41,18 @@ public class SimpleIRCServerContextTest
                 public void onConnect(IRCConnectEvent ice)
                 {
                     System.out.println("Connect - EventHandler");
-                    ice.getIRCNetwork()
-                            .send(new IRCNickCommand("nick"), new IRCUserCommand("userles", true, "realles"));
+
+                    try
+                    {
+                        ice.getIRCNetwork().getIRCManager().getEventManager()
+                                .register(new IncrementalAutoNickRenamer(ice.getIRCNetwork(), nick, 0));
+                    }
+                    catch (EventException e)
+                    {
+                        ice.getIRCNetwork().getIRCConnectionLog().exception(e);
+                    }
+
+                    ice.getIRCNetwork().send(new IRCNickCommand(nick), new IRCUserCommand("userles", true, "realles"));
 
                 }
             });
@@ -51,7 +62,7 @@ public class SimpleIRCServerContextTest
             e.printStackTrace();
         }
 
-        // isc.connect("irc.irchighway.net", 6667, "pass");
+        // inet.connect("irc.irchighway.net", 6667, "pass");
         // inet.connect("irc.chatzona.org", 6667, "pass");
         inet.connect("irc.webchat.org", 6667, "pass");
 
@@ -71,7 +82,7 @@ public class SimpleIRCServerContextTest
                 if (line.equals("")) break;
             }
 
-            inet.getIRCConnectionLog().tryMoveLogFile("src/newlog.txt");
+            // inet.getIRCConnectionLog().tryMoveLogFile("src/newlog.txt");
 
             inet.send(new IRCNickCommand("nick"));
 
@@ -80,7 +91,7 @@ public class SimpleIRCServerContextTest
                 if (line.equals("")) break;
             }
 
-            inet.send(new IRCNickCommand("nickles3"));
+            inet.send(new IRCNickCommand("coor"));
 
             while ((line = br.readLine()) != null)
             {
@@ -101,6 +112,6 @@ public class SimpleIRCServerContextTest
         {
         }
 
-        // inet.disconnect();
+        if (inet.isConnected()) inet.disconnect();
     }
 }

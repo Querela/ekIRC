@@ -3,6 +3,7 @@
  */
 package de.ekdev.ekirc.core;
 
+import de.ekdev.ekirc.core.event.IRCNickAlreadyInUseEvent;
 import de.ekdev.ekirc.core.event.IRCPingEvent;
 import de.ekdev.ekirc.core.event.IRCUnknownServerCommandEvent;
 
@@ -78,8 +79,12 @@ public class IRCMessageProcessor
         {
             case ERR_NICKNAMEINUSE:
             {
-                // autorename?
+                this.ircManager.getEventManager().dispatch(new IRCNickAlreadyInUseEvent(this.ircNetwork, im));
                 break;
+            }
+            case RPL_BOUNCE:
+            {
+
             }
             default:
             {
