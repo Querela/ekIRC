@@ -14,40 +14,21 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class IRCReader implements Runnable
 {
-    private final IRCConnection con;
-    private final IRCConnectionLog log;
-    private final IRCMessageProcessor msgProc;
-    private final IRCNetwork net;
+    private final IRCIOInterface ircInterface;
 
     private BufferedReader reader;
     private boolean isRunning;
     private Thread thread;
     private final static AtomicInteger threadCount = new AtomicInteger();
 
-    public IRCReader(IRCConnection con, IRCNetwork net, IRCConnectionLog log, IRCMessageProcessor msgProc)
-            throws IllegalArgumentException
+    public IRCReader(IRCIOInterface ircInterface) throws IllegalArgumentException
     {
-        if (con == null)
+        if (ircInterface == null)
         {
-            throw new IllegalArgumentException("Argument con is null!");
-        }
-        if (net == null)
-        {
-            throw new IllegalArgumentException("Argument net is null!");
-        }
-        if (log == null)
-        {
-            throw new IllegalArgumentException("Argument log is null!");
-        }
-        if (msgProc == null)
-        {
-            throw new IllegalArgumentException("Argument msgProc is null!");
+            throw new IllegalArgumentException("Argument ircInterface is null!");
         }
 
-        this.msgProc = msgProc;
-        this.con = con;
-        this.log = log;
-        this.net = net;
+        this.ircInterface = ircInterface;
     }
 
     // ------------------------------------------------------------------------
@@ -61,7 +42,7 @@ public class IRCReader implements Runnable
 
     public boolean start()
     {
-        if (!this.con.isConnected())
+        if (!this.ircInterface.getIRCConnection().isConnected())
         {
             return false;
         }
@@ -71,8 +52,8 @@ public class IRCReader implements Runnable
         }
 
         // init reader
-        this.reader = new BufferedReader(new InputStreamReader(new DataInputStream(this.con.getInputStream()),
-                this.con.getCharset()));
+        this.reader = new BufferedReader(new InputStreamReader(new DataInputStream(this.ircInterface.getIRCConnection()
+                .getInputStream()), this.ircInterface.getIRCConnection().getCharset()));
 
         // run asynchronously
         this.thread = new Thread(this);
@@ -95,7 +76,7 @@ public class IRCReader implements Runnable
     @Override
     public void run()
     {
-        this.log.message("READER THREAD STARTED ---");
+        this.ircInterface.getIRCConnectionLog().message("READER THREAD STARTED ---");
 
         while (!this.thread.isInterrupted())
         {
@@ -118,14 +99,14 @@ public class IRCReader implements Runnable
             // }
             catch (InterruptedIOException e)
             {
-                this.log.message("READ INTERRUPT ---");
+                this.ircInterface.getIRCConnectionLog().message("READ INTERRUPT ---");
                 // send a ping
                 continue;
             }
             catch (Exception e)
             {
                 // SocketException: socket closed
-                this.log.exception(e);
+                this.ircInterface.getIRCConnectionLog().exception(e);
                 line = null;
             }
 
@@ -135,13 +116,12 @@ public class IRCReader implements Runnable
                 break;
             }
 
-            this.log.in(line);
-            msgProc.handleLine(line);
+            this.ircInterface.getIRCConnectionLog().in(line);
+            this.ircInterface.getIRCMessageProcessor().handleLine(line);
         }
 
-        this.log.message("READER THREAD STOPPED ---");
+        this.ircInterface.getIRCConnectionLog().message("READER THREAD STOPPED ---");
         this.isRunning = false;
-        this.con.disconnect();
-        this.net.disconnect();
+        this.ircInterface.shutdown();
     }
 }

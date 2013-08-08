@@ -14,8 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class IRCWriter implements Runnable
 {
-    private final IRCConnection con;
-    private final IRCConnectionLog log;
+    private final IRCIOInterface ircInterface;
 
     private BufferedWriter writer;
     private boolean isRunning;
@@ -23,19 +22,14 @@ public class IRCWriter implements Runnable
     private LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>(); // TODO: add limit?
     private final static AtomicInteger threadCount = new AtomicInteger();
 
-    public IRCWriter(IRCConnection con, IRCConnectionLog log) throws IllegalArgumentException
+    public IRCWriter(IRCIOInterface ircInterface) throws IllegalArgumentException
     {
-        if (con == null)
+        if (ircInterface == null)
         {
-            throw new IllegalArgumentException("Argument con is null!");
-        }
-        if (log == null)
-        {
-            throw new IllegalArgumentException("Argument log is null!");
+            throw new IllegalArgumentException("Argument ircInterface is null!");
         }
 
-        this.con = con;
-        this.log = log;
+        this.ircInterface = ircInterface;
     }
 
     // ------------------------------------------------------------------------
@@ -48,7 +42,7 @@ public class IRCWriter implements Runnable
 
     public boolean start()
     {
-        if (!this.con.isConnected())
+        if (!this.ircInterface.getIRCConnection().isConnected())
         {
             return false;
         }
@@ -58,8 +52,8 @@ public class IRCWriter implements Runnable
         }
 
         // init writer
-        this.writer = new BufferedWriter(new OutputStreamWriter(new DataOutputStream(this.con.getOutputStream()),
-                this.con.getCharset()));
+        this.writer = new BufferedWriter(new OutputStreamWriter(new DataOutputStream(this.ircInterface.getIRCConnection()
+                .getOutputStream()), this.ircInterface.getIRCConnection().getCharset()));
 
         // run asynchronously
         this.thread = new Thread(this);
@@ -82,25 +76,25 @@ public class IRCWriter implements Runnable
     @Override
     public void run()
     {
-        this.log.message("WRITER THREAD STARTED ---");
+        this.ircInterface.getIRCConnectionLog().message("WRITER THREAD STARTED ---");
 
         try
         {
             while (!this.thread.isInterrupted())
             {
                 String line2send = this.queue.take();
-                if (line2send != null && this.con.isConnected())
+                if (line2send != null && this.ircInterface.getIRCConnection().isConnected())
                 {
                     sendLineNow(line2send);
                 }
-                Thread.sleep(this.con.getSendDelay());
+                Thread.sleep(this.ircInterface.getIRCConnection().getSendDelay());
             }
         }
         catch (InterruptedException e)
         {
         }
 
-        this.log.message("WRITER THREAD STOPPED ---");
+        this.ircInterface.getIRCConnectionLog().message("WRITER THREAD STOPPED ---");
     }
 
     // ------------------------------------------------------------------------
@@ -110,23 +104,23 @@ public class IRCWriter implements Runnable
         return this.queue.size();
     }
 
-    // public void flushQueue()
-    // {
-    // try
-    // {
-    // while (! this.queue.isEmpty())
-    // {
-    // String line2send = this.queue.take();
-    // if (line2send != null && this.con.isConnected())
-    // {
-    // sendLineNow(line2send);
-    // }
-    // }
-    // }
-    // catch (InterruptedException e)
-    // {
-    // }
-    // }
+    protected void flushQueue()
+    {
+        try
+        {
+            while (!this.queue.isEmpty())
+            {
+                String line2send = this.queue.take();
+                if (line2send != null && this.ircInterface.getIRCConnection().isConnected())
+                {
+                    sendLineNow(line2send);
+                }
+            }
+        }
+        catch (InterruptedException e)
+        {
+        }
+    }
 
     public void send(AsIRCMessage ircMessage)
     {
@@ -148,7 +142,7 @@ public class IRCWriter implements Runnable
         catch (InterruptedException e)
         {
             // TODO: abort?
-            this.log.exception(e);
+            this.ircInterface.getIRCConnectionLog().exception(e);
         }
     }
 
@@ -166,13 +160,13 @@ public class IRCWriter implements Runnable
                 this.writer.write(IRCMessage.IRC_LINE_ENDING);
                 this.writer.flush();
 
-                this.log.out(line);
+                this.ircInterface.getIRCConnectionLog().out(line);
             }
             catch (Exception e)
             {
                 // IOException
                 // TODO: abort here?
-                this.log.exception(e);
+                this.ircInterface.getIRCConnectionLog().exception(e);
             }
         }
     }

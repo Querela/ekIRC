@@ -14,6 +14,8 @@ import java.util.ListIterator;
  */
 public class EventListenerList
 {
+    // TODO: check out: CopyOnWriteArrayList to avoid ConcurrentModificationException if removing listener while raising
+    // events
     private final List<RegisteredEventListener> listeners;
     private static List<EventListenerList> allLists = new ArrayList<EventListenerList>();
 

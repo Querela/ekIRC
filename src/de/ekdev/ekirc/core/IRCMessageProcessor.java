@@ -12,23 +12,17 @@ import de.ekdev.ekirc.core.event.IRCUnknownServerCommandEvent;
  */
 public class IRCMessageProcessor
 {
-    private final IRCManager ircManager;
     private final IRCNetwork ircNetwork;
 
     protected final IRCMessageParser parser;
 
-    public IRCMessageProcessor(IRCManager ircManager, IRCNetwork ircNetwork)
+    public IRCMessageProcessor(IRCNetwork ircNetwork)
     {
-        if (ircManager == null)
-        {
-            throw new IllegalArgumentException("Argument ircManager is null!");
-        }
         if (ircNetwork == null)
         {
             throw new IllegalArgumentException("Argument ircNetwork is null!");
         }
 
-        this.ircManager = ircManager;
         this.ircNetwork = ircNetwork;
         this.parser = this.createDefaultIRCMessageParser();
     }
@@ -71,20 +65,49 @@ public class IRCMessageProcessor
 
         if (code == null)
         {
-            this.ircManager.getEventManager().dispatch(new IRCUnknownServerCommandEvent(this.ircNetwork, im));
+            this.ircNetwork.getIRCManager().getEventManager()
+                    .dispatch(new IRCUnknownServerCommandEvent(this.ircNetwork, im));
             return;
         }
 
         switch (code)
         {
-            case ERR_NICKNAMEINUSE:
+            case RPL_WELCOME: // 001
+            case RPL_YOURHOST: // 002
+            case RPL_CREATED: // 003
+            case RPL_MYINFO: // 004
+            case RPL_BOUNCE: // 005
+                // 007
             {
-                this.ircManager.getEventManager().dispatch(new IRCNickAlreadyInUseEvent(this.ircNetwork, im));
+                this.ircNetwork.getIRCConnectionLog().message(
+                        im.getCommand() + "-Handler (Successful Registration) not yet implemented.");
                 break;
             }
-            case RPL_BOUNCE:
+            case RPL_MOTDSTART: // 375
+            case RPL_MOTD: // 372
+            case RPL_ENDOFMOTD: // 376
+                // 377
             {
-
+                this.ircNetwork.getIRCConnectionLog().message(im.getCommand() + "-Handler (MOTD) not yet implemented.");
+                break;
+            }
+            case RPL_LUSERCLIENT: // 251
+            case RPL_LUSEROP: // 252
+            case RPL_LUSERUNKNOWN: // 253
+            case RPL_LUSERCHANNELS: // 254
+            case RPL_LUSERME: // 255
+                // 265
+                // 266
+            {
+                this.ircNetwork.getIRCConnectionLog().message(
+                        im.getCommand() + "-Handler (LUSER-Info) not yet implemented.");
+                break;
+            }
+            case ERR_NICKNAMEINUSE:
+            {
+                this.ircNetwork.getIRCManager().getEventManager()
+                        .dispatch(new IRCNickAlreadyInUseEvent(this.ircNetwork, im));
+                break;
             }
             default:
             {
@@ -108,7 +131,8 @@ public class IRCMessageProcessor
 
         if (isc == null)
         {
-            this.ircManager.getEventManager().dispatch(new IRCUnknownServerCommandEvent(this.ircNetwork, im));
+            this.ircNetwork.getIRCManager().getEventManager()
+                    .dispatch(new IRCUnknownServerCommandEvent(this.ircNetwork, im));
             return;
         }
 
@@ -116,11 +140,58 @@ public class IRCMessageProcessor
         {
             case PING:
             {
-                this.ircManager.getEventManager().dispatch(new IRCPingEvent(this.ircNetwork, im.getParams().get(0)));
+                this.ircNetwork.getIRCManager().getEventManager()
+                        .dispatch(new IRCPingEvent(this.ircNetwork, im.getParams().get(0)));
                 break;
             }
+            case PRIVMSG:
+            {
+                this.processPrivateMessage(im);
+                break;
+            }
+            // case NOTICE:
+            // {
+            //
+            // }
+            // case JOIN:
+            // {
+            //
+            // }
+            // case PART:
+            // {
+            //
+            // }
+            // case QUIT:
+            // {
+            //
+            // }
+            // case NICK:
+            // {
+            //
+            // }
+            // case KICK:
+            // {
+            //
+            // }
+            // case MODE:
+            // {
+            //
+            // }
+            // case TOPIC:
+            // {
+            //
+            // }
+            // case INVITE:
+            // {
+            //
+            // }
             case ERROR:
             {
+                // TODO: something more to do?
+                this.ircNetwork.getIRCConnectionLog().message(
+                        im.getCommand() + " - reason: '" + im.getParams().get(0) + "'");
+                this.ircNetwork.disconnect();
+                break;
             }
             default:
             {
@@ -128,6 +199,12 @@ public class IRCMessageProcessor
                 break;
             }
         }
+    }
+
+    protected void processPrivateMessage(IRCMessage im)
+    {
+        // TODO: raise event and react in event listener/handler and then here? static or dynamic binding?
+        // CTCP, DCC, user, channel
     }
 
     // ------------------------------------------------------------------------
@@ -141,7 +218,7 @@ public class IRCMessageProcessor
 
     protected final IRCManager getIRCManager()
     {
-        return this.ircManager;
+        return this.ircNetwork.getIRCManager();
     }
 
     public final IRCMessageParser getIRCMessageParser()

@@ -10,11 +10,12 @@ import de.ekdev.ekirc.core.commands.connection.IRCPassCommand;
 import de.ekdev.ekirc.core.commands.connection.IRCQuitCommand;
 import de.ekdev.ekirc.core.commands.misc.IRCPongCommand;
 import de.ekdev.ekirc.core.event.IRCConnectEvent;
+import de.ekdev.ekirc.core.event.IRCEvent;
 
 /**
  * @author ekDev
  */
-public class IRCNetwork
+public class IRCNetwork implements IRCIOInterface
 {
     public final static int MAX_SERVER_NAME_LENGTH = 63;
 
@@ -31,7 +32,8 @@ public class IRCNetwork
     protected IRCConnection ircConnection;
     protected IRCReader ircReader;
     protected IRCWriter ircWriter;
-    protected IRCConnectionLog ircLog;
+    protected IRCConnectionLog ircConnectionLog;
+    protected IRCMessageProcessor ircMessageProcessor;
 
     public IRCNetwork(IRCManager ircManager)
     {
@@ -54,35 +56,38 @@ public class IRCNetwork
 
         try
         {
-            this.ircLog = new IRCConnectionLog("IRCLog_" + host.replaceAll("\\.", "(dot)") + ".log", true);
-            this.ircLog.header(host, null);
+            this.ircConnectionLog = new IRCConnectionLog("IRCLog_" + host.replaceAll("\\.", "(dot)") + ".log", true);
+            this.ircConnectionLog.header(host, null);
         }
         catch (Exception e)
         {
             // FileNotFoundException
             // IllegalArgumentException
             e.printStackTrace();
-            this.ircLog = new IRCConnectionLog(System.out);
-            this.ircLog.header(host, "IRCConnectionLog file creation failed. Switch to std::out.");
-            this.ircLog.exception(e);
+            this.ircConnectionLog = new IRCConnectionLog(System.out);
+            this.ircConnectionLog.header(host, "IRCConnectionLog file creation failed. Switch to std::out.");
+            this.ircConnectionLog.exception(e);
         }
 
         this.ircConnection = new IRCConnection(host, port);
         this.name = host;
 
+        this.ircMessageProcessor = this.createDefaultIRCMessageProcessor();
+
         // create reader, writer threads
-        this.ircReader = new IRCReader(this.ircConnection, this, this.ircLog, this.createDefaultIRCMessageProcessor());
-        this.ircWriter = new IRCWriter(this.ircConnection, this.ircLog);
+        // TODO: To separate further -> proxy object
+        this.ircReader = new IRCReader((IRCIOInterface) this);
+        this.ircWriter = new IRCWriter((IRCIOInterface) this);
 
         // start connection
-        this.ircLog.message("Connecting to network ...");
+        this.ircConnectionLog.message("Connecting to network ...");
         try
         {
             this.ircConnection.connect();
         }
         catch (UnknownHostException e)
         {
-            this.ircLog.exception(e);
+            this.ircConnectionLog.exception(e);
         }
         if (this.ircConnection.isConnected())
         {
@@ -99,7 +104,7 @@ public class IRCNetwork
         }
         else
         {
-            this.ircLog.message("Couldn't connect to network!");
+            this.ircConnectionLog.message("Couldn't connect to network!");
 
             this.disconnect();
         }
@@ -120,7 +125,7 @@ public class IRCNetwork
     {
         if (this.ircConnection == null) return;
 
-        this.ircLog.message("Disconnecting from network ...");
+        this.ircConnectionLog.message("Disconnecting from network ...");
 
         this.ircWriter.stop();
         this.ircWriter = null;
@@ -131,8 +136,8 @@ public class IRCNetwork
         this.ircConnection = null;
 
         // close log if connection is closed
-        this.ircLog.close();
-        this.ircLog = null;
+        this.ircConnectionLog.close();
+        this.ircConnectionLog = null;
     }
 
     // ------------------------------------------------------------------------
@@ -239,7 +244,8 @@ public class IRCNetwork
     protected IRCMessageProcessor createDefaultIRCMessageProcessor()
     {
         // TODO: create new or use from manager?
-        return new IRCMessageProcessor(this.ircManager, this);
+        // TODO: use proxy too?
+        return new IRCMessageProcessor(this);
     }
 
     // ------------------------------------------------------------------------
@@ -247,6 +253,14 @@ public class IRCNetwork
     protected void registerEvents()
     {
 
+    }
+
+    // ------------------------------------------------------------------------
+
+    protected void setIRCMessageProcessor(IRCMessageProcessor ircMessageProcessor)
+    {
+        // update message processor if specific irc server implementation is known
+        this.ircMessageProcessor = ircMessageProcessor;
     }
 
     // ------------------------------------------------------------------------
@@ -266,8 +280,35 @@ public class IRCNetwork
         return this.ircUserManager;
     }
 
+    // --------------------------------
+
+    @Override
+    public final IRCConnection getIRCConnection()
+    {
+        return this.ircConnection;
+    }
+
+    @Override
+    public final IRCMessageProcessor getIRCMessageProcessor()
+    {
+        return this.ircMessageProcessor;
+    }
+
+    @Override
     public final IRCConnectionLog getIRCConnectionLog()
     {
-        return this.ircLog;
+        return this.ircConnectionLog;
+    }
+
+    @Override
+    public final void shutdown()
+    {
+        this.disconnect();
+    }
+
+    @Override
+    public final void raiseEvent(IRCEvent ircEvent)
+    {
+        this.ircManager.getEventManager().dispatch(ircEvent);
     }
 }
