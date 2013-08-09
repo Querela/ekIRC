@@ -50,12 +50,13 @@ public class IncrementalAutoNickRenamer implements EventListener
 
         if (this.counter > this.maxTries)
         {
-            // DOES NOT WORK
+            // DOES WORK
             // -> java.util.ConcurrentModificationException
             // --> at de.ekdev.ekevent.EventManager.fireEvent(EventManager.java:57)
-            // this.ircNetwork.getIRCConnectionLog().message(
-            // "Unregister " + this.getClass().getSimpleName() + " after " + (counter - 1) + " tries ...");
-            // this.ircNetwork.getIRCManager().getEventManager().unregister(this);
+            // because of CopyOnWriteArrayList!
+            this.ircNetwork.getIRCConnectionLog().message(
+                    "Unregister " + this.getClass().getSimpleName() + " after " + (counter - 1) + " tries ...");
+            this.ircNetwork.getIRCManager().getEventManager().unregister(this);
             return;
         }
 

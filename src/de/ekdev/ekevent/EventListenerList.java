@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author ekDev
@@ -31,7 +32,9 @@ public class EventListenerList
 
     public List<RegisteredEventListener> getListeners()
     {
-        return Collections.unmodifiableList(this.listeners);
+        // now iterating over the list won't throw a ConcurrentModificationException
+        // because it is operation on a static copy
+        return Collections.unmodifiableList(new CopyOnWriteArrayList<RegisteredEventListener>(this.listeners));
     }
 
     public static List<EventListenerList> getEventListenerLists()
