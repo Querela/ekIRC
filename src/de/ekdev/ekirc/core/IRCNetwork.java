@@ -137,7 +137,7 @@ public class IRCNetwork implements IRCIOInterface
 
         // close log if connection is closed
         this.ircConnectionLog.close();
-        this.ircConnectionLog = null;
+        // this.ircConnectionLog = null;
     }
 
     // ------------------------------------------------------------------------

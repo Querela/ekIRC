@@ -46,6 +46,7 @@ public class IRCConnection
     public static Socket getSocket(InetAddress host, int port) throws IOException
     {
         // TODO: secure socket / socketFactory ?
+        // TODO: http://docs.oracle.com/javase/6/docs/api/java/nio/channels/SocketChannel.html
         return new Socket(host, port);
     }
 
@@ -63,6 +64,7 @@ public class IRCConnection
         {
             try
             {
+                // return Channels.newInputStream(Channels.newChannel(this.sock.getInputStream()));
                 return this.sock.getInputStream();
             }
             catch (IOException e)

@@ -36,7 +36,7 @@ public class IRCReader implements Runnable
     public boolean isRunning()
     {
         // TODO: test interrupt status
-        this.isRunning = (this.thread != null) && this.thread.isAlive();
+        this.isRunning = (this.thread != null) && !this.thread.isInterrupted();
         return this.isRunning;
     }
 
@@ -106,6 +106,7 @@ public class IRCReader implements Runnable
             catch (Exception e)
             {
                 // SocketException: socket closed
+                // IOException: Stream closed
                 this.ircInterface.getIRCConnectionLog().exception(e);
                 line = null;
             }

@@ -52,8 +52,8 @@ public class IRCWriter implements Runnable
         }
 
         // init writer
-        this.writer = new BufferedWriter(new OutputStreamWriter(new DataOutputStream(this.ircInterface.getIRCConnection()
-                .getOutputStream()), this.ircInterface.getIRCConnection().getCharset()));
+        this.writer = new BufferedWriter(new OutputStreamWriter(new DataOutputStream(this.ircInterface
+                .getIRCConnection().getOutputStream()), this.ircInterface.getIRCConnection().getCharset()));
 
         // run asynchronously
         this.thread = new Thread(this);
@@ -70,6 +70,25 @@ public class IRCWriter implements Runnable
         {
             this.thread.interrupt();
             this.isRunning = false;
+
+            // try
+            // {
+            // int time = Math.max(((this.ircInterface.getIRCConnection() != null) ? 5 * this.ircInterface
+            // .getIRCConnection().getSendDelay() : 5000), 5000);
+            //
+            // this.thread.join(time);
+            // }
+            // catch (InterruptedException e)
+            // {
+            // this.ircInterface.getIRCConnectionLog().message(
+            // "Tried to wait for thread '" + this.thread.getName() + "' to finish ...");
+            // this.ircInterface.getIRCConnectionLog().exception(e);
+            // }
+            // catch (Exception e)
+            // {
+            // // something went wrong ...
+            // this.ircInterface.getIRCConnectionLog().exception(e);
+            // }
         }
     }
 
