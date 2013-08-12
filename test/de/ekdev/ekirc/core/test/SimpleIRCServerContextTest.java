@@ -6,9 +6,6 @@ package de.ekdev.ekirc.core.test;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import de.ekdev.ekevent.EventException;
 import de.ekdev.ekevent.EventHandler;
@@ -17,8 +14,8 @@ import de.ekdev.ekirc.core.IRCIdentity;
 import de.ekdev.ekirc.core.IRCManager;
 import de.ekdev.ekirc.core.IRCNetwork;
 import de.ekdev.ekirc.core.commands.connection.IRCNickCommand;
-import de.ekdev.ekirc.core.event.IRCDisconnectEvent;
 import de.ekdev.ekirc.core.event.NickChangeEvent;
+import de.ekdev.ekirc.core.event.listener.AutoReconnector;
 import de.ekdev.ekirc.core.event.listener.UserConnectionRegistrator;
 
 /**
@@ -57,42 +54,11 @@ public class SimpleIRCServerContextTest
                 }
             });
 
-            ircManager.getEventManager().register(new EventListener() {
-                @EventHandler
-                public void onDisconnect(IRCDisconnectEvent ide)
-                {
-                    final IRCNetwork inet = ide.getIRCNetwork();
-                    final EventListener el = this;
-                    final ScheduledExecutorService stp = Executors.newScheduledThreadPool(1);
-                    final Runnable tr = new Runnable() {
-                        private int counter = 0;
+            // only on inet for 3 successful times
+            ircManager.getEventManager().register(new AutoReconnector(inet, 15 * 1000, 3));
 
-                        @Override
-                        public void run()
-                        {
-                            if (inet.isConnected())
-                            {
-                                inet.getIRCConnectionLog().message("Shutting down reconnector ...");
-                                stp.shutdown();
-                                IRCDisconnectEvent.getListenerList().unregister(el);
-                                return;
-                            }
-
-                            inet.getIRCConnectionLog().message("Trying to reconnect ... [" + ++counter + "]");
-                            try
-                            {
-                                inet.reconnect();
-                            }
-                            catch (Exception e)
-                            {
-                                // display only the first time ...
-                                if (counter == 1) inet.getIRCConnectionLog().exception(e);
-                            }
-                        }
-                    };
-                    stp.scheduleAtFixedRate(tr, 0, 10, TimeUnit.SECONDS);
-                }
-            });
+            // on all nets forever trying
+            // ircManager.getEventManager().register(new AutoReconnector(null, 15 * 1000, 0));
         }
         catch (EventException e)
         {
@@ -152,5 +118,6 @@ public class SimpleIRCServerContextTest
         }
 
         if (inet.isConnected()) inet.disconnect();
+        inet.closeConnectionLog();
     }
 }
