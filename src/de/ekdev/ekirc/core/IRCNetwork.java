@@ -10,6 +10,7 @@ import de.ekdev.ekirc.core.commands.connection.IRCPassCommand;
 import de.ekdev.ekirc.core.commands.connection.IRCQuitCommand;
 import de.ekdev.ekirc.core.commands.misc.IRCPongCommand;
 import de.ekdev.ekirc.core.event.IRCConnectEvent;
+import de.ekdev.ekirc.core.event.IRCDisconnectEvent;
 import de.ekdev.ekirc.core.event.IRCEvent;
 
 /**
@@ -35,7 +36,7 @@ public class IRCNetwork implements IRCIOInterface
     protected IRCConnectionLog ircConnectionLog;
     protected IRCMessageProcessor ircMessageProcessor;
 
-    public IRCNetwork(IRCManager ircManager, IRCIdentity myIRCIdentity)
+    public IRCNetwork(IRCManager ircManager, IRCIdentity myIRCIdentity, String host, int port)
     {
         if (ircManager == null)
         {
@@ -49,38 +50,35 @@ public class IRCNetwork implements IRCIOInterface
         this.ircManager = ircManager;
 
         this.myIRCIdentity = myIRCIdentity;
+        this.name = host;
 
+        // default network info
         this.ircNetworkInfo = new IRCNetworkInfo();
 
+        // default user/channel management
         this.ircChannelManager = this.createDefaultIRCChannelManager();
         this.ircUserManager = this.createDefaultIRCUserManager();
+
+        // open log!
+        this.openConnectionLog();
+
+        // set up connection without actually connecting
+        this.ircConnection = new IRCConnection(host, port);
+
+        // default message processor - can be replaced/redirected later
+        this.ircMessageProcessor = this.createDefaultIRCMessageProcessor();
     }
 
     // ------------------------------------------------------------------------
 
-    public void connect(String host, int port)
+    public void connect()
     {
-        if (this.ircConnection != null && this.ircConnection.isConnected()) return;
-
-        try
+        if (this.ircConnection == null)
         {
-            this.ircConnectionLog = new IRCConnectionLog("IRCLog_" + host.replaceAll("\\.", "(dot)") + ".log", true);
-            this.ircConnectionLog.header(host, null);
+            throw new NullPointerException(
+                    "ircConnection is null! Can't connect to network! Create new IRCNetwork object!");
         }
-        catch (Exception e)
-        {
-            // FileNotFoundException
-            // IllegalArgumentException
-            e.printStackTrace();
-            this.ircConnectionLog = new IRCConnectionLog(System.out);
-            this.ircConnectionLog.header(host, "IRCConnectionLog file creation failed. Switch to std::out.");
-            this.ircConnectionLog.exception(e);
-        }
-
-        this.ircConnection = new IRCConnection(host, port);
-        this.name = host;
-
-        this.ircMessageProcessor = this.createDefaultIRCMessageProcessor();
+        if (this.ircConnection.isConnected()) return;
 
         // create reader, writer threads
         // TODO: To separate further -> proxy object
@@ -97,6 +95,7 @@ public class IRCNetwork implements IRCIOInterface
         {
             this.ircConnectionLog.exception(e);
         }
+
         if (this.ircConnection.isConnected())
         {
             this.ircReader.start();
@@ -132,7 +131,8 @@ public class IRCNetwork implements IRCIOInterface
 
     public void disconnect()
     {
-        if (this.ircConnection == null) return;
+        // TODO: check only null? So we can reconnect on first time if never connected?
+        if (this.ircConnection == null || !this.ircConnection.isConnected()) return;
 
         this.ircConnectionLog.message("Disconnecting from network ...");
 
@@ -142,12 +142,46 @@ public class IRCNetwork implements IRCIOInterface
         this.ircReader = null;
 
         this.ircConnection.disconnect();
-        this.ircConnection = null;
 
-        // close log if connection is closed
-        this.ircConnectionLog.close();
-        // this.ircConnectionLog = null;
+        this.ircManager.getEventManager().dispatch(new IRCDisconnectEvent(this));
     }
+
+    public void reconnect()
+    {
+        this.connect();
+    }
+
+    // --------------------------------
+
+    protected void openConnectionLog()
+    {
+        try
+        {
+            this.ircConnectionLog = new IRCConnectionLog("IRCLog_" + this.name.replaceAll("\\.", "(dot)") + ".log",
+                    true);
+            this.ircConnectionLog.header(this.name, null);
+        }
+        catch (Exception e)
+        {
+            // FileNotFoundException
+            // IllegalArgumentException
+            e.printStackTrace();
+            this.ircConnectionLog = new IRCConnectionLog(System.out);
+            this.ircConnectionLog.header(this.name, "IRCConnectionLog file creation failed. Switch to std::out.");
+            this.ircConnectionLog.exception(e);
+        }
+    }
+
+    public void closeConnectionLog()
+    {
+        if (this.ircConnectionLog != null) this.ircConnectionLog.close();
+    }
+
+    // protected void reopenConnectionLog()
+    // {
+    // if (this.ircConnectionLog != null) this.closeConnectionLog();
+    // this.openConnectionLog();
+    // }
 
     // ------------------------------------------------------------------------
 
@@ -190,13 +224,6 @@ public class IRCNetwork implements IRCIOInterface
     public IRCIdentity getMyIRCIdentity()
     {
         return this.myIRCIdentity;
-    }
-
-    public void createMyIRCIdentity(IRCIdentity myIRCIdentity)
-    {
-        if (this.myIRCIdentity != null) return;
-
-        this.myIRCIdentity = myIRCIdentity;
     }
 
     // ------------------------------------------------------------------------
@@ -271,13 +298,6 @@ public class IRCNetwork implements IRCIOInterface
 
     // ------------------------------------------------------------------------
 
-    protected void registerEvents()
-    {
-
-    }
-
-    // ------------------------------------------------------------------------
-
     protected void setIRCMessageProcessor(IRCMessageProcessor ircMessageProcessor)
     {
         // update message processor if specific irc server implementation is known
@@ -340,7 +360,7 @@ public class IRCNetwork implements IRCIOInterface
     {
         if (this.isConnected()) this.disconnect();
 
-        if (this.ircConnectionLog != null) this.ircConnectionLog.close();
+        if (this.ircConnectionLog != null) this.closeConnectionLog();
 
         super.finalize();
     }

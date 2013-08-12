@@ -62,7 +62,8 @@ public class UserConnectionRegistrator implements EventListener
             this.ircNetwork.getIRCConnectionLog().exception(e);
         }
 
-        IRCConnectEvent.getListenerList().unregister(this);
+        // don't remove if reconnect ... !?!
+        // IRCConnectEvent.getListenerList().unregister(this);
         // this.ircNetwork.getIRCManager().getEventManager().unregister(this);
     }
 }
