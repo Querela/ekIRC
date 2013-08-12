@@ -3,9 +3,15 @@
  */
 package de.ekdev.ekirc.core;
 
-import de.ekdev.ekirc.core.event.IRCNickAlreadyInUseEvent;
+import static de.ekdev.ekirc.core.IRCNumericServerReply.*;
+import de.ekdev.ekirc.core.event.IRCNetworkInfoEvent;
 import de.ekdev.ekirc.core.event.IRCPingEvent;
 import de.ekdev.ekirc.core.event.IRCUnknownServerCommandEvent;
+import de.ekdev.ekirc.core.event.NickAlreadyInUseEvent;
+import de.ekdev.ekirc.core.event.NickChangeEvent;
+import de.ekdev.ekirc.core.event.QuitEvent;
+import de.ekdev.ekirc.core.event.UpdatedMotdEvent;
+import de.ekdev.ekirc.core.event.UpdatingMotdEvent;
 
 /**
  * @author ekDev
@@ -51,73 +57,87 @@ public class IRCMessageProcessor
 
         if (im.isNumericReply())
         {
-            processServerResponse(im);
+            processServerResponse(im, false);
         }
         else
         {
-            processCommand(im);
+            processCommand(im, false);
         }
     }
 
-    protected void processServerResponse(IRCMessage im)
+    protected void processServerResponse(IRCMessage im, boolean handledAlready)
     {
-        IRCNumericServerReply code = IRCNumericServerReply.byCode(im.getNumericReply());
-
-        if (code == null)
+        switch (im.getNumericReply())
         {
-            this.ircNetwork.getIRCManager().getEventManager()
-                    .dispatch(new IRCUnknownServerCommandEvent(this.ircNetwork, im));
-            return;
-        }
+            case RPL_WELCOME:
+            {
+                int i = im.getParams().get(1).lastIndexOf(IRCMessage.IRC_SPACE);
+                String nickuserhost = im.getParams().get(1).substring(i + 1);
+                this.ircNetwork.getIRCConnectionLog().object("nickuserhost", nickuserhost);
 
-        switch (code)
-        {
-            case RPL_WELCOME: // 001
-            case RPL_YOURHOST: // 002
-            case RPL_CREATED: // 003
-            case RPL_MYINFO: // 004
-            case RPL_BOUNCE: // 005
-                // 007
-            {
-                this.ircNetwork.getIRCConnectionLog().message(
-                        im.getCommand() + "-Handler (Successful Registration) not yet implemented.");
-                break;
+                // set my user object !
+                IRCUser ircUser = new IRCUser(this.ircNetwork.getIRCUserManager(),
+                        IRCUser.getNickByPrefix(nickuserhost));
+                ircUser.setUsername(IRCUser.getUsernameByPrefix(nickuserhost));
+                ircUser.setHostmask(IRCUser.getHostmaskByPrefix(nickuserhost));
+                this.ircNetwork.getMyIRCIdentity().setIRCUser(ircUser);
+                this.ircNetwork.getIRCConnectionLog().object("ircUser", ircUser);
+                // go on
             }
-            case RPL_MOTDSTART: // 375
-            case RPL_MOTD: // 372
-            case RPL_ENDOFMOTD: // 376
-                // 377
+            case RPL_YOURHOST:
+            case RPL_CREATED:
+            case RPL_MYINFO:
+            case RPL_ISUPPORT:
             {
-                this.ircNetwork.getIRCConnectionLog().message(im.getCommand() + "-Handler (MOTD) not yet implemented.");
-                break;
+                this.ircNetwork.raiseEvent(new IRCNetworkInfoEvent(this.ircNetwork, im));
+                this.ircNetwork.getIRCNetworkInfo().update(im);
+                break; // -----------------------------------------------------
             }
-            case RPL_LUSERCLIENT: // 251
-            case RPL_LUSEROP: // 252
-            case RPL_LUSERUNKNOWN: // 253
-            case RPL_LUSERCHANNELS: // 254
-            case RPL_LUSERME: // 255
-                // 265
-                // 266
+            case RPL_MOTDSTART:
             {
+                this.ircNetwork.raiseEvent(new IRCNetworkInfoEvent(this.ircNetwork, im));
+                this.ircNetwork.raiseEvent(new UpdatingMotdEvent(this.ircNetwork));
+                this.ircNetwork.getIRCNetworkInfo().newMotd().addModtLine(im.getParams().get(1).substring(2));
+                break; // -----------------------------------------------------
+            }
+            case RPL_MOTD:
+            {
+                this.ircNetwork.raiseEvent(new IRCNetworkInfoEvent(this.ircNetwork, im));
+                this.ircNetwork.getIRCNetworkInfo().addModtLine(im.getParams().get(1).substring(2));
+                break; // -----------------------------------------------------
+            }
+            case RPL_ENDOFMOTD:
+            {
+                this.ircNetwork.raiseEvent(new IRCNetworkInfoEvent(this.ircNetwork, im));
+                this.ircNetwork.getIRCNetworkInfo().addModtLine(im.getParams().get(1).substring(2)).finishNewMotd();
+                this.ircNetwork.raiseEvent(new UpdatedMotdEvent(this.ircNetwork));
+                break; // -----------------------------------------------------
+            }
+            case RPL_LUSERCLIENT:
+            case RPL_LUSEROP:
+            case RPL_LUSERUNKNOWN:
+            case RPL_LUSERCHANNELS:
+            case RPL_LUSERME:
+            {
+                this.ircNetwork.raiseEvent(new IRCNetworkInfoEvent(this.ircNetwork, im));
                 this.ircNetwork.getIRCConnectionLog().message(
                         im.getCommand() + "-Handler (LUSER-Info) not yet implemented.");
                 break;
             }
             case ERR_NICKNAMEINUSE:
             {
-                this.ircNetwork.getIRCManager().getEventManager()
-                        .dispatch(new IRCNickAlreadyInUseEvent(this.ircNetwork, im));
+                this.ircNetwork.raiseEvent(new NickAlreadyInUseEvent(this.ircNetwork, im));
                 break;
             }
             default:
             {
-                this.ircNetwork.getIRCConnectionLog().message(im.getCommand() + "-Handler not yet implemented.");
+                if (!handledAlready) this.ircNetwork.raiseEvent(new IRCUnknownServerCommandEvent(this.ircNetwork, im));
                 break;
             }
         }
     }
 
-    protected void processCommand(IRCMessage im)
+    protected void processCommand(IRCMessage im, boolean handledAlready)
     {
         // TODO: EnumMap ?
         IRCServerCommand isc = null;;
@@ -131,8 +151,7 @@ public class IRCMessageProcessor
 
         if (isc == null)
         {
-            this.ircNetwork.getIRCManager().getEventManager()
-                    .dispatch(new IRCUnknownServerCommandEvent(this.ircNetwork, im));
+            this.ircNetwork.raiseEvent(new IRCUnknownServerCommandEvent(this.ircNetwork, im));
             return;
         }
 
@@ -140,8 +159,7 @@ public class IRCMessageProcessor
         {
             case PING:
             {
-                this.ircNetwork.getIRCManager().getEventManager()
-                        .dispatch(new IRCPingEvent(this.ircNetwork, im.getParams().get(0)));
+                this.ircNetwork.raiseEvent(new IRCPingEvent(this.ircNetwork, im.getParams().get(0)));
                 break;
             }
             case PRIVMSG:
@@ -161,14 +179,25 @@ public class IRCMessageProcessor
             // {
             //
             // }
-            // case QUIT:
-            // {
-            //
-            // }
-            // case NICK:
-            // {
-            //
-            // }
+            case QUIT:
+            {
+                IRCUser ircUser = this.ircNetwork.getIRCUserManager().getIRCUserByPrefix(im.getPrefix());
+                this.ircNetwork.getIRCUserManager().removeIRCUser(ircUser);
+                this.ircNetwork.raiseEvent(new QuitEvent(this.ircNetwork, ircUser, im.getParams().get(0)));
+                break;
+            }
+            case NICK:
+            {
+                String sourceNick = IRCUser.getNickByPrefix(im.getPrefix());
+                IRCUser ircUser = this.ircNetwork.getIRCUserManager().getIRCUser(sourceNick);
+                if (ircUser == null) break;
+
+                ircUser.setNickname(im.getParams().get(0));
+
+                this.ircNetwork.raiseEvent(new NickChangeEvent(this.ircNetwork, ircUser, sourceNick, im.getParams()
+                        .get(0)));
+                break;
+            }
             // case KICK:
             // {
             //
@@ -195,7 +224,8 @@ public class IRCMessageProcessor
             }
             default:
             {
-                this.ircNetwork.getIRCConnectionLog().message(im.getCommand() + "-Handler not yet implemented.");
+                if (!handledAlready)
+                    this.ircNetwork.getIRCConnectionLog().message(im.getCommand() + "-Handler not yet implemented.");
                 break;
             }
         }

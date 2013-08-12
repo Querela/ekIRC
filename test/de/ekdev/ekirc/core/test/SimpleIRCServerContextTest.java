@@ -10,12 +10,12 @@ import java.io.InputStreamReader;
 import de.ekdev.ekevent.EventException;
 import de.ekdev.ekevent.EventHandler;
 import de.ekdev.ekevent.EventListener;
+import de.ekdev.ekirc.core.IRCIdentity;
 import de.ekdev.ekirc.core.IRCManager;
 import de.ekdev.ekirc.core.IRCNetwork;
 import de.ekdev.ekirc.core.commands.connection.IRCNickCommand;
-import de.ekdev.ekirc.core.commands.connection.IRCUserCommand;
-import de.ekdev.ekirc.core.event.IRCConnectEvent;
-import de.ekdev.ekirc.core.event.listener.IncrementalAutoNickRenamer;
+import de.ekdev.ekirc.core.event.NickChangeEvent;
+import de.ekdev.ekirc.core.event.listener.UserConnectionRegistrator;
 
 /**
  * @author ekDev
@@ -30,30 +30,24 @@ public class SimpleIRCServerContextTest
     {
 
         IRCManager ircManager = new IRCManager();
-        IRCNetwork inet = new IRCNetwork(ircManager);
+        IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"));
 
         final String nick = "coor";
+        // final String nick = "mike";
 
         try
         {
+            ircManager.getEventManager().register(new UserConnectionRegistrator(inet, nick, "uerles", true));
+
             ircManager.getEventManager().register(new EventListener() {
                 @EventHandler
-                public void onConnect(IRCConnectEvent ice)
+                public void onNickChange(NickChangeEvent nce)
                 {
-                    System.out.println("Connect - EventHandler");
-
-                    try
-                    {
-                        ice.getIRCNetwork().getIRCManager().getEventManager()
-                                .register(new IncrementalAutoNickRenamer(ice.getIRCNetwork(), nick, 0));
-                    }
-                    catch (EventException e)
-                    {
-                        ice.getIRCNetwork().getIRCConnectionLog().exception(e);
-                    }
-
-                    ice.getIRCNetwork().send(new IRCNickCommand(nick), new IRCUserCommand("userles", true, "realles"));
-
+                    nce.getIRCNetwork()
+                            .getIRCConnectionLog()
+                            .message(
+                                    (nce.isMe() ? "MY " : "") + "NICK CHANGE FROM '" + nce.getOldNick() + "' TO '"
+                                            + nce.getNewNick() + "'!");
                 }
             });
         }
@@ -62,9 +56,9 @@ public class SimpleIRCServerContextTest
             e.printStackTrace();
         }
 
-        // inet.connect("irc.irchighway.net", 6667, "pass");
-        // inet.connect("irc.chatzona.org", 6667, "pass");
-        inet.connect("irc.webchat.org", 6667, "pass");
+        // inet.connect("irc.irchighway.net", 6667);
+        // inet.connect("irc.chatzona.org", 6667);
+        inet.connect("irc.webchat.org", 6667);
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         try

@@ -17,6 +17,7 @@ import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.nio.file.FileAlreadyExistsException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -103,6 +104,14 @@ public class IRCConnectionLog
         this.canWrite = false;
     }
 
+    @Override
+    protected void finalize() throws Throwable
+    {
+        this.close();
+
+        super.finalize();
+    }
+
     public boolean canWrite()
     {
         this.canWrite = (this.writer != null && this.writer.checkError());
@@ -123,13 +132,13 @@ public class IRCConnectionLog
     public synchronized boolean moveLogFile(String newFilename) throws FileAlreadyExistsException,
             UnsupportedOperationException
     {
-        if (! this.canMoveLogFile())
+        if (!this.canMoveLogFile())
         {
             this.line(IRCConnectionLog.PREFIX_MESSAGE + IRCConnectionLog.SEP);
             this.line(IRCConnectionLog.PREFIX_MESSAGE + "! Attempt to move log file to '" + newFilename + "' !");
             this.line(IRCConnectionLog.PREFIX_MESSAGE + "! Failed due to having no valid File object !");
             this.line(IRCConnectionLog.PREFIX_MESSAGE + IRCConnectionLog.SEP);
-            
+
             throw new UnsupportedOperationException(
                     "moveLogFile(String) can only be called if a valid File object exists - not for streams!");
         }
@@ -141,7 +150,7 @@ public class IRCConnectionLog
             this.line(IRCConnectionLog.PREFIX_MESSAGE + "! Attempt to move log file to '" + newFilename + "' !");
             this.line(IRCConnectionLog.PREFIX_MESSAGE + "! Failed because destination file already exists !");
             this.line(IRCConnectionLog.PREFIX_MESSAGE + IRCConnectionLog.SEP);
-            
+
             throw new FileAlreadyExistsException(newFilename, null, "Can't rename file if already existing!");
         }
 
@@ -190,21 +199,21 @@ public class IRCConnectionLog
 
     public boolean tryMoveLogFile(String newFilename)
     {
-        if (! this.canMoveLogFile()) return false;
-        
+        if (!this.canMoveLogFile()) return false;
+
         boolean ret = false;
         try
         {
             ret = this.moveLogFile(newFilename);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             return false;
         }
-        
+
         return ret;
     }
-    
+
     // ------------------------------------------------------------------------
 
     public void header(String name, String note)
@@ -238,20 +247,29 @@ public class IRCConnectionLog
 
     public void message(String msg)
     {
+        this.message(msg, null);
+    }
+
+    public void message(String msg, String optPrefix)
+    {
         if (msg == null) return;
+        if (optPrefix == null) optPrefix = "";
 
         StringReader sr = new StringReader(msg);
         BufferedReader br = new BufferedReader(sr);
 
         String line;
+        List<String> lines = new ArrayList<>();
         try
         {
             while ((line = br.readLine()) != null)
-                this.line(IRCConnectionLog.PREFIX_MESSAGE + line);
+                lines.add(IRCConnectionLog.PREFIX_MESSAGE + optPrefix + line);
         }
         catch (IOException ioe)
         {
         }
+
+        this.lines(lines);
 
         try
         {
@@ -274,14 +292,17 @@ public class IRCConnectionLog
         BufferedReader br = new BufferedReader(sr);
 
         String line;
+        List<String> lines = new ArrayList<>();
         try
         {
             while ((line = br.readLine()) != null)
-                this.line(IRCConnectionLog.PREFIX_EXCEPTION + line);
+                lines.add(IRCConnectionLog.PREFIX_EXCEPTION + line);
         }
         catch (IOException ioe)
         {
         }
+
+        this.lines(lines);
 
         try
         {

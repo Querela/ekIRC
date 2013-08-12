@@ -7,7 +7,7 @@ import de.ekdev.ekevent.EventHandler;
 import de.ekdev.ekevent.EventListener;
 import de.ekdev.ekirc.core.IRCNetwork;
 import de.ekdev.ekirc.core.commands.connection.IRCNickCommand;
-import de.ekdev.ekirc.core.event.IRCNickAlreadyInUseEvent;
+import de.ekdev.ekirc.core.event.NickAlreadyInUseEvent;
 
 /**
  * @author ekDev
@@ -36,15 +36,15 @@ public class IncrementalAutoNickRenamer implements EventListener
     }
 
     @EventHandler
-    public void onIRCNickAlreadyInUseEvent(IRCNickAlreadyInUseEvent inaiue)
+    public void onNickAlreadyInUseEvent(NickAlreadyInUseEvent naiue)
     {
-        if (!this.ircNetwork.equals(inaiue.getIRCNetwork())) return;
+        if (!this.ircNetwork.equals(naiue.getIRCNetwork())) return;
 
-        this.ircNetwork.getIRCConnectionLog().object("inaiue", inaiue);
-        this.ircNetwork.getIRCConnectionLog().object("inaiue.getIRCMessage()", inaiue.getIRCMessage());
+        this.ircNetwork.getIRCConnectionLog().object("inaiue", naiue);
+        this.ircNetwork.getIRCConnectionLog().object("inaiue.getIRCMessage()", naiue.getIRCMessage());
         // this.ircNetwork.getIRCConnectionLog().object("inaiue.getIRCMessage().asIRCMessage()",
         // inaiue.getIRCMessage().asIRCMessage());
-        this.ircNetwork.getIRCConnectionLog().message(inaiue.getIRCMessage().asIRCMessageString());
+        this.ircNetwork.getIRCConnectionLog().message(naiue.getIRCMessage().asIRCMessageString());
 
         this.counter++;
 
@@ -56,7 +56,8 @@ public class IncrementalAutoNickRenamer implements EventListener
             // because of CopyOnWriteArrayList!
             this.ircNetwork.getIRCConnectionLog().message(
                     "Unregister " + this.getClass().getSimpleName() + " after " + (counter - 1) + " tries ...");
-            this.ircNetwork.getIRCManager().getEventManager().unregister(this);
+            // this.ircNetwork.getIRCManager().getEventManager().unregister(this);
+            NickAlreadyInUseEvent.getListenerList().unregister(this);
             return;
         }
 

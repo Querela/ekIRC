@@ -1,5 +1,5 @@
 /**
- * IRCNickAlreadyInUseEvent.java
+ * IRCNetworkInfoEvent.java
  */
 package de.ekdev.ekirc.core.event;
 
@@ -10,13 +10,12 @@ import de.ekdev.ekirc.core.IRCNetwork;
 /**
  * @author ekDev
  */
-public class IRCNickAlreadyInUseEvent extends IRCNetworkEvent
+public class IRCNetworkInfoEvent extends IRCNetworkEvent
 {
     private final static EventListenerList listeners = new EventListenerList();
-
     private final IRCMessage ircMessage;
 
-    public IRCNickAlreadyInUseEvent(IRCNetwork source, IRCMessage ircMessage)
+    public IRCNetworkInfoEvent(IRCNetwork source, IRCMessage ircMessage)
     {
         super(source);
         this.ircMessage = ircMessage;
@@ -27,21 +26,16 @@ public class IRCNickAlreadyInUseEvent extends IRCNetworkEvent
         return this.ircMessage;
     }
 
-    public String getNick()
-    {
-        return this.ircMessage.getParams().get(1);
-    }
-
     // ------------------------------------------------------------------------
 
     @Override
     public EventListenerList getListeners()
     {
-        return IRCNickAlreadyInUseEvent.listeners;
+        return IRCNetworkInfoEvent.listeners;
     }
 
     public static EventListenerList getListenerList()
     {
-        return IRCNickAlreadyInUseEvent.listeners;
+        return IRCNetworkInfoEvent.listeners;
     }
 }

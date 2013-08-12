@@ -3,8 +3,6 @@
  */
 package de.ekdev.ekirc.core.test;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
 import de.ekdev.ekirc.core.IRCMessage;

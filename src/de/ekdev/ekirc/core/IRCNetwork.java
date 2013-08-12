@@ -20,9 +20,9 @@ public class IRCNetwork implements IRCIOInterface
     public final static int MAX_SERVER_NAME_LENGTH = 63;
 
     private String name;
-    // private IRCNetworkInfo ircNetworkInfo;
+    private IRCNetworkInfo ircNetworkInfo;
 
-    // protected IRCIdentity myIRCIdentity;
+    protected IRCIdentity myIRCIdentity;
 
     private final IRCManager ircManager;
 
@@ -35,14 +35,22 @@ public class IRCNetwork implements IRCIOInterface
     protected IRCConnectionLog ircConnectionLog;
     protected IRCMessageProcessor ircMessageProcessor;
 
-    public IRCNetwork(IRCManager ircManager)
+    public IRCNetwork(IRCManager ircManager, IRCIdentity myIRCIdentity)
     {
         if (ircManager == null)
         {
             throw new IllegalArgumentException("Argument ircManager is null!");
         }
+        if (myIRCIdentity == null)
+        {
+            throw new IllegalArgumentException("Argument myIRCIdentity is null!");
+        }
 
         this.ircManager = ircManager;
+
+        this.myIRCIdentity = myIRCIdentity;
+
+        this.ircNetworkInfo = new IRCNetworkInfo();
 
         this.ircChannelManager = this.createDefaultIRCChannelManager();
         this.ircUserManager = this.createDefaultIRCUserManager();
@@ -50,7 +58,7 @@ public class IRCNetwork implements IRCIOInterface
 
     // ------------------------------------------------------------------------
 
-    public void connect(String host, int port, String password)
+    public void connect(String host, int port)
     {
         if (this.ircConnection != null && this.ircConnection.isConnected()) return;
 
@@ -94,6 +102,7 @@ public class IRCNetwork implements IRCIOInterface
             this.ircReader.start();
             this.ircWriter.start();
 
+            String password = this.myIRCIdentity.getConnectionPassword();
             if (password != null && password.length() > 0)
             {
                 this.ircWriter.sendImmediate(new IRCPassCommand(password));
@@ -173,10 +182,22 @@ public class IRCNetwork implements IRCIOInterface
 
     // ------------------------------------------------------------------------
 
-    // public IRCNetworkInfo getIRCNetworkInfo()
-    // {
-    // return this.ircNetworkInfo;
-    // }
+    public IRCNetworkInfo getIRCNetworkInfo()
+    {
+        return this.ircNetworkInfo;
+    }
+
+    public IRCIdentity getMyIRCIdentity()
+    {
+        return this.myIRCIdentity;
+    }
+
+    public void createMyIRCIdentity(IRCIdentity myIRCIdentity)
+    {
+        if (this.myIRCIdentity != null) return;
+
+        this.myIRCIdentity = myIRCIdentity;
+    }
 
     // ------------------------------------------------------------------------
 
@@ -310,5 +331,17 @@ public class IRCNetwork implements IRCIOInterface
     public final void raiseEvent(IRCEvent ircEvent)
     {
         this.ircManager.getEventManager().dispatch(ircEvent);
+    }
+
+    // --------------------------------
+
+    @Override
+    protected void finalize() throws Throwable
+    {
+        if (this.isConnected()) this.disconnect();
+
+        if (this.ircConnectionLog != null) this.ircConnectionLog.close();
+
+        super.finalize();
     }
 }

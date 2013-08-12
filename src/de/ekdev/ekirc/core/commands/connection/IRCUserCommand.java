@@ -34,10 +34,10 @@ public final class IRCUserCommand implements AsIRCMessage
         {
             throw new IllegalArgumentException("Argument realname can't be null or empty in a USER command!");
         }
-        if (realname.indexOf(IRCMessage.IRC_SPACE) != -1)
-        {
-            throw new IllegalArgumentException("Argument realname can't contain a space character!");
-        }
+        // if (realname.indexOf(IRCMessage.IRC_SPACE) != -1)
+        // {
+        // throw new IllegalArgumentException("Argument realname can't contain a space character!");
+        // }
 
         this.username = username;
         this.invisible = invisible;

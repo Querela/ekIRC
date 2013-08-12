@@ -205,4 +205,12 @@ public class IRCConnection
             // ignore
         }
     }
+
+    @Override
+    protected void finalize() throws Throwable
+    {
+        this.disconnect();
+
+        super.finalize();
+    }
 }

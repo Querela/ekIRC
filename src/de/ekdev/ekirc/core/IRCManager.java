@@ -64,7 +64,7 @@ public class IRCManager
     }
 
     // ------------------------------------------------------------------------
-    
+
     protected EventListener createDefaultPingEventListener()
     {
         return new EventListener() {
@@ -96,6 +96,16 @@ public class IRCManager
             }
         };
     }
+
+    // protected EventListener createDefaultIRCdServerVersionEventListener()
+
+    // ------------------------------------------------------------------------
+
+    // TODO: add methods
+    // - create/add new network + connect to it with identity
+    // - remove network?
+    // -> map<network, identity>? -> no
+    // cross network operations? or extra class/user implementation?
 
     // ------------------------------------------------------------------------
 
