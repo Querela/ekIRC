@@ -8,7 +8,7 @@ package de.ekdev.ekevent;
  */
 public abstract class Event
 {
-    Object source;
+    private Object source;
     // private final static EventListenerList listeners = new EventListenerList();
     public final static String METHOD_LISTENERLIST = "getListenerList";
 
