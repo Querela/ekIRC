@@ -3,6 +3,8 @@ ekIRC
 
 A Java IRC Chat implementation
 
+ - Java 1.7 !
+
 
 Some parts of the source code are from:
  - Bukkit: (event system)
@@ -14,3 +16,6 @@ Some parts of the source code are from:
   - http://jd.bukkit.org/rb/doxygen/d9/d11/HandlerList_8java_source.html
   - http://jd.bukkit.org/rb/doxygen/d1/ddb/JavaPluginLoader_8java_source.html#l00359
   - http://jd.bukkit.org/rb/doxygen/df/db4/SimplePluginManager_8java_source.html#l00497
+
+ - pircbotx
+  - http://code.google.com/p/pircbotx/ (project home on google code)
