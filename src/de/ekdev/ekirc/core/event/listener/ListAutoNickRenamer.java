@@ -5,6 +5,7 @@ package de.ekdev.ekirc.core.event.listener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import de.ekdev.ekevent.EventHandler;
 import de.ekdev.ekevent.EventListener;
@@ -23,10 +24,7 @@ public class ListAutoNickRenamer implements EventListener
 
     public ListAutoNickRenamer(IRCNetwork ircNetwork, List<String> nicknames)
     {
-        if (ircNetwork == null)
-        {
-            throw new IllegalArgumentException("Argument ircNetwork can't be null!");
-        }
+        Objects.requireNonNull(ircNetwork, "ircNetwork must not be null!");
         if (nicknames == null || nicknames.size() == 0)
         {
             throw new IllegalArgumentException("Argument nicknames can't be null or an empty list!");
@@ -53,13 +51,18 @@ public class ListAutoNickRenamer implements EventListener
             return;
         }
 
-        try
+        // if invalid nickname skip to next one ...
+        for (; this.index < this.nicknames.size();)
         {
-            this.ircNetwork.send(new IRCNickCommand(this.nicknames.get(this.index++)));
-        }
-        catch (Exception e)
-        {
-            this.ircNetwork.getIRCConnectionLog().exception(e);
+            try
+            {
+                this.ircNetwork.send(new IRCNickCommand(this.nicknames.get(this.index++)));
+                break; // leave if no error
+            }
+            catch (Exception e)
+            {
+                this.ircNetwork.getIRCConnectionLog().exception(e);
+            }
         }
     }
 }

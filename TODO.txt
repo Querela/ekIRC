@@ -22,6 +22,8 @@ ToDo / ToThinkAbout:
     - waiting for events? (event list?)
     - event group
     - asyc events - thread group store in events
+    
+    - events with only one listener / n-listeners
 
 
 - make events for each server reply / bundle events in groups?
@@ -44,7 +46,7 @@ ToDo / ToThinkAbout:
     - store what?
 
 
-- 
+- IRCValidation?
 
 
 #####

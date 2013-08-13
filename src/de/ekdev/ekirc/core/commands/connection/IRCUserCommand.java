@@ -8,6 +8,7 @@ import java.util.List;
 
 import de.ekdev.ekirc.core.AsIRCMessage;
 import de.ekdev.ekirc.core.IRCMessage;
+import de.ekdev.ekirc.core.IRCUser;
 
 /**
  * @author ekDev
@@ -21,23 +22,12 @@ public final class IRCUserCommand implements AsIRCMessage
 
     public IRCUserCommand(String username, boolean invisible, String realname)
     {
-        if (username == null || username.length() == 0)
-        {
-            throw new IllegalArgumentException("Argument username can't be null or empty in a USER command!");
-        }
-        if (username.indexOf(IRCMessage.IRC_SPACE) != -1)
-        {
-            throw new IllegalArgumentException("Argument username can't contain a space character!");
-        }
+        IRCUser.validateUsername(username);
 
         if (realname == null || realname.length() == 0)
         {
             throw new IllegalArgumentException("Argument realname can't be null or empty in a USER command!");
         }
-        // if (realname.indexOf(IRCMessage.IRC_SPACE) != -1)
-        // {
-        // throw new IllegalArgumentException("Argument realname can't contain a space character!");
-        // }
 
         this.username = username;
         this.invisible = invisible;

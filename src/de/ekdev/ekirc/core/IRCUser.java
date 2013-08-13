@@ -3,6 +3,8 @@
  */
 package de.ekdev.ekirc.core;
 
+import java.util.Objects;
+
 /**
  * @author ekDev
  */
@@ -22,13 +24,9 @@ public class IRCUser implements Comparable<IRCUser>
 
     // ------------------------------------------------------------------------
 
-    public IRCUser(IRCUserManager ircUserManager, String nickname)
+    public IRCUser(IRCUserManager ircUserManager, String nickname) throws NullPointerException
     {
-        if (ircUserManager == null)
-        {
-            throw new IllegalArgumentException("ircUserManager can't be null!");
-        }
-
+        Objects.requireNonNull(ircUserManager, "ircUserManager must not be null!");
         IRCUser.validateNickname(nickname); // throws exceptions
 
         this.ircUserManager = ircUserManager;
@@ -97,20 +95,39 @@ public class IRCUser implements Comparable<IRCUser>
 
     // ------------------------------------------------------------------------
 
-    public static boolean validateNickname(String nickname)
+    public static boolean validateNickname(String nickname) throws NullPointerException, IllegalArgumentException
     {
+        Objects.requireNonNull(nickname, "Invalid nickname format: nickname must not be null!");
+        if (nickname.length() == 0)
+        {
+            throw new IllegalArgumentException("Invalid nickname format: nickname is empty!");
+        }
+        if (nickname.indexOf(IRCMessage.IRC_SPACE) != -1)
+        {
+            throw new IllegalArgumentException("Invalid nickname format: nickname can't contain a space character!");
+        }
         // TODO: validateNickname
         return true;
     }
 
-    public static boolean validateUsername(String username)
+    public static boolean validateUsername(String username) throws NullPointerException, IllegalArgumentException
     {
+        Objects.requireNonNull(username, "Invalid username format: username must not be null!");
+        if (username.length() == 0)
+        {
+            throw new IllegalArgumentException("Invalid username format: username can't be empty!");
+        }
+        if (username.indexOf(IRCMessage.IRC_SPACE) != -1)
+        {
+            throw new IllegalArgumentException("Invalid username format: username can't contain a space character!");
+        }
         // TODO: validateUsername
         return true;
     }
 
-    public static boolean validateHostmask(String hostmask)
+    public static boolean validateHostmask(String hostmask) throws NullPointerException
     {
+        Objects.requireNonNull(hostmask, "Invalid hostmask format: hostmask must not be null!");
         // TODO: validateHostmask
         return true;
     }

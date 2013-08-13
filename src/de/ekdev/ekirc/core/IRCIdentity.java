@@ -3,6 +3,8 @@
  */
 package de.ekdev.ekirc.core;
 
+import java.util.Objects;
+
 /**
  * @author ekDev
  */
@@ -16,18 +18,10 @@ public class IRCIdentity
 
     // ------------------------------------------------------------------------
 
-    public IRCIdentity(String realname, String password)
+    public IRCIdentity(String realname, String password) throws NullPointerException
     {
-        // TODO: validate ...
-
-        this.realname = realname;
-        this.connectionPassword = password;
-    }
-
-    public IRCIdentity(IRCUser ircUser, String realname, String password)
-    {
-        // TODO: validate ...
-        this.myIRCUser = ircUser;
+        Objects.requireNonNull(realname, "realname must not be null!");
+        IRCIdentity.validatePassword(password);
 
         this.realname = realname;
         this.connectionPassword = password;
@@ -50,15 +44,25 @@ public class IRCIdentity
         return this.myIRCUser;
     }
 
-    public void setIRCUser(IRCUser ircUser)
+    public void setIRCUser(IRCUser ircUser) throws NullPointerException
     {
+        Objects.requireNonNull(ircUser, "ircUser must not be null!");
         this.myIRCUser = ircUser;
     }
 
     // ------------------------------------------------------------------------
 
-    public static boolean validatePassword(String password)
+    public static boolean validatePassword(String password) throws NullPointerException, IllegalArgumentException
     {
+        Objects.requireNonNull(password, "Invalid password format: password must not be null!");
+        if (password.length() == 0)
+        {
+            throw new IllegalArgumentException("Invalid password format: password can't be empty!");
+        }
+        if (password.indexOf(IRCMessage.IRC_SPACE) != -1)
+        {
+            throw new IllegalArgumentException("Invalid password format: password can't contain a space character!");
+        }
         // TODO: validatePassword
         return true;
     }

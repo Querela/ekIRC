@@ -3,10 +3,13 @@
  */
 package de.ekdev.ekirc.core.event.listener;
 
+import java.util.Objects;
+
 import de.ekdev.ekevent.EventException;
 import de.ekdev.ekevent.EventHandler;
 import de.ekdev.ekevent.EventListener;
 import de.ekdev.ekirc.core.IRCNetwork;
+import de.ekdev.ekirc.core.IRCUser;
 import de.ekdev.ekirc.core.commands.connection.IRCNickCommand;
 import de.ekdev.ekirc.core.commands.connection.IRCUserCommand;
 import de.ekdev.ekirc.core.event.IRCConnectEvent;
@@ -24,11 +27,9 @@ public class UserConnectionRegistrator implements EventListener
 
     public UserConnectionRegistrator(IRCNetwork ircNetwork, String nickname, String username, boolean invisible)
     {
-        // TODO: check
-        if (ircNetwork == null)
-        {
-            throw new IllegalArgumentException("Argument ircNetwork can't be null!");
-        }
+        Objects.requireNonNull(ircNetwork, "ircNetwork must not be null");
+        IRCUser.validateNickname(nickname);
+        IRCUser.validateUsername(username);
 
         this.ircNetwork = ircNetwork;
         this.nickname = nickname;

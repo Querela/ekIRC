@@ -3,9 +3,12 @@
  */
 package de.ekdev.ekirc.core.event.listener;
 
+import java.util.Objects;
+
 import de.ekdev.ekevent.EventHandler;
 import de.ekdev.ekevent.EventListener;
 import de.ekdev.ekirc.core.IRCNetwork;
+import de.ekdev.ekirc.core.IRCUser;
 import de.ekdev.ekirc.core.commands.connection.IRCNickCommand;
 import de.ekdev.ekirc.core.event.NickAlreadyInUseEvent;
 
@@ -21,14 +24,9 @@ public class IncrementalAutoNickRenamer implements EventListener
 
     public IncrementalAutoNickRenamer(IRCNetwork ircNetwork, String nickname, int tries)
     {
-        if (ircNetwork == null)
-        {
-            throw new IllegalArgumentException("Argument ircNetwork can't be null!");
-        }
-        if (nickname == null || nickname.length() == 0)
-        {
-            throw new IllegalArgumentException("Argument nickname can't be null or empty!");
-        }
+        Objects.requireNonNull(ircNetwork, "ircNetwork must not be null!");
+        IRCUser.validateNickname(nickname);
+        // tries <= 0 -> infinite
 
         this.ircNetwork = ircNetwork;
         this.nickname = nickname;
@@ -48,7 +46,7 @@ public class IncrementalAutoNickRenamer implements EventListener
 
         this.counter++;
 
-        if (this.counter > this.maxTries)
+        if (this.maxTries > 0 && this.counter > this.maxTries)
         {
             // DOES WORK
             // -> java.util.ConcurrentModificationException

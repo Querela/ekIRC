@@ -4,6 +4,9 @@
 package de.ekdev.ekirc.core;
 
 import static de.ekdev.ekirc.core.IRCNumericServerReply.*;
+
+import java.util.Objects;
+
 import de.ekdev.ekirc.core.event.IRCNetworkInfoEvent;
 import de.ekdev.ekirc.core.event.IRCPingEvent;
 import de.ekdev.ekirc.core.event.IRCUnknownServerCommandEvent;
@@ -22,12 +25,9 @@ public class IRCMessageProcessor
 
     protected final IRCMessageParser parser;
 
-    public IRCMessageProcessor(IRCNetwork ircNetwork)
+    public IRCMessageProcessor(IRCNetwork ircNetwork) throws NullPointerException
     {
-        if (ircNetwork == null)
-        {
-            throw new IllegalArgumentException("Argument ircNetwork is null!");
-        }
+        Objects.requireNonNull(ircNetwork, "ircNetwork must not be null!");
 
         this.ircNetwork = ircNetwork;
         this.parser = this.createDefaultIRCMessageParser();
@@ -73,7 +73,6 @@ public class IRCMessageProcessor
             {
                 int i = im.getParams().get(1).lastIndexOf(IRCMessage.IRC_SPACE);
                 String nickuserhost = im.getParams().get(1).substring(i + 1);
-                this.ircNetwork.getIRCConnectionLog().object("nickuserhost", nickuserhost);
 
                 // set my user object !
                 IRCUser ircUser = new IRCUser(this.ircNetwork.getIRCUserManager(),

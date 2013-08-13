@@ -3,6 +3,7 @@
  */
 package de.ekdev.ekirc.core;
 
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -14,12 +15,9 @@ public class IRCUserManager
 
     private final ConcurrentHashMap<String, IRCUser> users;
 
-    public IRCUserManager(IRCNetwork ircNetwork)
+    public IRCUserManager(IRCNetwork ircNetwork) throws NullPointerException
     {
-        if (ircNetwork == null)
-        {
-            throw new IllegalArgumentException("Argument ircNetwork is null!");
-        }
+        Objects.requireNonNull(ircNetwork, "ircNetwork must not be null!");
 
         this.ircNetwork = ircNetwork;
 

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.ekdev.ekirc.core.AsIRCMessage;
+import de.ekdev.ekirc.core.IRCIdentity;
 import de.ekdev.ekirc.core.IRCMessage;
 
 /**
@@ -19,14 +20,7 @@ public final class IRCPassCommand implements AsIRCMessage
 
     public IRCPassCommand(String password)
     {
-        if (password == null || password.length() == 0)
-        {
-            throw new IllegalArgumentException("Argument password can't be null or empty in a PASS command!");
-        }
-        if (password.indexOf(IRCMessage.IRC_SPACE) != -1)
-        {
-            throw new IllegalArgumentException("Argument password can't contain a space character!");
-        }
+        IRCIdentity.validatePassword(password);
 
         this.password = password;
     }

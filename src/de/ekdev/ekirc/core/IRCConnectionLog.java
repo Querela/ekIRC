@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author ekDev
@@ -42,13 +43,11 @@ public class IRCConnectionLog
     private boolean canWrite;
     protected Date startDate;
 
-    public IRCConnectionLog(String filename, boolean append) throws FileNotFoundException, IllegalArgumentException
+    public IRCConnectionLog(String filename, boolean append) throws FileNotFoundException, IllegalArgumentException,
+            NullPointerException
     {
         // create a file output log
-        if (filename == null)
-        {
-            throw new IllegalArgumentException("Argument filename is null!");
-        }
+        Objects.requireNonNull(filename, "filename must not be null!");
 
         file = new File(filename);
 
@@ -78,13 +77,10 @@ public class IRCConnectionLog
         this.canWrite = true;
     }
 
-    public IRCConnectionLog(OutputStream os)
+    public IRCConnectionLog(OutputStream os) throws NullPointerException
     {
         // Create a log with given output stream
-        if (os == null)
-        {
-            throw new IllegalArgumentException("Argument os is null!");
-        }
+        Objects.requireNonNull(os, "os must not be null!");
 
         this.file = null;
         this.writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(os)));

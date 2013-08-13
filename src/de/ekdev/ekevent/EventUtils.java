@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -19,10 +20,7 @@ public class EventUtils
             EventListener listener)
     {
         // check arguments
-        if (listener == null)
-        {
-            throw new IllegalArgumentException("Argument listener is null!");
-        }
+        Objects.requireNonNull(listener, "listener must not be null!");
 
         Map<Class<? extends Event>, Set<RegisteredEventListener>> ret = new HashMap<Class<? extends Event>, Set<RegisteredEventListener>>();
         Set<Method> methods = new HashSet<Method>();
@@ -92,13 +90,13 @@ public class EventUtils
                     }
                 }
             };
-            
+
             eventSet.add(new RegisteredEventListener(listener, executor));
         }
 
         return ret;
     }
-    
+
     public static Class<? extends Event> getAsSubclass(Class<?> clazz)
     {
         if (Event.class.isAssignableFrom(clazz))

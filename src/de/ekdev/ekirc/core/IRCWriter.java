@@ -6,6 +6,7 @@ package de.ekdev.ekirc.core;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -22,12 +23,9 @@ public class IRCWriter implements Runnable
     private LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>(); // TODO: add limit?
     private final static AtomicInteger threadCount = new AtomicInteger();
 
-    public IRCWriter(IRCIOInterface ircInterface) throws IllegalArgumentException
+    public IRCWriter(IRCIOInterface ircInterface) throws NullPointerException
     {
-        if (ircInterface == null)
-        {
-            throw new IllegalArgumentException("Argument ircInterface is null!");
-        }
+        Objects.requireNonNull(ircInterface, "ircInterface must not be null!");
 
         this.ircInterface = ircInterface;
     }

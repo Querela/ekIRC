@@ -8,6 +8,7 @@ import java.util.List;
 
 import de.ekdev.ekirc.core.AsIRCMessage;
 import de.ekdev.ekirc.core.IRCMessage;
+import de.ekdev.ekirc.core.IRCUser;
 
 /**
  * @author ekDev
@@ -19,14 +20,7 @@ public final class IRCNickCommand implements AsIRCMessage
 
     public IRCNickCommand(String nick)
     {
-        if (nick == null || nick.length() == 0)
-        {
-            throw new IllegalArgumentException("Argument nick can't be null or empty in a NICK command!");
-        }
-        if (nick.indexOf(IRCMessage.IRC_SPACE) != -1)
-        {
-            throw new IllegalArgumentException("Argument nick can't contain a space character!");
-        }
+        IRCUser.validateNickname(nick);
 
         this.nick = nick;
     }

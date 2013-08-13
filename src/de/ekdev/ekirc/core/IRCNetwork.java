@@ -5,6 +5,7 @@ package de.ekdev.ekirc.core;
 
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Objects;
 
 import de.ekdev.ekirc.core.commands.connection.IRCPassCommand;
 import de.ekdev.ekirc.core.commands.connection.IRCQuitCommand;
@@ -37,15 +38,10 @@ public class IRCNetwork implements IRCIOInterface
     protected IRCMessageProcessor ircMessageProcessor;
 
     public IRCNetwork(IRCManager ircManager, IRCIdentity myIRCIdentity, String host, int port)
+            throws NullPointerException
     {
-        if (ircManager == null)
-        {
-            throw new IllegalArgumentException("Argument ircManager is null!");
-        }
-        if (myIRCIdentity == null)
-        {
-            throw new IllegalArgumentException("Argument myIRCIdentity is null!");
-        }
+        Objects.requireNonNull(ircManager, "ircManager must not be null!");
+        Objects.requireNonNull(myIRCIdentity, "myIRCIdentity must not be null!");
 
         this.ircManager = ircManager;
 
@@ -73,11 +69,9 @@ public class IRCNetwork implements IRCIOInterface
 
     public void connect()
     {
-        if (this.ircConnection == null)
-        {
-            throw new NullPointerException(
-                    "ircConnection is null! Can't connect to network! Create new IRCNetwork object!");
-        }
+        Objects.requireNonNull(this.ircConnection,
+                "this.ircConnection is null! Can't connect to network! Create new IRCNetwork object!");
+
         if (this.ircConnection.isConnected()) return;
 
         // create reader, writer threads

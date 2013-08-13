@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -21,12 +22,9 @@ public class IRCReader implements Runnable
     private Thread thread;
     private final static AtomicInteger threadCount = new AtomicInteger();
 
-    public IRCReader(IRCIOInterface ircInterface) throws IllegalArgumentException
+    public IRCReader(IRCIOInterface ircInterface) throws NullPointerException
     {
-        if (ircInterface == null)
-        {
-            throw new IllegalArgumentException("Argument ircInterface is null!");
-        }
+        Objects.requireNonNull(ircInterface, "ircInterface must not be null!");
 
         this.ircInterface = ircInterface;
     }

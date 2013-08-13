@@ -3,25 +3,24 @@
  */
 package de.ekdev.ekirc.core;
 
+import java.util.Objects;
+
 /**
  * @author ekDev
  */
 public class IRCChannelManager
 {
     private final IRCNetwork ircNetwork;
-    
-    public IRCChannelManager(IRCNetwork ircNetwork)
+
+    public IRCChannelManager(IRCNetwork ircNetwork) throws NullPointerException
     {
-        if (ircNetwork == null)
-        {
-            throw new IllegalArgumentException("Argument ircNetwork is null!");
-        }
-        
+        Objects.requireNonNull(ircNetwork, "ircNetwork must not be null!");
+
         this.ircNetwork = ircNetwork;
     }
-    
+
     // ------------------------------------------------------------------------
-    
+
     public final IRCNetwork getIRCNetwork()
     {
         return this.ircNetwork;
