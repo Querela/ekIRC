@@ -1,6 +1,13 @@
+# private files #
 .*
+
+# my log files #
 *.log
 
+# ObjectAid class diagrams #
+*.ucls
+
+# java class files #
 *.class
 
 # Package Files #
