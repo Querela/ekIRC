@@ -5,6 +5,8 @@ package de.ekdev.ekirc.core;
 
 import java.util.Objects;
 
+import de.ekdev.ekirc.core.commands.connection.IRCNickCommand;
+
 /**
  * @author ekDev
  */
@@ -47,7 +49,19 @@ public class IRCIdentity
     public void setIRCUser(IRCUser ircUser) throws NullPointerException
     {
         Objects.requireNonNull(ircUser, "ircUser must not be null!");
+        // TODO: allow only one time? dependency inject?
         this.myIRCUser = ircUser;
+    }
+
+    // ------------------------------------------------------------------------
+
+    public void changeNick(String newNickname) throws NullPointerException, IRCNicknameFormatException
+    {
+        IRCNickCommand ircNickCommand = new IRCNickCommand(newNickname);
+
+        // TODO: use this underhanded way to send a message?
+        // TODO: check validity (user)
+        this.myIRCUser.getIRCUserManager().getIRCNetwork().send(ircNickCommand);
     }
 
     // ------------------------------------------------------------------------

@@ -9,7 +9,9 @@ import de.ekdev.ekevent.EventException;
 import de.ekdev.ekevent.EventHandler;
 import de.ekdev.ekevent.EventListener;
 import de.ekdev.ekirc.core.IRCNetwork;
+import de.ekdev.ekirc.core.IRCNicknameFormatException;
 import de.ekdev.ekirc.core.IRCUser;
+import de.ekdev.ekirc.core.IRCUsernameFormatException;
 import de.ekdev.ekirc.core.commands.connection.IRCNickCommand;
 import de.ekdev.ekirc.core.commands.connection.IRCUserCommand;
 import de.ekdev.ekirc.core.event.IRCConnectEvent;
@@ -26,6 +28,7 @@ public class UserConnectionRegistrator implements EventListener
     private final boolean invisible;
 
     public UserConnectionRegistrator(IRCNetwork ircNetwork, String nickname, String username, boolean invisible)
+            throws NullPointerException, IRCNicknameFormatException, IRCUsernameFormatException
     {
         Objects.requireNonNull(ircNetwork, "ircNetwork must not be null");
         IRCUser.validateNickname(nickname);
@@ -50,6 +53,15 @@ public class UserConnectionRegistrator implements EventListener
         }
         catch (EventException e)
         {
+            this.ircNetwork.getIRCConnectionLog().exception(e);
+        }
+        catch (NullPointerException e)
+        {
+            this.ircNetwork.getIRCConnectionLog().exception(e);
+        }
+        catch (IRCNicknameFormatException e)
+        {
+            // should not happen
             this.ircNetwork.getIRCConnectionLog().exception(e);
         }
 

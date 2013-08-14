@@ -13,6 +13,8 @@ import de.ekdev.ekevent.EventListener;
 import de.ekdev.ekirc.core.IRCIdentity;
 import de.ekdev.ekirc.core.IRCManager;
 import de.ekdev.ekirc.core.IRCNetwork;
+import de.ekdev.ekirc.core.IRCNicknameFormatException;
+import de.ekdev.ekirc.core.IRCUsernameFormatException;
 import de.ekdev.ekirc.core.commands.connection.IRCNickCommand;
 import de.ekdev.ekirc.core.event.NickChangeEvent;
 import de.ekdev.ekirc.core.event.listener.AutoReconnector;
@@ -27,7 +29,7 @@ public class SimpleIRCServerContextTest
     {
     }
 
-    public static void main(String[] args)
+    public static void main(String[] args) throws NullPointerException, IRCNicknameFormatException, IRCUsernameFormatException
     {
 
         IRCManager ircManager = new IRCManager();

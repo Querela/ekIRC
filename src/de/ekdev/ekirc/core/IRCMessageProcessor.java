@@ -78,7 +78,7 @@ public class IRCMessageProcessor
                 IRCUser ircUser = new IRCUser(this.ircNetwork.getIRCUserManager(),
                         IRCUser.getNickByPrefix(nickuserhost));
                 ircUser.setUsername(IRCUser.getUsernameByPrefix(nickuserhost));
-                ircUser.setHostmask(IRCUser.getHostmaskByPrefix(nickuserhost));
+                ircUser.setHostmask(IRCUser.getHostByPrefix(nickuserhost));
                 this.ircNetwork.getMyIRCIdentity().setIRCUser(ircUser);
                 this.ircNetwork.getIRCConnectionLog().object("ircUser", ircUser);
                 // go on

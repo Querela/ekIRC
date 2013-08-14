@@ -8,6 +8,7 @@ import java.util.List;
 
 import de.ekdev.ekirc.core.AsIRCMessage;
 import de.ekdev.ekirc.core.IRCMessage;
+import de.ekdev.ekirc.core.IRCNicknameFormatException;
 import de.ekdev.ekirc.core.IRCUser;
 
 /**
@@ -18,7 +19,7 @@ public final class IRCNickCommand implements AsIRCMessage
     private final String nick;
     public final static String COMMAND = "NICK";
 
-    public IRCNickCommand(String nick)
+    public IRCNickCommand(String nick) throws NullPointerException, IRCNicknameFormatException
     {
         IRCUser.validateNickname(nick);
 

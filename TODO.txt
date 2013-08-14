@@ -8,6 +8,12 @@ ToDo / ToThinkAbout:
     <- classes can also be overwritten ...
 
 
+- frameworks
+    - dependency injection (guice?) !
+    - project lombok?
+    - logging framework (log4j2?)
+
+
 - define interfaces for all communications
     -> separate implementation from logic
     -> expose only logic needed for other classes

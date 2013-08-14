@@ -9,6 +9,7 @@ import java.util.List;
 import de.ekdev.ekirc.core.AsIRCMessage;
 import de.ekdev.ekirc.core.IRCMessage;
 import de.ekdev.ekirc.core.IRCUser;
+import de.ekdev.ekirc.core.IRCUsernameFormatException;
 
 /**
  * @author ekDev
@@ -20,7 +21,7 @@ public final class IRCUserCommand implements AsIRCMessage
     private final boolean invisible;
     public final static String COMMAND = "USER";
 
-    public IRCUserCommand(String username, boolean invisible, String realname)
+    public IRCUserCommand(String username, boolean invisible, String realname) throws NullPointerException, IRCUsernameFormatException
     {
         IRCUser.validateUsername(username);
 

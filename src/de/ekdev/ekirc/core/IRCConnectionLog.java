@@ -51,19 +51,19 @@ public class IRCConnectionLog
 
         file = new File(filename);
 
-        if (file.exists() && !file.isFile())
+        boolean fileexists = file.exists();
+
+        if (fileexists && !file.isFile())
         {
             throw new IllegalArgumentException("Argument filename specifies no file!");
         }
-
-        boolean hadContent = file.exists();
 
         this.writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, append),
                 Charset.defaultCharset())));
         this.canWrite = true;
 
-        // append a empty line if probably hadContent
-        if (append && hadContent) this.line("");
+        // append a empty line if file existed and probably had Content
+        if (fileexists && append) this.line("");
     }
 
     public IRCConnectionLog() throws IOException
@@ -208,6 +208,12 @@ public class IRCConnectionLog
         }
 
         return ret;
+    }
+
+    public synchronized boolean moveAndAppendLogFile(String newFilename, boolean append)
+    {
+        // TODO: append old file onto destination file, if no append then remove existing destination or abort?
+        return false;
     }
 
     // ------------------------------------------------------------------------

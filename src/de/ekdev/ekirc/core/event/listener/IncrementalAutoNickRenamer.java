@@ -8,6 +8,7 @@ import java.util.Objects;
 import de.ekdev.ekevent.EventHandler;
 import de.ekdev.ekevent.EventListener;
 import de.ekdev.ekirc.core.IRCNetwork;
+import de.ekdev.ekirc.core.IRCNicknameFormatException;
 import de.ekdev.ekirc.core.IRCUser;
 import de.ekdev.ekirc.core.commands.connection.IRCNickCommand;
 import de.ekdev.ekirc.core.event.NickAlreadyInUseEvent;
@@ -22,7 +23,8 @@ public class IncrementalAutoNickRenamer implements EventListener
     private final int maxTries;
     private int counter = 0;
 
-    public IncrementalAutoNickRenamer(IRCNetwork ircNetwork, String nickname, int tries)
+    public IncrementalAutoNickRenamer(IRCNetwork ircNetwork, String nickname, int tries) throws NullPointerException,
+            IRCNicknameFormatException
     {
         Objects.requireNonNull(ircNetwork, "ircNetwork must not be null!");
         IRCUser.validateNickname(nickname);

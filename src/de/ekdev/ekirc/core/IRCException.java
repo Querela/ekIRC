@@ -33,5 +33,4 @@ public class IRCException extends Exception
     {
         super(message, cause, enableSuppression, writableStackTrace);
     }
-
 }

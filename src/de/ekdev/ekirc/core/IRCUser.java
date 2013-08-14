@@ -18,16 +18,15 @@ public class IRCUser implements Comparable<IRCUser>
 
     private String nickname;
     private String username;
-    private String hostmask;
-
-    // private String servername;
+    private String host;
 
     // ------------------------------------------------------------------------
 
     public IRCUser(IRCUserManager ircUserManager, String nickname) throws NullPointerException
     {
         Objects.requireNonNull(ircUserManager, "ircUserManager must not be null!");
-        IRCUser.validateNickname(nickname); // throws exceptions
+        Objects.requireNonNull(nickname, "nickname must not be null!");
+        // IRCUser.validateNickname(nickname); // throws exceptions
 
         this.ircUserManager = ircUserManager;
         this.nickname = nickname;
@@ -63,14 +62,16 @@ public class IRCUser implements Comparable<IRCUser>
         return this.username;
     }
 
-    public String getHostmask()
+    public String getHost()
     {
-        return this.hostmask;
+        return this.host;
     }
 
     public String getPrefix()
     {
-        return this.nickname + '!' + this.username + '@' + this.hostmask;
+        return this.nickname
+                + ((this.host != null) ? ((this.username != null) ? IRCUser.USER_EXCLAMATION_MARK + this.username : "")
+                        + IRCUser.USER_AT + this.host : "");
     }
 
     public void setNickname(String newNickname)
@@ -90,44 +91,44 @@ public class IRCUser implements Comparable<IRCUser>
 
     public void setHostmask(String hostmask)
     {
-        this.hostmask = hostmask;
+        this.host = hostmask;
     }
 
     // ------------------------------------------------------------------------
 
-    public static boolean validateNickname(String nickname) throws NullPointerException, IllegalArgumentException
+    public static boolean validateNickname(String nickname) throws NullPointerException, IRCNicknameFormatException
     {
         Objects.requireNonNull(nickname, "Invalid nickname format: nickname must not be null!");
         if (nickname.length() == 0)
         {
-            throw new IllegalArgumentException("Invalid nickname format: nickname is empty!");
+            throw new IRCNicknameFormatException("nickname is empty!");
         }
         if (nickname.indexOf(IRCMessage.IRC_SPACE) != -1)
         {
-            throw new IllegalArgumentException("Invalid nickname format: nickname can't contain a space character!");
+            throw new IRCNicknameFormatException("nickname can't contain a space character!");
         }
         // TODO: validateNickname
         return true;
     }
 
-    public static boolean validateUsername(String username) throws NullPointerException, IllegalArgumentException
+    public static boolean validateUsername(String username) throws NullPointerException, IRCUsernameFormatException
     {
         Objects.requireNonNull(username, "Invalid username format: username must not be null!");
         if (username.length() == 0)
         {
-            throw new IllegalArgumentException("Invalid username format: username can't be empty!");
+            throw new IRCUsernameFormatException("username can't be empty!");
         }
         if (username.indexOf(IRCMessage.IRC_SPACE) != -1)
         {
-            throw new IllegalArgumentException("Invalid username format: username can't contain a space character!");
+            throw new IRCUsernameFormatException("username can't contain a space character!");
         }
         // TODO: validateUsername
         return true;
     }
 
-    public static boolean validateHostmask(String hostmask) throws NullPointerException
+    public static boolean validateHost(String hostmask) throws NullPointerException, IRCHostFormatException
     {
-        Objects.requireNonNull(hostmask, "Invalid hostmask format: hostmask must not be null!");
+        Objects.requireNonNull(hostmask, "Invalid host format: host must not be null!");
         // TODO: validateHostmask
         return true;
     }
@@ -155,7 +156,7 @@ public class IRCUser implements Comparable<IRCUser>
         return prefix.substring(excla + 1, at);
     }
 
-    public static String getHostmaskByPrefix(String prefix)
+    public static String getHostByPrefix(String prefix)
     {
         if (prefix == null) return null;
 
@@ -209,6 +210,7 @@ public class IRCUser implements Comparable<IRCUser>
     @Override
     public int compareTo(IRCUser other)
     {
-        return this.nickname.compareTo(other.getNickname());
+        // TODO: scandinavian compare ? []\~ == {}|^
+        return this.nickname.compareToIgnoreCase(other.getNickname());
     }
 }
