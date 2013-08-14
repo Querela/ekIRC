@@ -218,7 +218,7 @@ public class IRCMessageProcessor
                 // TODO: something more to do?
                 this.ircNetwork.getIRCConnectionLog().message(
                         im.getCommand() + " - reason: '" + im.getParams().get(0) + "'");
-                this.ircNetwork.disconnect();
+                this.ircNetwork.disconnect(false);
                 break;
             }
             default:

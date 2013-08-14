@@ -37,6 +37,9 @@ public class AutoReconnector implements EventListener
     @EventHandler
     public void onDisconnect(IRCDisconnectEvent ide)
     {
+        // abort if no reconnect possible
+        if (!ide.isReconnectPossible()) return;
+
         // if no ircNetwork given then continue
         if (this.ircNetwork != null && !this.ircNetwork.equals(ide.getIRCNetwork())) return;
 

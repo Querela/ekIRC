@@ -29,7 +29,8 @@ public class SimpleIRCServerContextTest
     {
     }
 
-    public static void main(String[] args) throws NullPointerException, IRCNicknameFormatException, IRCUsernameFormatException
+    public static void main(String[] args) throws NullPointerException, IRCNicknameFormatException,
+            IRCUsernameFormatException
     {
 
         IRCManager ircManager = new IRCManager();
@@ -119,7 +120,7 @@ public class SimpleIRCServerContextTest
         {
         }
 
-        if (inet.isConnected()) inet.disconnect();
+        if (inet.isConnected()) inet.disconnect(false);
         inet.closeConnectionLog();
     }
 }

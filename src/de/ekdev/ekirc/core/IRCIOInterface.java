@@ -18,7 +18,7 @@ public interface IRCIOInterface
 
     public IRCConnectionLog getIRCConnectionLog();
 
-    public void shutdown();
+    public void shutdown(boolean allowReconnect);
 
     public void raiseEvent(IRCEvent ircEvent);
 }

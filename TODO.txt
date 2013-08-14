@@ -55,6 +55,9 @@ ToDo / ToThinkAbout:
 - IRCValidation?
 
 
+- IRC Service registration -> ignore
+
+
 #####
 - server reply codes
     - store server reply codes in static final variables (constants) rather than enums?

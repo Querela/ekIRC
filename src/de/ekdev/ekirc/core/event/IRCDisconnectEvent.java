@@ -12,10 +12,17 @@ import de.ekdev.ekirc.core.IRCNetwork;
 public class IRCDisconnectEvent extends IRCNetworkEvent
 {
     private final static EventListenerList listeners = new EventListenerList();
+    private final boolean reconnectPossible;
 
-    public IRCDisconnectEvent(IRCNetwork source)
+    public IRCDisconnectEvent(IRCNetwork source, boolean reconnectPossible)
     {
         super(source);
+        this.reconnectPossible = reconnectPossible;
+    }
+
+    public boolean isReconnectPossible()
+    {
+        return this.reconnectPossible;
     }
 
     // ------------------------------------------------------------------------

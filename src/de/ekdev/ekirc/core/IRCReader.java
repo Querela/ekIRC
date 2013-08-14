@@ -121,6 +121,6 @@ public class IRCReader implements Runnable
 
         this.ircInterface.getIRCConnectionLog().message("READER THREAD STOPPED ---");
         this.isRunning = false;
-        this.ircInterface.shutdown();
+        this.ircInterface.shutdown(true);
     }
 }

@@ -36,6 +36,7 @@ public class IRCNetwork implements IRCIOInterface
     protected IRCWriter ircWriter;
     protected IRCConnectionLog ircConnectionLog;
     protected IRCMessageProcessor ircMessageProcessor;
+    private boolean canReconnect;
 
     public IRCNetwork(IRCManager ircManager, IRCIdentity myIRCIdentity, String host, int port)
             throws NullPointerException
@@ -74,6 +75,8 @@ public class IRCNetwork implements IRCIOInterface
 
         if (this.ircConnection.isConnected()) return;
 
+        this.canReconnect = true;
+
         // create reader, writer threads
         // TODO: To separate further -> proxy object
         this.ircReader = new IRCReader((IRCIOInterface) this);
@@ -108,7 +111,7 @@ public class IRCNetwork implements IRCIOInterface
         {
             this.ircConnectionLog.message("Couldn't connect to network!");
 
-            this.disconnect();
+            this.disconnect(false);
         }
     }
 
@@ -123,10 +126,12 @@ public class IRCNetwork implements IRCIOInterface
             this.ircWriter.sendImmediate(new IRCQuitCommand(reason));
     }
 
-    public void disconnect()
+    public void disconnect(boolean allowReconnect)
     {
         // TODO: check only null? So we can reconnect on first time if never connected?
         if (this.ircConnection == null || !this.ircConnection.isConnected()) return;
+
+        this.canReconnect = this.canReconnect && allowReconnect;
 
         this.ircConnectionLog.message("Disconnecting from network ...");
 
@@ -137,11 +142,18 @@ public class IRCNetwork implements IRCIOInterface
 
         this.ircConnection.disconnect();
 
-        this.ircManager.getEventManager().dispatch(new IRCDisconnectEvent(this));
+        this.ircManager.getEventManager().dispatch(new IRCDisconnectEvent(this, this.canReconnect));
+    }
+
+    public boolean canReconnect()
+    {
+        return this.canReconnect;
     }
 
     public void reconnect()
     {
+        if (!this.canReconnect) return;
+
         this.connect();
     }
 
@@ -336,9 +348,10 @@ public class IRCNetwork implements IRCIOInterface
     }
 
     @Override
-    public final void shutdown()
+    public final void shutdown(boolean allowReconnect)
     {
-        this.disconnect();
+        // allow reconnect
+        this.disconnect(allowReconnect);
     }
 
     @Override
@@ -352,7 +365,7 @@ public class IRCNetwork implements IRCIOInterface
     @Override
     protected void finalize() throws Throwable
     {
-        if (this.isConnected()) this.disconnect();
+        if (this.isConnected()) this.disconnect(false);
 
         if (this.ircConnectionLog != null) this.closeConnectionLog();
 
