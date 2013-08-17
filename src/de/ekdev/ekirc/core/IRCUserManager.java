@@ -76,6 +76,9 @@ public class IRCUserManager
     {
         if (nick == null) return;
 
-        this.users.remove(nick);
+        IRCUser ircUser = this.users.remove(nick);
+
+        // remove user from all channels
+        if (ircUser != null) this.ircNetwork.getIRCChannelManager().removeIRCUserFromAllIRCChannels(ircUser);
     }
 }

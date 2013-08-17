@@ -11,7 +11,6 @@ import java.util.Objects;
 
 import de.ekdev.ekirc.core.AsIRCMessage;
 import de.ekdev.ekirc.core.IRCMessage;
-import de.ekdev.ekirc.core.commands.connection.IRCNickCommand;
 
 /**
  * @author ekDev

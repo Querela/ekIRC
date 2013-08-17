@@ -3,7 +3,10 @@
  */
 package de.ekdev.ekirc.core;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author ekDev
@@ -20,6 +23,8 @@ public class IRCUser implements Comparable<IRCUser>
     private String username;
     private String host;
 
+    private final Set<IRCChannel> channels;
+
     // ------------------------------------------------------------------------
 
     public IRCUser(IRCUserManager ircUserManager, String nickname) throws NullPointerException
@@ -30,6 +35,8 @@ public class IRCUser implements Comparable<IRCUser>
 
         this.ircUserManager = ircUserManager;
         this.nickname = nickname;
+
+        this.channels = Collections.synchronizedSet(new HashSet<IRCChannel>());
 
         // automatically add to manager
         this.ircUserManager.addIRCUser(this);
@@ -92,6 +99,27 @@ public class IRCUser implements Comparable<IRCUser>
     protected void setHostmask(String hostmask)
     {
         this.host = hostmask;
+    }
+
+    // --------------------------------
+
+    public Set<IRCChannel> getIRCChannels()
+    {
+        return Collections.unmodifiableSet(this.channels);
+    }
+
+    protected void addIRCChannel(IRCChannel ircChannel)
+    {
+        if (ircChannel == null) return;
+
+        this.channels.add(ircChannel);
+    }
+
+    protected void removeIRCChannel(IRCChannel ircChannel)
+    {
+        if (ircChannel == null) return;
+
+        this.channels.remove(ircChannel);
     }
 
     // ------------------------------------------------------------------------

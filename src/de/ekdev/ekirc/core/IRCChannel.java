@@ -93,6 +93,9 @@ public class IRCChannel
         // TODO: add to different sets (MODE dependent)
 
         this.users.add(ircUser);
+
+        // add channel reference in user
+        ircUser.addIRCChannel(this);
     }
 
     protected void removeIRCUser(IRCUser ircUser)
@@ -102,6 +105,20 @@ public class IRCChannel
         // TODO: remove from all other sets too
 
         this.users.remove(ircUser);
+
+        // remove channel reference from user
+        ircUser.removeIRCChannel(this);
+    }
+
+    protected void removeAllIRCUsers()
+    {
+        // remove the channel reference from all users of this channel
+        for (IRCUser user : this.users)
+        {
+            user.removeIRCChannel(this);
+        }
+
+        this.users.clear();
     }
 
     // ------------------------------------------------------------------------

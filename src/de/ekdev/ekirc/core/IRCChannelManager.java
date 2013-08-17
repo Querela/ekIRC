@@ -77,7 +77,9 @@ public class IRCChannelManager
     {
         if (name == null) return;
 
-        this.channels.remove(name);
+        IRCChannel ircChannel = this.channels.remove(name);
+
+        if (ircChannel != null) ircChannel.removeAllIRCUsers();
     }
 
     protected void removeIRCChannel(IRCChannel ircChannel)
@@ -85,5 +87,15 @@ public class IRCChannelManager
         if (ircChannel == null) return;
 
         this.removeIRCCChannel(ircChannel.getName());
+    }
+
+    // ------------------------------------------------------------------------
+
+    protected void removeIRCUserFromAllIRCChannels(IRCUser ircUser)
+    {
+        for (IRCChannel ircChannel : this.channels.values())
+        {
+            ircChannel.removeIRCUser(ircUser);
+        }
     }
 }

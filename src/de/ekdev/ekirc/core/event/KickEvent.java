@@ -1,5 +1,5 @@
 /**
- * PartEvent.java
+ * KickEvent.java
  */
 package de.ekdev.ekirc.core.event;
 
@@ -11,23 +11,21 @@ import de.ekdev.ekirc.core.IRCUser;
 /**
  * @author ekDev
  */
-public class PartEvent extends IRCNetworkEvent
+public class KickEvent extends IRCNetworkEvent
 {
     private final static EventListenerList listeners = new EventListenerList();
 
     private final IRCChannel ircChannel;
-    private final IRCUser ircUser;
+    private final IRCUser source;
+    private final IRCUser recipient;
     private final String reason;
 
-    public PartEvent(IRCNetwork source, IRCChannel ircChannel, IRCUser ircUser, String reason)
+    public KickEvent(IRCNetwork ircNetwork, IRCChannel ircChannel, IRCUser source, IRCUser recipient, String reason)
     {
-        super(source);
-        // Objects.requireNonNull(ircChannel, "ircChannel must not be null!");
-        // Objects.requireNonNull(ircUser, "ircUser must not be null!");
-        if (reason != null && reason.trim().length() == 0) reason = null;
-
+        super(ircNetwork);
         this.ircChannel = ircChannel;
-        this.ircUser = ircUser;
+        this.source = source;
+        this.recipient = recipient;
         this.reason = reason;
     }
 
@@ -36,9 +34,14 @@ public class PartEvent extends IRCNetworkEvent
         return this.ircChannel;
     }
 
-    public IRCUser getIRCUser()
+    public IRCUser getSourceIRCUser()
     {
-        return this.ircUser;
+        return this.source;
+    }
+
+    public IRCUser getRecipientIRCUser()
+    {
+        return this.recipient;
     }
 
     public boolean hasReason()
@@ -56,11 +59,11 @@ public class PartEvent extends IRCNetworkEvent
     @Override
     public EventListenerList getListeners()
     {
-        return PartEvent.listeners;
+        return KickEvent.listeners;
     }
 
     public static EventListenerList getListenerList()
     {
-        return PartEvent.listeners;
+        return KickEvent.listeners;
     }
 }
