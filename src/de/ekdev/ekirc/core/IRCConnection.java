@@ -43,7 +43,7 @@ public class IRCConnection
 
     // ------------------------------------------------------------------------
 
-    public static Socket getSocket(InetAddress host, int port) throws IOException
+    public Socket getSocket(InetAddress host, int port) throws IOException
     {
         // TODO: secure socket / socketFactory ?
         // TODO: http://docs.oracle.com/javase/6/docs/api/java/nio/channels/SocketChannel.html
@@ -158,7 +158,7 @@ public class IRCConnection
         {
             try
             {
-                this.sock = IRCConnection.getSocket(ia, this.port);
+                this.sock = this.getSocket(ia, this.port);
                 this.isConnected = true;
 
                 // set socket timeout? for exiting
@@ -176,7 +176,7 @@ public class IRCConnection
         {
             try
             {
-                this.sock = IRCConnection.getSocket(tia, this.port);
+                this.sock = this.getSocket(tia, this.port);
                 this.isConnected = true;
                 this.ia = tia;
 
