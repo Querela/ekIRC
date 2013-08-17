@@ -40,7 +40,7 @@ public class IRCChannel
         this.name = name;
         this.topic = topic;
 
-        this.users = new HashSet<IRCUser>();
+        this.users = Collections.synchronizedSet(new HashSet<IRCUser>());
 
         // automatically add to manager
         this.ircChannelManager.addIRCChannel(this);
@@ -92,10 +92,7 @@ public class IRCChannel
 
         // TODO: add to different sets (MODE dependent)
 
-        synchronized (this.users)
-        {
-            this.users.add(ircUser);
-        }
+        this.users.add(ircUser);
     }
 
     public void removeIRCUser(IRCUser ircUser)
@@ -104,10 +101,7 @@ public class IRCChannel
 
         // TODO: remove from all other sets too
 
-        synchronized (this.users)
-        {
-            this.users.remove(ircUser);
-        }
+        this.users.remove(ircUser);
     }
 
     // ------------------------------------------------------------------------
