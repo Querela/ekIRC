@@ -3,7 +3,10 @@
  */
 package de.ekdev.ekirc.core;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author ekDev
@@ -21,6 +24,11 @@ public class IRCChannel
     // http://webtoman.com/opera/panel/ircdmodes.html
     private String modes; // -> EnumSet?
 
+    protected final Set<IRCUser> users;
+
+    // TODO: more Sets for different statuses of users? Map<User, Status?>
+    // for set operations are different sets better
+
     // ------------------------------------------------------------------------
 
     public IRCChannel(IRCChannelManager ircChannelManager, String name, String topic) throws NullPointerException
@@ -31,6 +39,8 @@ public class IRCChannel
         this.ircChannelManager = ircChannelManager;
         this.name = name;
         this.topic = topic;
+
+        this.users = new HashSet<IRCUser>();
 
         // automatically add to manager
         this.ircChannelManager.addIRCChannel(this);
@@ -49,8 +59,8 @@ public class IRCChannel
     }
 
     // ------------------------------------------------------------------------
+    // Fields
 
-    // TODO: get fields
     public String getName()
     {
         return this.name;
@@ -66,13 +76,42 @@ public class IRCChannel
         this.topic = topic;
     }
 
+    // --------------------------------
+
+    public Set<IRCUser> getUsers()
+    {
+        return Collections.unmodifiableSet(this.users);
+    }
+
     // ------------------------------------------------------------------------
+    // Update
 
-    // TODO: update fields (user?)
+    public void addIRCUser(IRCUser ircUser)
+    {
+        if (ircUser == null) return;
+
+        // TODO: add to different sets (MODE dependent)
+
+        synchronized (this.users)
+        {
+            this.users.add(ircUser);
+        }
+    }
+
+    public void removeIRCUser(IRCUser ircUser)
+    {
+        if (ircUser == null) return;
+
+        // TODO: remove from all other sets too
+
+        synchronized (this.users)
+        {
+            this.users.remove(ircUser);
+        }
+    }
 
     // ------------------------------------------------------------------------
-
-    // TODO: actions
+    // Actions
 
     // ------------------------------------------------------------------------
 

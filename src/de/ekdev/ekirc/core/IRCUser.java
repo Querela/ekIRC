@@ -170,6 +170,8 @@ public class IRCUser implements Comparable<IRCUser>
 
     // ------------------------------------------------------------------------
 
+    // TODO: add other field too?
+
     /*
      * (non-Javadoc)
      * 

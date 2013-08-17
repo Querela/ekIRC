@@ -67,6 +67,9 @@ ToDo / ToThinkAbout:
     - use literal server commands from command classes or from enum
 
 
+- change 'null' value if nothing is present to default-objects? / skip null checks ...
+
+
 - add message length checking (construct message and the check length?)
 
 

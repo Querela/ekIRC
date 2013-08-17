@@ -85,7 +85,7 @@ public class IRCChannelList implements Iterable<IRCChannelList.Entry>
             Objects.requireNonNull(name, "name must not be null!");
             if (numberOfUsers < 1)
                 throw new IllegalArgumentException("numberOfUsers must not be lower or equal zero!");
-            if (topic != null && topic.trim().equals("")) topic = null;
+            if (topic != null && topic.trim().length() == 0) topic = null;
 
             this.name = name;
             this.users = numberOfUsers;
@@ -192,8 +192,9 @@ public class IRCChannelList implements Iterable<IRCChannelList.Entry>
         {
             return this.add(new IRCChannelList.Entry(channelName, numberOfUsers, topic));
         }
-        
-        public Builder add(String channelName, String numberOfUsersString, String topic) throws IRCMessageFormatException
+
+        public Builder add(String channelName, String numberOfUsersString, String topic)
+                throws IRCMessageFormatException
         {
             int numberOfUsers = 0;
             try

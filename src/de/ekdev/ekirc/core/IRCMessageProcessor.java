@@ -9,6 +9,7 @@ import java.util.Objects;
 
 import de.ekdev.ekirc.core.event.IRCNetworkInfoEvent;
 import de.ekdev.ekirc.core.event.JoinEvent;
+import de.ekdev.ekirc.core.event.PartEvent;
 import de.ekdev.ekirc.core.event.PingEvent;
 import de.ekdev.ekirc.core.event.IRCUnknownServerCommandEvent;
 import de.ekdev.ekirc.core.event.NickAlreadyInUseEvent;
@@ -200,12 +201,12 @@ public class IRCMessageProcessor
             case PING:
             {
                 this.ircNetwork.raiseEvent(new PingEvent(this.ircNetwork, im.getParams().get(0)));
-                break;
+                break; // -----------------------------------------------------
             }
             case PRIVMSG:
             {
                 this.processPrivateMessage(im);
-                break;
+                break; // -----------------------------------------------------
             }
             // case NOTICE:
             // {
@@ -222,18 +223,34 @@ public class IRCMessageProcessor
                     // TODO: WHO/NAMES, MODE
                 }
 
+                ircChannel.addIRCUser(ircUser);
+
                 this.ircNetwork.raiseEvent(new JoinEvent(this.ircNetwork, ircChannel, ircUser));
+                break; // -----------------------------------------------------
             }
-            // case PART:
-            // {
-            //
-            // }
+            case PART:
+            {
+                IRCUser ircUser = this.ircNetwork.getIRCUserManager().getIRCUserByPrefix(im.getPrefix());
+                IRCChannel ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(im.getParams().get(0));
+                String reason = (im.getParams().size() > 1) ? im.getParams().get(1) : null;
+
+                ircChannel.removeIRCUser(ircUser);
+
+                if (ircUser.isMe())
+                {
+                    // remove channel?
+                    // this.ircNetwork.getIRCChannelManager().removeIRCChannel(ircChannel);
+                }
+
+                this.ircNetwork.raiseEvent(new PartEvent(this.ircNetwork, ircChannel, ircUser, reason));
+                break; // -----------------------------------------------------
+            }
             case QUIT:
             {
                 IRCUser ircUser = this.ircNetwork.getIRCUserManager().getIRCUserByPrefix(im.getPrefix());
                 this.ircNetwork.getIRCUserManager().removeIRCUser(ircUser);
                 this.ircNetwork.raiseEvent(new QuitEvent(this.ircNetwork, ircUser, im.getParams().get(0)));
-                break;
+                break; // -----------------------------------------------------
             }
             case NICK:
             {
@@ -245,7 +262,7 @@ public class IRCMessageProcessor
 
                 this.ircNetwork.raiseEvent(new NickChangeEvent(this.ircNetwork, ircUser, sourceNick, im.getParams()
                         .get(0)));
-                break;
+                break; // -----------------------------------------------------
             }
             // case KICK:
             // {
@@ -269,7 +286,7 @@ public class IRCMessageProcessor
                 this.ircNetwork.getIRCConnectionLog().message(
                         im.getCommand() + " - reason: '" + im.getParams().get(0) + "'");
                 this.ircNetwork.disconnect(false);
-                break;
+                break; // -----------------------------------------------------
             }
             default:
             {
