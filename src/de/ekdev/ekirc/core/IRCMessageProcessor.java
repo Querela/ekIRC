@@ -264,10 +264,10 @@ public class IRCMessageProcessor
                         .get(0)));
                 break; // -----------------------------------------------------
             }
-            // case KICK:
-            // {
-            //
-            // }
+            case KICK:
+            {
+
+            }
             // case MODE:
             // {
             //
@@ -305,7 +305,7 @@ public class IRCMessageProcessor
 
     // ------------------------------------------------------------------------
 
-    public IRCMessageParser createDefaultIRCMessageParser()
+    protected IRCMessageParser createDefaultIRCMessageParser()
     {
         return new IRCMessageParser();
     }

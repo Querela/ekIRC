@@ -4,6 +4,7 @@
 package de.ekdev.ekirc.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import de.ekdev.ekevent.EventException;
@@ -18,15 +19,15 @@ import de.ekdev.ekirc.core.event.IRCUnknownServerCommandEvent;
  */
 public class IRCManager
 {
-    protected EventManager eventManager;
+    private final EventManager eventManager;
 
-    protected List<IRCNetwork> networks;
+    protected final List<IRCNetwork> networks;
 
     public IRCManager()
     {
         this.eventManager = this.createDefaultEventManager();
 
-        this.networks = new ArrayList<IRCNetwork>();
+        this.networks = Collections.synchronizedList(new ArrayList<IRCNetwork>());
 
         this.initializeEventSystem();
     }
@@ -106,6 +107,20 @@ public class IRCManager
     // - remove network?
     // -> map<network, identity>? -> no
     // cross network operations? or extra class/user implementation?
+
+    protected void addIRCNetwork(IRCNetwork ircNetwork)
+    {
+        if (ircNetwork == null) return;
+
+        this.networks.add(ircNetwork);
+    }
+
+    // --------------------------------
+
+    public List<IRCNetwork> getNetworks()
+    {
+        return Collections.unmodifiableList(this.networks);
+    }
 
     // ------------------------------------------------------------------------
 

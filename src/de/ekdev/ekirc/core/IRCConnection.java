@@ -43,7 +43,7 @@ public class IRCConnection
 
     // ------------------------------------------------------------------------
 
-    public Socket getSocket(InetAddress host, int port) throws IOException
+    protected Socket getSocket(InetAddress host, int port) throws IOException
     {
         // TODO: secure socket / socketFactory ?
         // TODO: http://docs.oracle.com/javase/6/docs/api/java/nio/channels/SocketChannel.html

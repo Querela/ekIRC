@@ -18,8 +18,8 @@ import de.ekdev.ekirc.core.IRCNicknameFormatException;
 import de.ekdev.ekirc.core.IRCUsernameFormatException;
 import de.ekdev.ekirc.core.commands.channel.IRCListCommand;
 import de.ekdev.ekirc.core.commands.connection.IRCNickCommand;
-import de.ekdev.ekirc.core.event.NickChangeEvent;
 import de.ekdev.ekirc.core.event.ChannelListUpdateEvent;
+import de.ekdev.ekirc.core.event.NickChangeEvent;
 import de.ekdev.ekirc.core.event.listener.AutoReconnector;
 import de.ekdev.ekirc.core.event.listener.UserConnectionRegistrator;
 

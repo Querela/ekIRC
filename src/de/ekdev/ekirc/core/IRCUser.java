@@ -74,7 +74,7 @@ public class IRCUser implements Comparable<IRCUser>
                         + IRCUser.USER_AT + this.host : "");
     }
 
-    public void setNickname(String newNickname)
+    protected void setNickname(String newNickname)
     {
         this.ircUserManager.removeIRCUser(this);
 
@@ -84,12 +84,12 @@ public class IRCUser implements Comparable<IRCUser>
         this.ircUserManager.addIRCUser(this);
     }
 
-    public void setUsername(String username)
+    protected void setUsername(String username)
     {
         this.username = username;
     }
 
-    public void setHostmask(String hostmask)
+    protected void setHostmask(String hostmask)
     {
         this.host = hostmask;
     }

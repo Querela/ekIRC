@@ -64,6 +64,9 @@ public class IRCNetwork implements IRCIOInterface
 
         // default message processor - can be replaced/redirected later
         this.ircMessageProcessor = this.createDefaultIRCMessageProcessor();
+
+        // add to manager
+        this.ircManager.addIRCNetwork(this);
     }
 
     // ------------------------------------------------------------------------

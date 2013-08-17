@@ -32,18 +32,18 @@ public class IRCChannelManager
     {
         return this.ircNetwork;
     }
-    
+
     // --------------------------------
-    
+
     public IRCChannelList getIRCChannelList()
     {
         return this.ircChannelList;
     }
-    
-    public void updateIRCChannelList(IRCChannelList ircChannelList)
+
+    protected void updateIRCChannelList(IRCChannelList ircChannelList)
     {
         Objects.requireNonNull(ircChannelList, "ircChannelList must not be null!");
-        
+
         this.ircChannelList = ircChannelList;
     }
 
@@ -66,21 +66,21 @@ public class IRCChannelManager
         return this.getOrCreateIRCChannel(name);
     }
 
-    public void addIRCChannel(IRCChannel ircChannel)
+    protected void addIRCChannel(IRCChannel ircChannel)
     {
         if (ircChannel == null) return;
 
         this.channels.put(ircChannel.getName(), ircChannel);
     }
 
-    public void removeIRCCChannel(String name)
+    protected void removeIRCCChannel(String name)
     {
         if (name == null) return;
 
         this.channels.remove(name);
     }
 
-    public void removeIRCChannel(IRCChannel ircChannel)
+    protected void removeIRCChannel(IRCChannel ircChannel)
     {
         if (ircChannel == null) return;
 

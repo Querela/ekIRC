@@ -46,7 +46,7 @@ public class IRCIdentity
         return this.myIRCUser;
     }
 
-    public void setIRCUser(IRCUser ircUser) throws NullPointerException
+    protected void setIRCUser(IRCUser ircUser) throws NullPointerException
     {
         Objects.requireNonNull(ircUser, "ircUser must not be null!");
         // TODO: allow only one time? dependency inject?

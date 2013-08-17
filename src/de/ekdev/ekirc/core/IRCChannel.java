@@ -24,7 +24,7 @@ public class IRCChannel
     // http://webtoman.com/opera/panel/ircdmodes.html
     private String modes; // -> EnumSet?
 
-    protected final Set<IRCUser> users;
+    private final Set<IRCUser> users;
 
     // TODO: more Sets for different statuses of users? Map<User, Status?>
     // for set operations are different sets better
@@ -71,7 +71,7 @@ public class IRCChannel
         return this.topic;
     }
 
-    public void setTopic(String topic)
+    protected void setTopic(String topic)
     {
         this.topic = topic;
     }
@@ -86,7 +86,7 @@ public class IRCChannel
     // ------------------------------------------------------------------------
     // Update
 
-    public void addIRCUser(IRCUser ircUser)
+    protected void addIRCUser(IRCUser ircUser)
     {
         if (ircUser == null) return;
 
@@ -95,7 +95,7 @@ public class IRCChannel
         this.users.add(ircUser);
     }
 
-    public void removeIRCUser(IRCUser ircUser)
+    protected void removeIRCUser(IRCUser ircUser)
     {
         if (ircUser == null) return;
 

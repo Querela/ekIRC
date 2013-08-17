@@ -58,21 +58,21 @@ public class IRCUserManager
         return this.getIRCUser(IRCUser.getNickByPrefix(prefix));
     }
 
-    public void addIRCUser(IRCUser ircUser)
+    protected void addIRCUser(IRCUser ircUser)
     {
         if (ircUser == null) return;
 
         this.users.put(ircUser.getNickname(), ircUser);
     }
 
-    public void removeIRCUser(IRCUser ircUser)
+    protected void removeIRCUser(IRCUser ircUser)
     {
         if (ircUser == null) return;
 
         this.removeIRCUser(ircUser.getNickname());
     }
 
-    public void removeIRCUser(String nick)
+    protected void removeIRCUser(String nick)
     {
         if (nick == null) return;
 
