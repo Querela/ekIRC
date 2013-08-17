@@ -13,6 +13,7 @@ import de.ekdev.ekirc.core.event.IRCUnknownServerCommandEvent;
 import de.ekdev.ekirc.core.event.NickAlreadyInUseEvent;
 import de.ekdev.ekirc.core.event.NickChangeEvent;
 import de.ekdev.ekirc.core.event.QuitEvent;
+import de.ekdev.ekirc.core.event.UpdatedChannelListEvent;
 import de.ekdev.ekirc.core.event.UpdatedMotdEvent;
 import de.ekdev.ekirc.core.event.UpdatingMotdEvent;
 
@@ -25,12 +26,18 @@ public class IRCMessageProcessor
 
     protected final IRCMessageParser parser;
 
+    protected IRCChannelList.Builder ircChannelListBuilder;
+
+    // ------------------------------------------------------------------------
+
     public IRCMessageProcessor(IRCNetwork ircNetwork) throws NullPointerException
     {
         Objects.requireNonNull(ircNetwork, "ircNetwork must not be null!");
 
         this.ircNetwork = ircNetwork;
         this.parser = this.createDefaultIRCMessageParser();
+
+        this.ircChannelListBuilder = new IRCChannelList.Builder();
     }
 
     // ------------------------------------------------------------------------
@@ -67,6 +74,9 @@ public class IRCMessageProcessor
 
     protected void processServerResponse(IRCMessage im, boolean handledAlready)
     {
+        // im.getParams().get(0); // --> always me ?
+        // this.ircNetwork.ircConnectionLog.object("im", im);
+
         switch (im.getNumericReply())
         {
             case RPL_WELCOME:
@@ -121,12 +131,39 @@ public class IRCMessageProcessor
                 this.ircNetwork.raiseEvent(new IRCNetworkInfoEvent(this.ircNetwork, im));
                 this.ircNetwork.getIRCConnectionLog().message(
                         im.getCommand() + "-Handler (LUSER-Info) not yet implemented.");
-                break;
+                break; // -----------------------------------------------------
             }
             case ERR_NICKNAMEINUSE:
             {
                 this.ircNetwork.raiseEvent(new NickAlreadyInUseEvent(this.ircNetwork, im));
-                break;
+                break; // -----------------------------------------------------
+            }
+            case RPL_LIST:
+            {
+                try
+                {
+                    this.ircChannelListBuilder.add(im.getParams().get(1), im.getParams().get(2), im.getParams().get(3));
+                }
+                catch (Exception e)
+                {
+                    // shouldn't occur but better safe than sorry ... ;-)
+                    // IRCMessageFormatException
+                    // NullPointerException
+                    // IllegalArgumentException
+                    this.ircNetwork.getIRCConnectionLog().exception(e);
+                }
+                break; // -----------------------------------------------------
+            }
+            case RPL_LISTEND:
+            {
+                IRCChannelList old = this.ircNetwork.getIRCChannelManager().getIRCChannelList();
+
+                this.ircChannelListBuilder.sort(); // ?
+                this.ircNetwork.getIRCChannelManager().updateIRCChannelList(ircChannelListBuilder.build());
+                this.ircChannelListBuilder.clear();
+
+                this.ircNetwork.raiseEvent(new UpdatedChannelListEvent(this.ircNetwork, old));
+                break; // -----------------------------------------------------
             }
             default:
             {

@@ -10,13 +10,16 @@ import java.io.InputStreamReader;
 import de.ekdev.ekevent.EventException;
 import de.ekdev.ekevent.EventHandler;
 import de.ekdev.ekevent.EventListener;
+import de.ekdev.ekirc.core.IRCChannelList;
 import de.ekdev.ekirc.core.IRCIdentity;
 import de.ekdev.ekirc.core.IRCManager;
 import de.ekdev.ekirc.core.IRCNetwork;
 import de.ekdev.ekirc.core.IRCNicknameFormatException;
 import de.ekdev.ekirc.core.IRCUsernameFormatException;
+import de.ekdev.ekirc.core.commands.channel.IRCListCommand;
 import de.ekdev.ekirc.core.commands.connection.IRCNickCommand;
 import de.ekdev.ekirc.core.event.NickChangeEvent;
+import de.ekdev.ekirc.core.event.UpdatedChannelListEvent;
 import de.ekdev.ekirc.core.event.listener.AutoReconnector;
 import de.ekdev.ekirc.core.event.listener.UserConnectionRegistrator;
 
@@ -57,6 +60,32 @@ public class SimpleIRCServerContextTest
                 }
             });
 
+            ircManager.getEventManager().register(new EventListener() {
+                @EventHandler
+                public void newChannelList(UpdatedChannelListEvent ucle)
+                {
+                    if (ucle.hasOldIRCChannelList())
+                    {
+                        ucle.getIRCNetwork().getIRCConnectionLog()
+                                .message("old channel list: size = " + ucle.getOldIRCChannelList().size());
+                    }
+                    ucle.getIRCNetwork().getIRCConnectionLog()
+                            .message("new channel list: size = " + ucle.getNewIRCChannelList().size());
+                    // ucle.getIRCNetwork().getIRCConnectionLog()
+                    // .object("ucle.getNewIRCChannelList()", ucle.getNewIRCChannelList());
+                    int totalUsers = 0;
+                    for (IRCChannelList.Entry le : ucle.getNewIRCChannelList())
+                    {
+                        totalUsers += le.getNumberOfUsers();
+                    }
+                    ucle.getIRCNetwork()
+                            .getIRCConnectionLog()
+                            .message(
+                                    "new channel list: delta users/channel = " + totalUsers
+                                            / (float) ucle.getNewIRCChannelList().size());
+                }
+            });
+
             // only on inet for 3 successful times
             ircManager.getEventManager().register(new AutoReconnector(inet, 15 * 1000, 3));
 
@@ -79,7 +108,8 @@ public class SimpleIRCServerContextTest
                 if (line.equals("")) break;
             }
 
-            inet.send(new IRCNickCommand("nickles"));
+            // inet.send(new IRCNickCommand("nickles"));
+            inet.send(new IRCListCommand());
 
             while ((line = br.readLine()) != null)
             {
