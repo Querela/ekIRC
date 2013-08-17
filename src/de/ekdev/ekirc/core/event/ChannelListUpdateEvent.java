@@ -1,5 +1,5 @@
 /**
- * UpdatedChannelListEvent.java
+ * ChannelListUpdateEvent.java
  */
 package de.ekdev.ekirc.core.event;
 
@@ -10,14 +10,14 @@ import de.ekdev.ekirc.core.IRCNetwork;
 /**
  * @author ekDev
  */
-public class UpdatedChannelListEvent extends IRCNetworkEvent
+public class ChannelListUpdateEvent extends IRCNetworkEvent
 {
     private final static EventListenerList listeners = new EventListenerList();
 
     private final IRCChannelList oldIRCChannelList;
     private final IRCChannelList newIRCChannelList;
 
-    public UpdatedChannelListEvent(IRCNetwork ircNetwork, IRCChannelList oldIRCChannelList)
+    public ChannelListUpdateEvent(IRCNetwork ircNetwork, IRCChannelList oldIRCChannelList)
     {
         super(ircNetwork);
 
@@ -47,11 +47,11 @@ public class UpdatedChannelListEvent extends IRCNetworkEvent
     @Override
     public EventListenerList getListeners()
     {
-        return UpdatedChannelListEvent.listeners;
+        return ChannelListUpdateEvent.listeners;
     }
 
     public static EventListenerList getListenerList()
     {
-        return UpdatedChannelListEvent.listeners;
+        return ChannelListUpdateEvent.listeners;
     }
 }

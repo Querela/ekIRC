@@ -1,5 +1,5 @@
 /**
- * UpdatingMotdEvent.java
+ * MotdUpdatingEvent.java
  */
 package de.ekdev.ekirc.core.event;
 
@@ -14,12 +14,12 @@ import de.ekdev.ekirc.core.IRCNetworkInfo;
 /**
  * @author ekDev
  */
-public class UpdatingMotdEvent extends IRCNetworkEvent
+public class MotdUpdatingEvent extends IRCNetworkEvent
 {
     private final static EventListenerList listeners = new EventListenerList();
     private final List<String> oldMotd;
 
-    public UpdatingMotdEvent(IRCNetwork source)
+    public MotdUpdatingEvent(IRCNetwork source)
     {
         super(source);
         this.oldMotd = new ArrayList<>(this.getIRCNetworkInfo().getMotd());
@@ -55,11 +55,11 @@ public class UpdatingMotdEvent extends IRCNetworkEvent
     @Override
     public EventListenerList getListeners()
     {
-        return UpdatingMotdEvent.listeners;
+        return MotdUpdatingEvent.listeners;
     }
 
     public static EventListenerList getListenerList()
     {
-        return UpdatingMotdEvent.listeners;
+        return MotdUpdatingEvent.listeners;
     }
 }

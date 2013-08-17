@@ -8,14 +8,15 @@ import static de.ekdev.ekirc.core.IRCNumericServerReply.*;
 import java.util.Objects;
 
 import de.ekdev.ekirc.core.event.IRCNetworkInfoEvent;
-import de.ekdev.ekirc.core.event.IRCPingEvent;
+import de.ekdev.ekirc.core.event.JoinEvent;
+import de.ekdev.ekirc.core.event.PingEvent;
 import de.ekdev.ekirc.core.event.IRCUnknownServerCommandEvent;
 import de.ekdev.ekirc.core.event.NickAlreadyInUseEvent;
 import de.ekdev.ekirc.core.event.NickChangeEvent;
 import de.ekdev.ekirc.core.event.QuitEvent;
-import de.ekdev.ekirc.core.event.UpdatedChannelListEvent;
-import de.ekdev.ekirc.core.event.UpdatedMotdEvent;
-import de.ekdev.ekirc.core.event.UpdatingMotdEvent;
+import de.ekdev.ekirc.core.event.ChannelListUpdateEvent;
+import de.ekdev.ekirc.core.event.MotdUpdatedEvent;
+import de.ekdev.ekirc.core.event.MotdUpdatingEvent;
 
 /**
  * @author ekDev
@@ -26,7 +27,7 @@ public class IRCMessageProcessor
 
     protected final IRCMessageParser parser;
 
-    protected IRCChannelList.Builder ircChannelListBuilder;
+    private IRCChannelList.Builder ircChannelListBuilder;
 
     // ------------------------------------------------------------------------
 
@@ -105,7 +106,7 @@ public class IRCMessageProcessor
             case RPL_MOTDSTART:
             {
                 this.ircNetwork.raiseEvent(new IRCNetworkInfoEvent(this.ircNetwork, im));
-                this.ircNetwork.raiseEvent(new UpdatingMotdEvent(this.ircNetwork));
+                this.ircNetwork.raiseEvent(new MotdUpdatingEvent(this.ircNetwork));
                 this.ircNetwork.getIRCNetworkInfo().newMotd().addModtLine(im.getParams().get(1).substring(2));
                 break; // -----------------------------------------------------
             }
@@ -119,7 +120,7 @@ public class IRCMessageProcessor
             {
                 this.ircNetwork.raiseEvent(new IRCNetworkInfoEvent(this.ircNetwork, im));
                 this.ircNetwork.getIRCNetworkInfo().addModtLine(im.getParams().get(1).substring(2)).finishNewMotd();
-                this.ircNetwork.raiseEvent(new UpdatedMotdEvent(this.ircNetwork));
+                this.ircNetwork.raiseEvent(new MotdUpdatedEvent(this.ircNetwork));
                 break; // -----------------------------------------------------
             }
             case RPL_LUSERCLIENT:
@@ -138,6 +139,8 @@ public class IRCMessageProcessor
                 this.ircNetwork.raiseEvent(new NickAlreadyInUseEvent(this.ircNetwork, im));
                 break; // -----------------------------------------------------
             }
+            // ----------------------------------------------------------------
+            // reply to LIST command
             case RPL_LIST:
             {
                 try
@@ -162,9 +165,10 @@ public class IRCMessageProcessor
                 this.ircNetwork.getIRCChannelManager().updateIRCChannelList(ircChannelListBuilder.build());
                 this.ircChannelListBuilder.clear();
 
-                this.ircNetwork.raiseEvent(new UpdatedChannelListEvent(this.ircNetwork, old));
+                this.ircNetwork.raiseEvent(new ChannelListUpdateEvent(this.ircNetwork, old));
                 break; // -----------------------------------------------------
             }
+            // ----------------------------------------------------------------
             default:
             {
                 if (!handledAlready) this.ircNetwork.raiseEvent(new IRCUnknownServerCommandEvent(this.ircNetwork, im));
@@ -195,7 +199,7 @@ public class IRCMessageProcessor
         {
             case PING:
             {
-                this.ircNetwork.raiseEvent(new IRCPingEvent(this.ircNetwork, im.getParams().get(0)));
+                this.ircNetwork.raiseEvent(new PingEvent(this.ircNetwork, im.getParams().get(0)));
                 break;
             }
             case PRIVMSG:
@@ -207,10 +211,19 @@ public class IRCMessageProcessor
             // {
             //
             // }
-            // case JOIN:
-            // {
-            //
-            // }
+            case JOIN:
+            {
+                IRCUser ircUser = this.ircNetwork.getIRCUserManager().getIRCUserByPrefix(im.getPrefix());
+                IRCChannel ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(im.getParams().get(0));
+
+                if (ircUser.isMe())
+                {
+                    // TODO: request information ... or as reaction to event?
+                    // TODO: WHO/NAMES, MODE
+                }
+
+                this.ircNetwork.raiseEvent(new JoinEvent(this.ircNetwork, ircChannel, ircUser));
+            }
             // case PART:
             // {
             //

@@ -1,5 +1,5 @@
 /**
- * IRCPingEvent.java
+ * PingEvent.java
  */
 package de.ekdev.ekirc.core.event;
 
@@ -9,12 +9,12 @@ import de.ekdev.ekirc.core.IRCNetwork;
 /**
  * @author ekDev
  */
-public class IRCPingEvent extends IRCNetworkEvent
+public class PingEvent extends IRCNetworkEvent
 {
     private final static EventListenerList listeners = new EventListenerList();
     private final String pingValue;
 
-    public IRCPingEvent(IRCNetwork source, String pingValue)
+    public PingEvent(IRCNetwork source, String pingValue)
     {
         super(source);
         this.pingValue = pingValue;
@@ -30,11 +30,11 @@ public class IRCPingEvent extends IRCNetworkEvent
     @Override
     public EventListenerList getListeners()
     {
-        return IRCPingEvent.listeners;
+        return PingEvent.listeners;
     }
 
     public static EventListenerList getListenerList()
     {
-        return IRCPingEvent.listeners;
+        return PingEvent.listeners;
     }
 }

@@ -10,7 +10,7 @@ import de.ekdev.ekevent.EventException;
 import de.ekdev.ekevent.EventHandler;
 import de.ekdev.ekevent.EventListener;
 import de.ekdev.ekevent.EventManager;
-import de.ekdev.ekirc.core.event.IRCPingEvent;
+import de.ekdev.ekirc.core.event.PingEvent;
 import de.ekdev.ekirc.core.event.IRCUnknownServerCommandEvent;
 
 /**
@@ -69,7 +69,7 @@ public class IRCManager
     {
         return new EventListener() {
             @EventHandler
-            public void onPingEvent(IRCPingEvent ipe)
+            public void onPingEvent(PingEvent ipe)
             {
                 ipe.getIRCNetwork().sendPong(ipe.getPingValue());
             }

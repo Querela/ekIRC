@@ -19,7 +19,7 @@ import de.ekdev.ekirc.core.IRCUsernameFormatException;
 import de.ekdev.ekirc.core.commands.channel.IRCListCommand;
 import de.ekdev.ekirc.core.commands.connection.IRCNickCommand;
 import de.ekdev.ekirc.core.event.NickChangeEvent;
-import de.ekdev.ekirc.core.event.UpdatedChannelListEvent;
+import de.ekdev.ekirc.core.event.ChannelListUpdateEvent;
 import de.ekdev.ekirc.core.event.listener.AutoReconnector;
 import de.ekdev.ekirc.core.event.listener.UserConnectionRegistrator;
 
@@ -62,7 +62,7 @@ public class SimpleIRCServerContextTest
 
             ircManager.getEventManager().register(new EventListener() {
                 @EventHandler
-                public void newChannelList(UpdatedChannelListEvent ucle)
+                public void newChannelList(ChannelListUpdateEvent ucle)
                 {
                     if (ucle.hasOldIRCChannelList())
                     {
