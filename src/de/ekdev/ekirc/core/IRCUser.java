@@ -133,6 +133,8 @@ public class IRCUser implements Comparable<IRCUser>
         return true;
     }
 
+    // TODO: add nickname compare/equality especially for special chars
+
     public static String getNickByPrefix(String prefix)
     {
         if (prefix == null) return null;

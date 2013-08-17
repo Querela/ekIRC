@@ -33,7 +33,7 @@ public class IRCChannel
         this.topic = topic;
 
         // automatically add to manager
-        // this.ircChannelManager.addIRCChannel(this);
+        this.ircChannelManager.addIRCChannel(this);
     }
 
     public IRCChannel(IRCChannelManager ircChannelManager, String name) throws NullPointerException
@@ -65,6 +65,10 @@ public class IRCChannel
     {
         this.topic = topic;
     }
+
+    // ------------------------------------------------------------------------
+
+    // TODO: update fields (user?)
 
     // ------------------------------------------------------------------------
 
