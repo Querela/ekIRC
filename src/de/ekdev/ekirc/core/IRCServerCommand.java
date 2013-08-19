@@ -1,5 +1,11 @@
+/**
+ * IRCServerCommand.java
+ */
 package de.ekdev.ekirc.core;
 
+/**
+ * @author ekDev
+ */
 public enum IRCServerCommand
 {
     PING, //
@@ -8,7 +14,7 @@ public enum IRCServerCommand
     JOIN, //
     PART, //
     NICK, //
-    NOTICE, //
+    NOTICE, // CTCP responses
     QUIT, //
     KICK, //
     MODE, //

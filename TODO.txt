@@ -28,6 +28,7 @@ ToDo / ToThinkAbout:
     - waiting for events? (event list?)
     - event group
     - asyc events - thread group store in events
+    - / event contexts
     
     - events with only one listener / n-listeners
 
@@ -42,6 +43,7 @@ ToDo / ToThinkAbout:
     - how to connect to different networks? (same network multiple time)
     - reconnect ? (how)
     - store persistent information (channel, credentials (myIRCIdentity))
+    - on disconnect create onConnect event handler for rejoining channels?
 
 
 - IRCServerInfo
@@ -73,6 +75,7 @@ ToDo / ToThinkAbout:
 
 
 - change 'null' value if nothing is present to default-objects? / skip null checks ...
+    - empty-objects / static final ...
 
 
 - add message length checking (construct message and the check length?)

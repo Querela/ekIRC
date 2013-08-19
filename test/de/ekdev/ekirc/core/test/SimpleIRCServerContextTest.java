@@ -10,13 +10,14 @@ import java.io.InputStreamReader;
 import de.ekdev.ekevent.EventException;
 import de.ekdev.ekevent.EventHandler;
 import de.ekdev.ekevent.EventListener;
+import de.ekdev.ekirc.core.AsIRCMessage;
 import de.ekdev.ekirc.core.IRCChannelList;
 import de.ekdev.ekirc.core.IRCIdentity;
 import de.ekdev.ekirc.core.IRCManager;
+import de.ekdev.ekirc.core.IRCMessage;
 import de.ekdev.ekirc.core.IRCNetwork;
 import de.ekdev.ekirc.core.IRCNicknameFormatException;
 import de.ekdev.ekirc.core.IRCUsernameFormatException;
-import de.ekdev.ekirc.core.commands.channel.IRCListCommand;
 import de.ekdev.ekirc.core.commands.connection.IRCNickCommand;
 import de.ekdev.ekirc.core.event.ChannelListUpdateEvent;
 import de.ekdev.ekirc.core.event.NickChangeEvent;
@@ -37,9 +38,9 @@ public class SimpleIRCServerContextTest
     {
 
         IRCManager ircManager = new IRCManager();
-        // IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.irchighway.net", 6667);
+        IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.irchighway.net", 6667);
         // IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.chatzona.org", 6667);
-        IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.webchat.org", 6667);
+        // IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.webchat.org", 6667);
 
         final String nick = "coor";
         // final String nick = "mike";
@@ -109,7 +110,7 @@ public class SimpleIRCServerContextTest
             }
 
             // inet.send(new IRCNickCommand("nickles"));
-            inet.send(new IRCListCommand());
+            // inet.send(new IRCListCommand());
 
             while ((line = br.readLine()) != null)
             {
@@ -122,7 +123,71 @@ public class SimpleIRCServerContextTest
 
             // inet.getIRCConnectionLog().tryMoveLogFile("src/newlog.txt");
 
-            inet.send(new IRCNickCommand("nick"));
+            // inet.send(new IRCNickCommand("nick"));
+
+            inet.send(new AsIRCMessage() {
+                @Override
+                public String asIRCMessageString()
+                {
+                    return "JOIN #ebooks";
+                }
+
+                @Override
+                public IRCMessage asIRCMessage()
+                {
+                    return null;
+                }
+            }, new AsIRCMessage() {
+                @Override
+                public String asIRCMessageString()
+                {
+                    return "PRIVMSG #ebooks :@search David Thorpe";
+                }
+
+                @Override
+                public IRCMessage asIRCMessage()
+                {
+                    return null;
+                }
+            }, new AsIRCMessage() {
+                @Override
+                public String asIRCMessageString()
+                {
+                    try
+                    {
+                        Thread.sleep(5000);
+                    }
+                    catch (InterruptedException e)
+                    {
+                    }
+                    return "JOIN 0";
+                }
+
+                @Override
+                public IRCMessage asIRCMessage()
+                {
+                    return null;
+                }
+            }, new AsIRCMessage() {
+                @Override
+                public String asIRCMessageString()
+                {
+                    try
+                    {
+                        Thread.sleep(5000);
+                    }
+                    catch (InterruptedException e)
+                    {
+                    }
+                    return "JOIN #ebooks";
+                }
+
+                @Override
+                public IRCMessage asIRCMessage()
+                {
+                    return null;
+                }
+            });
 
             while ((line = br.readLine()) != null)
             {
