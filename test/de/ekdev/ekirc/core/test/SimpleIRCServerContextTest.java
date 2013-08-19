@@ -149,44 +149,6 @@ public class SimpleIRCServerContextTest
                 {
                     return null;
                 }
-            }, new AsIRCMessage() {
-                @Override
-                public String asIRCMessageString()
-                {
-                    try
-                    {
-                        Thread.sleep(5000);
-                    }
-                    catch (InterruptedException e)
-                    {
-                    }
-                    return "JOIN 0";
-                }
-
-                @Override
-                public IRCMessage asIRCMessage()
-                {
-                    return null;
-                }
-            }, new AsIRCMessage() {
-                @Override
-                public String asIRCMessageString()
-                {
-                    try
-                    {
-                        Thread.sleep(5000);
-                    }
-                    catch (InterruptedException e)
-                    {
-                    }
-                    return "JOIN #ebooks";
-                }
-
-                @Override
-                public IRCMessage asIRCMessage()
-                {
-                    return null;
-                }
             });
 
             while ((line = br.readLine()) != null)
@@ -194,7 +156,7 @@ public class SimpleIRCServerContextTest
                 if (line.equals("")) break;
             }
 
-            inet.send(new IRCNickCommand("coor"));
+            // inet.send(new IRCNickCommand("coor"));
 
             while ((line = br.readLine()) != null)
             {

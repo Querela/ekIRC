@@ -354,7 +354,7 @@ public class IRCMessageProcessor
             this.ircNetwork.getIRCConnectionLog().message("check this CTCP message?: '" + message + "'");
         }
 
-        this.processCTCP(im, im.getParams().get(1));
+        if (this.containsCTCPMessage(im.getParams().get(1))) this.processCTCP(im, im.getParams().get(1));
     }
 
     protected void processNotice(IRCMessage im)
@@ -362,12 +362,12 @@ public class IRCMessageProcessor
         // TODO: can contain CTCP answers ...
         this.ircNetwork.getIRCConnectionLog().object("im", im);
 
-        this.processCTCP(im, im.getParams().get(1));
+        if (this.containsCTCPMessage(im.getParams().get(1))) this.processCTCP(im, im.getParams().get(1));
     }
 
     protected void processCTCP(IRCMessage im, String ctcpMessage)
     {
-
+        this.ircNetwork.getIRCConnectionLog().message("Is CTCP in: " + im.getCommand());
         this.ircNetwork.getIRCConnectionLog().object("lowLevelMessage   ", ctcpMessage);
         String middleLevelMessage = this.dequoteLowLevel(ctcpMessage);
         this.ircNetwork.getIRCConnectionLog().object("middleLevelMessage", middleLevelMessage);
@@ -382,6 +382,8 @@ public class IRCMessageProcessor
 
         // TODO: something
     }
+
+    // ------------
 
     protected String quoteCTCP(String highLevelMessage)
     {
