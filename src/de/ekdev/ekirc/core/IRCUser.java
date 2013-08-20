@@ -130,13 +130,40 @@ public class IRCUser implements Comparable<IRCUser>
         Objects.requireNonNull(nickname, "Invalid nickname format: nickname must not be null!");
         if (nickname.length() == 0)
         {
-            throw new IRCNicknameFormatException("nickname is empty!");
+            throw new IRCNicknameFormatException("nickname must not be empty!");
         }
-        if (nickname.indexOf(IRCMessage.IRC_SPACE) != -1)
+        if (nickname.indexOf(0x20) != -1)
         {
-            throw new IRCNicknameFormatException("nickname can't contain a space character!");
+            throw new IRCNicknameFormatException("nickname must not contain a 0x20 (space) character!");
         }
-        // TODO: validateNickname
+
+        char[] chars = nickname.toCharArray();
+
+        for (int i = 0; i < chars.length; i++)
+        {
+            char c = chars[i];
+            if ((c >= 0x41 && c <= 0x5A) // letter: A-Z
+                    || (c >= 0x61 && c <= 0x7A) // letter: a-z
+                    || (c >= 0x5B && c <= 0x60) // special: [\\]^_`
+                    || (c >= 0x7B && c <= 0x7D) // special: {|}
+            )
+            {
+                continue;
+            }
+            else if ((i > 0) && // not the first
+                    ((c >= 0x30 && c <= 0x39) // digit: 0-9
+                    || (c == 0x2d)) // hypen/minus: -
+            )
+            {
+                continue;
+            }
+            else
+            {
+                throw new IRCNicknameFormatException("nickname contains an illegal character: "
+                        + ((c >= 0x20) ? "\"" + c + "\" " : "") + "[0x" + String.format("%02X", c) + "] at index " + i);
+            }
+        }
+
         return true;
     }
 
@@ -145,20 +172,44 @@ public class IRCUser implements Comparable<IRCUser>
         Objects.requireNonNull(username, "Invalid username format: username must not be null!");
         if (username.length() == 0)
         {
-            throw new IRCUsernameFormatException("username can't be empty!");
+            throw new IRCUsernameFormatException("username must not be empty!");
         }
-        if (username.indexOf(IRCMessage.IRC_SPACE) != -1)
+
+        if (username.indexOf(0x00) != -1)
         {
-            throw new IRCUsernameFormatException("username can't contain a space character!");
+            throw new IRCUsernameFormatException("username must not contain a 0x00 (null) character!");
         }
-        // TODO: validateUsername
+        if (username.indexOf(0x0A) != -1)
+        {
+            throw new IRCUsernameFormatException("username must not contain a 0x0A (carriage return) character!");
+        }
+        if (username.indexOf(0x0D) != -1)
+        {
+            throw new IRCUsernameFormatException("username must not contain a 0x0D (line feed) character!");
+        }
+        if (username.indexOf(0x20) != -1)
+        {
+            throw new IRCUsernameFormatException("username must not contain a 0x20 (space) character!");
+        }
+        if (username.indexOf(0x40) != -1)
+        {
+            throw new IRCUsernameFormatException("username must not contain a 0x40 (at / @) character!");
+        }
+
         return true;
     }
 
     public static boolean validateHost(String hostmask) throws NullPointerException, IRCHostFormatException
     {
         Objects.requireNonNull(hostmask, "Invalid host format: host must not be null!");
+
         // TODO: validateHostmask
+
+        // host: "(\\w[\\w-]*\\w*)(\\.\\w[\\w-]*\\w*)*"
+        // ipv4: "\\b([12][0-9]{2}|[1-9]?[0-9])(\\.([12][0-9]{2}|[1-9]?[0-9])){3}\\b"
+        // ipv6: ?
+        // "([0-9A-Fa-f]{0,4}(:[0-9A-Fa-f]{0,4}){1,7})\\b([12][0-9]{2}|[1-9]?[0-9])(\\.([12][0-9]{2}|[1-9]?[0-9])){3}"
+
         return true;
     }
 

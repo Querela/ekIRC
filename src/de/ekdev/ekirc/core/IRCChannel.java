@@ -126,15 +126,102 @@ public class IRCChannel
 
     // ------------------------------------------------------------------------
 
-    public static boolean validateChannelname(String channelname)
+    public static boolean validateChannelname(String channelname) throws NullPointerException,
+            IRCChannelNameFormatException
     {
-        // TODO: validateChannelname
+        Objects.requireNonNull(channelname, "Invalid channelname format: channelname must not be null!");
+        if (channelname.length() == 0)
+        {
+            throw new IRCChannelNameFormatException("channelname must not be empty!");
+        }
+        if (channelname.length() > 50)
+        {
+            throw new IRCChannelNameFormatException("channelname must not be longer than 50 characters!");
+        }
+
+        if (IRCChannel.CHANNEL_PREFIXES.indexOf(channelname.charAt(0)) == -1)
+        {
+            throw new IRCChannelNameFormatException("channelname must start with the prefixes '&', '#', '+' or '!' !");
+        }
+
+        // TODO: more special with '!' and chanid, chanmasks?
+
+        if (channelname.indexOf(0x00) != -1)
+        {
+            throw new IRCChannelNameFormatException("channelname must not contain a 0x00 (null) character!");
+        }
+        if (channelname.indexOf(0x07) != -1)
+        {
+            throw new IRCChannelNameFormatException("channelname must not contain a 0x07 (^G) character!");
+        }
+        if (channelname.indexOf(0x0A) != -1)
+        {
+            throw new IRCChannelNameFormatException("channelname must not contain a 0x0A (carriage return) character!");
+        }
+        if (channelname.indexOf(0x0D) != -1)
+        {
+            throw new IRCChannelNameFormatException("channelname must not contain a 0x0D (line feed) character!");
+        }
+        if (channelname.indexOf(0x20) != -1)
+        {
+            throw new IRCChannelNameFormatException("channelname must not contain a 0x20 (space) character!");
+        }
+        if (channelname.indexOf(0x2C) != -1)
+        {
+            throw new IRCChannelNameFormatException("channelname must not contain a 0x2C (comma) character!");
+        }
+        // if (channelname.indexOf(0x3A) != -1)
+        // {
+        // throw new IRCChannelNameFormatException("channelname must not contain a 0x3A (colon) character!");
+        // }
+
         return true;
     }
 
-    public static boolean validateChannelkey(String channelkey)
+    public static boolean validateChannelkey(String channelkey) throws NullPointerException,
+            IRCChannelKeyFormatException
     {
-        // TODO: validateChannelkey
+        Objects.requireNonNull(channelkey, "Invalid channelname format: channelname must not be null!");
+        if (channelkey.length() == 0)
+        {
+            throw new IRCChannelKeyFormatException("channelkey must not be empty!");
+        }
+        if (channelkey.length() > 23)
+        {
+            throw new IRCChannelKeyFormatException("channelkey must not be longer than 23 characters!");
+        }
+
+        // TODO: check key codes (rfc contradictory)
+
+        if (channelkey.indexOf(0x00) != -1)
+        {
+            throw new IRCChannelKeyFormatException("channelkey must not contain a 0x00 (null) character!");
+        }
+        if (channelkey.indexOf(0x09) != -1)
+        {
+            throw new IRCChannelKeyFormatException("channelkey must not contain a 0x09 (hor. tab) character!");
+        }
+        if (channelkey.indexOf(0x0A) != -1)
+        {
+            throw new IRCChannelKeyFormatException("channelkey must not contain a 0x0A (carriage return) character!");
+        }
+        if (channelkey.indexOf(0x0B) != -1)
+        {
+            throw new IRCChannelKeyFormatException("channelkey must not contain a 0x0A (vert. tab) character!");
+        }
+        if (channelkey.indexOf(0x0C) != -1)
+        {
+            throw new IRCChannelKeyFormatException("channelkey must not contain a 0x0c (form feed) character!");
+        }
+        if (channelkey.indexOf(0x0D) != -1)
+        {
+            throw new IRCChannelKeyFormatException("channelkey must not contain a 0x0D (line feed) character!");
+        }
+        if (channelkey.indexOf(0x20) != -1)
+        {
+            throw new IRCChannelKeyFormatException("channelkey must not contain a 0x20 (space) character!");
+        }
+
         return true;
     }
 
