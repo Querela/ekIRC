@@ -524,25 +524,35 @@ public class IRCMessageProcessor
         List<IRCExtendedDataMessage> le = this.extractCTCPDataMessages(middleLevelMessage);
         for (IRCExtendedDataMessage edm : le)
         {
-            IRCCTCPCommand icc;
-            try
-            {
-                icc = IRCCTCPCommand.valueOf(edm.getTag());
-            }
-            catch (Exception e)
-            {
-                this.ircNetwork.raiseEvent(new UnknownCTCPCommandEvent(this.ircNetwork, im, edm));
-                continue; // skip to next ...
-            }
+            this.processCTCPCommand(im, edm, isNotice, false);
+        }
+    }
 
-            // TODO:
-            switch (icc)
+    protected void processCTCPCommand(IRCMessage im, IRCExtendedDataMessage edm, boolean isNotice,
+            boolean handledAlready)
+    {
+        IRCCTCPCommand icc = null;
+        try
+        {
+            icc = IRCCTCPCommand.valueOf(edm.getTag());
+        }
+        catch (Exception e)
+        {
+        }
+
+        if (icc == null)
+        {
+            this.ircNetwork.raiseEvent(new UnknownCTCPCommandEvent(this.ircNetwork, im, edm));
+            return;
+        }
+
+        // TODO: do the magick
+        switch (icc)
+        {
+            default:
             {
-                default:
-                {
-                    this.ircNetwork.raiseEvent(new UnknownCTCPCommandEvent(this.ircNetwork, im, edm));
-                    break; // -------------------------------------------------
-                }
+                if (!handledAlready) this.ircNetwork.raiseEvent(new UnknownCTCPCommandEvent(this.ircNetwork, im, edm));
+                break; // -----------------------------------------------------
             }
         }
     }
