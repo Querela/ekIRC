@@ -19,6 +19,8 @@ import de.ekdev.ekirc.core.IRCNetwork;
 import de.ekdev.ekirc.core.IRCNicknameFormatException;
 import de.ekdev.ekirc.core.IRCUsernameFormatException;
 import de.ekdev.ekirc.core.commands.connection.IRCNickCommand;
+import de.ekdev.ekirc.core.event.ActionMessageToChannelEvent;
+import de.ekdev.ekirc.core.event.ActionMessageToUserEvent;
 import de.ekdev.ekirc.core.event.ChannelListUpdateEvent;
 import de.ekdev.ekirc.core.event.NickChangeEvent;
 import de.ekdev.ekirc.core.event.NoticeToChannelEvent;
@@ -51,8 +53,10 @@ public class SimpleIRCServerContextTest
 
         try
         {
+            // registrator
             ircManager.getEventManager().register(new UserConnectionRegistrator(inet, nick, "uerles", true));
 
+            // nickname change
             ircManager.getEventManager().register(new EventListener() {
                 @EventHandler
                 public void onNickChange(NickChangeEvent nce)
@@ -65,6 +69,7 @@ public class SimpleIRCServerContextTest
                 }
             });
 
+            // channel list
             ircManager.getEventManager().register(new EventListener() {
                 @EventHandler
                 public void newChannelList(ChannelListUpdateEvent ucle)
@@ -91,6 +96,7 @@ public class SimpleIRCServerContextTest
                 }
             });
 
+            // messages
             ircManager.getEventManager().register(new EventListener() {
                 @EventHandler
                 public void onPrivMsgToMe(PrivateMessageToUserEvent event)
@@ -127,8 +133,27 @@ public class SimpleIRCServerContextTest
                             .object("NOTICE to chan [" + event.getTargetIRCChannel().getName() + "]",
                                     event.getMessage());
                 }
+
+                @EventHandler
+                public void onActionToUser(ActionMessageToUserEvent event)
+                {
+                    event.getIRCNetwork()
+                            .getIRCConnectionLog()
+                            .object("ACTION to chan [" + event.getTargetIRCUser().getNickname() + "]",
+                                    event.getActor().getNickname() + " " + event.getMessage());
+                }
+
+                @EventHandler
+                public void onActionToChan(ActionMessageToChannelEvent event)
+                {
+                    event.getIRCNetwork()
+                            .getIRCConnectionLog()
+                            .object("ACTION to chan [" + event.getTargetIRCChannel().getName() + "]",
+                                    event.getActor().getNickname() + " " + event.getMessage());
+                }
             });
 
+            // reconnect
             // only on inet for 3 successful times
             ircManager.getEventManager().register(new AutoReconnector(inet, 15 * 1000, 3));
 

@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import de.ekdev.ekirc.core.event.ActionMessageToChannelEvent;
+import de.ekdev.ekirc.core.event.ActionMessageToUserEvent;
 import de.ekdev.ekirc.core.event.ChannelListUpdateEvent;
 import de.ekdev.ekirc.core.event.IRCNetworkInfoEvent;
 import de.ekdev.ekirc.core.event.JoinEvent;
@@ -558,10 +560,29 @@ public class IRCMessageProcessor
         // TODO: do the magick
         switch (icc)
         {
+            case ACTION:
+            {
+                String target = im.getParams().get(0);
+                if (IRCChannel.CHANNEL_PREFIXES.indexOf(target.charAt(0)) == -1)
+                {
+                    // message to user
+                    IRCUser targetIRCUser = this.ircNetwork.getIRCUserManager().getIRCUser(target);
+                    this.ircNetwork.raiseEvent(new ActionMessageToUserEvent(this.ircNetwork, sourceIRCUser,
+                            targetIRCUser, edm.getExtendedData()));
+                }
+                else
+                {
+                    // message to channel
+                    IRCChannel targetIRCChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(target);
+                    this.ircNetwork.raiseEvent(new ActionMessageToChannelEvent(this.ircNetwork, sourceIRCUser,
+                            targetIRCChannel, edm.getExtendedData()));
+                }
+                break; // -----------------------------------------------------
+            }
             case DCC:
             {
                 // boolean result = this.ircNetwork.getIRCDCCManager()
-                //       .processRequest(sourceIRCUser, edm.getExtendedData());
+                // .processRequest(sourceIRCUser, edm.getExtendedData());
             }
             default:
             {
