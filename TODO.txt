@@ -65,6 +65,13 @@ ToDo / ToThinkAbout:
     - store channels in User? (information hiding, functionality)
 
 
+- sort events in sub-packages?
+    - user, channel, connection, message, ...
+
+
+- dcc message?
+
+
 #####
 - server reply codes
     - store server reply codes in static final variables (constants) rather than enums?
