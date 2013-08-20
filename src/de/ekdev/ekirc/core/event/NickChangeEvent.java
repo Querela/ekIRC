@@ -17,9 +17,9 @@ public class NickChangeEvent extends IRCNetworkEvent
     private final String oldNick;
     private final String newNick;
 
-    public NickChangeEvent(IRCNetwork source, IRCUser ircUser, String oldNick, String newNick)
+    public NickChangeEvent(IRCNetwork ircNetwork, IRCUser ircUser, String oldNick, String newNick)
     {
-        super(source);
+        super(ircNetwork);
         this.ircUser = ircUser;
         this.oldNick = oldNick;
         this.newNick = newNick;

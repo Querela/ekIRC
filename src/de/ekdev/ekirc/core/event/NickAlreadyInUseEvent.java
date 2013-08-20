@@ -16,9 +16,9 @@ public class NickAlreadyInUseEvent extends IRCNetworkEvent
 
     private final IRCMessage ircMessage;
 
-    public NickAlreadyInUseEvent(IRCNetwork source, IRCMessage ircMessage)
+    public NickAlreadyInUseEvent(IRCNetwork ircNetwork, IRCMessage ircMessage)
     {
-        super(source);
+        super(ircNetwork);
         this.ircMessage = ircMessage;
     }
 

@@ -16,9 +16,9 @@ public class QuitEvent extends IRCNetworkEvent
     private final IRCUser ircUser;
     private final String reason;
 
-    public QuitEvent(IRCNetwork source, IRCUser ircUser, String reason)
+    public QuitEvent(IRCNetwork ircNetwork, IRCUser ircUser, String reason)
     {
-        super(source);
+        super(ircNetwork);
         this.ircUser = ircUser;
         this.reason = reason;
     }

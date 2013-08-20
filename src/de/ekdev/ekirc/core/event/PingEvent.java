@@ -14,9 +14,9 @@ public class PingEvent extends IRCNetworkEvent
     private final static EventListenerList listeners = new EventListenerList();
     private final String pingValue;
 
-    public PingEvent(IRCNetwork source, String pingValue)
+    public PingEvent(IRCNetwork ircNetwork, String pingValue)
     {
-        super(source);
+        super(ircNetwork);
         this.pingValue = pingValue;
     }
 

@@ -19,9 +19,9 @@ public class PartEvent extends IRCNetworkEvent
     private final IRCUser ircUser;
     private final String reason;
 
-    public PartEvent(IRCNetwork source, IRCChannel ircChannel, IRCUser ircUser, String reason)
+    public PartEvent(IRCNetwork ircNetwork, IRCChannel ircChannel, IRCUser ircUser, String reason)
     {
-        super(source);
+        super(ircNetwork);
         // Objects.requireNonNull(ircChannel, "ircChannel must not be null!");
         // Objects.requireNonNull(ircUser, "ircUser must not be null!");
         if (reason != null && reason.trim().length() == 0) reason = null;

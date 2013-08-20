@@ -15,9 +15,9 @@ public class IRCNetworkInfoEvent extends IRCNetworkEvent
     private final static EventListenerList listeners = new EventListenerList();
     private final IRCMessage ircMessage;
 
-    public IRCNetworkInfoEvent(IRCNetwork source, IRCMessage ircMessage)
+    public IRCNetworkInfoEvent(IRCNetwork ircNetwork, IRCMessage ircMessage)
     {
-        super(source);
+        super(ircNetwork);
         this.ircMessage = ircMessage;
     }
 

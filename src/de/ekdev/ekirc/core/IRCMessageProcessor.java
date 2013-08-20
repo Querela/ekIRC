@@ -18,8 +18,12 @@ import de.ekdev.ekirc.core.event.MotdUpdatedEvent;
 import de.ekdev.ekirc.core.event.MotdUpdatingEvent;
 import de.ekdev.ekirc.core.event.NickAlreadyInUseEvent;
 import de.ekdev.ekirc.core.event.NickChangeEvent;
+import de.ekdev.ekirc.core.event.NoticeToChannelEvent;
+import de.ekdev.ekirc.core.event.NoticeToUserEvent;
 import de.ekdev.ekirc.core.event.PartEvent;
 import de.ekdev.ekirc.core.event.PingEvent;
+import de.ekdev.ekirc.core.event.PrivateMessageToChannelEvent;
+import de.ekdev.ekirc.core.event.PrivateMessageToUserEvent;
 import de.ekdev.ekirc.core.event.QuitEvent;
 
 /**
@@ -199,7 +203,7 @@ public class IRCMessageProcessor
     protected void processCommand(IRCMessage im, boolean handledAlready)
     {
         // TODO: EnumMap ?
-        IRCServerCommand isc = null;;
+        IRCServerCommand isc = null;
         try
         {
             isc = IRCServerCommand.valueOf(im.getCommand());
@@ -223,13 +227,9 @@ public class IRCMessageProcessor
                 break; // -----------------------------------------------------
             }
             case PRIVMSG:
-            {
-                this.processPrivateMessage(im);
-                break; // -----------------------------------------------------
-            }
             case NOTICE:
             {
-                this.processNotice(im);
+                this.processMessage(im);
                 break; // -----------------------------------------------------
             }
             case JOIN:
@@ -335,39 +335,97 @@ public class IRCMessageProcessor
 
     // --------------------------------
 
-    protected void processPrivateMessage(IRCMessage im)
+    protected void processMessage(IRCMessage im)
     {
         // TODO: raise event and react in event listener/handler and then here? static or dynamic binding?
-        // CTCP, DCC, user, channel
         this.ircNetwork.getIRCConnectionLog().object("im", im);
+
+        // check command
+        boolean isNotice = false;
+        try
+        {
+            IRCServerCommand isc = IRCServerCommand.valueOf(im.getCommand());
+            if (isc == IRCServerCommand.NOTICE)
+            {
+                isNotice = true;
+            }
+            else if (isc != IRCServerCommand.PRIVMSG)
+            {
+                throw new IllegalArgumentException("IRCMessage im is neither PRIVMSG or NOTICE!");
+            }
+        }
+        catch (Exception e)
+        {
+        }
 
         String message = im.getParams().get(1);
-        if (message.startsWith(IRCMessageProcessor.CTCP_XDELIM) && message.endsWith(IRCMessageProcessor.CTCP_XDELIM))
-        {
-            message = message.substring(1, message.length() - 1);
 
-            this.ircNetwork.getIRCConnectionLog().message("CTCP message: '" + message + "'");
-        }
-        // check if exists ...
-        else if (message.indexOf(IRCMessageProcessor.CTCP_XDELIM) != -1)
+        // lowlevel decode message
+        message = this.dequoteLowLevel(message);
+
+        // check for CTCP messages
+        if (this.containsCTCPMessage(message))
         {
-            this.ircNetwork.getIRCConnectionLog().message("check this CTCP message?: '" + message + "'");
+            this.processCTCP(im);
+
+            message = this.removeCTCPMessages(message); // normal message part
         }
 
-        if (this.containsCTCPMessage(im.getParams().get(1))) this.processCTCP(im, im.getParams().get(1));
+        if (message != null && message.trim().length() > 0)
+        {
+            // TODO: check if message from user or server
+            if (im.getPrefix().indexOf("@") == -1
+            /* && im.getPrefix().contains(this.ircNetwork.getIRCNetworkInfo().getServerName()) */)
+            {
+                this.ircNetwork.getIRCConnectionLog().message("--> Is message from server? <--");
+                // TODO: do something ...
+                return;
+            }
+
+            IRCUser sourceIRCUser = this.ircNetwork.getIRCUserManager().getIRCUserByPrefix(im.getPrefix());
+
+            // check recipient
+            String target = im.getParams().get(0);
+            if (IRCChannel.CHANNEL_PREFIXES.indexOf(target.charAt(0)) == -1)
+            {
+                // message to user
+                IRCUser targetIRCUser = this.ircNetwork.getIRCUserManager().getIRCUser(target);
+                if (isNotice)
+                {
+                    this.ircNetwork.raiseEvent(new NoticeToUserEvent(this.ircNetwork, sourceIRCUser, targetIRCUser,
+                            message));
+                }
+                else
+                {
+                    this.ircNetwork.raiseEvent(new PrivateMessageToUserEvent(this.ircNetwork, sourceIRCUser,
+                            targetIRCUser, message));
+                }
+            }
+            else
+            {
+                // message to channel
+                IRCChannel targetIRCChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(target);
+                if (isNotice)
+                {
+                    this.ircNetwork.raiseEvent(new NoticeToChannelEvent(this.ircNetwork, sourceIRCUser,
+                            targetIRCChannel, message));
+                }
+                else
+                {
+                    this.ircNetwork.raiseEvent(new PrivateMessageToChannelEvent(this.ircNetwork, sourceIRCUser,
+                            targetIRCChannel, message));
+                }
+            }
+        }
+        // empty message -> ignore
     }
 
-    protected void processNotice(IRCMessage im)
+    protected void processCTCP(IRCMessage im)
     {
-        // TODO: can contain CTCP answers ...
-        this.ircNetwork.getIRCConnectionLog().object("im", im);
+        this.ircNetwork.getIRCConnectionLog().message("CTCP-" + im.getCommand());
 
-        if (this.containsCTCPMessage(im.getParams().get(1))) this.processCTCP(im, im.getParams().get(1));
-    }
+        String ctcpMessage = im.getParams().get(1);
 
-    protected void processCTCP(IRCMessage im, String ctcpMessage)
-    {
-        this.ircNetwork.getIRCConnectionLog().message("Is CTCP in: " + im.getCommand());
         this.ircNetwork.getIRCConnectionLog().object("lowLevelMessage   ", ctcpMessage);
         String middleLevelMessage = this.dequoteLowLevel(ctcpMessage);
         this.ircNetwork.getIRCConnectionLog().object("middleLevelMessage", middleLevelMessage);
@@ -380,7 +438,25 @@ public class IRCMessageProcessor
             this.ircNetwork.getIRCConnectionLog().object("XXX extDataMsg", edm);
         }
 
-        // TODO: something
+        // --------
+
+        // check command
+        boolean isNotice = false;
+        try
+        {
+            IRCServerCommand isc = IRCServerCommand.valueOf(im.getCommand());
+            if (isc == IRCServerCommand.NOTICE)
+            {
+                isNotice = true;
+            }
+            else if (isc != IRCServerCommand.PRIVMSG)
+            {
+                throw new IllegalArgumentException("IRCMessage im is neither PRIVMSG or NOTICE!");
+            }
+        }
+        catch (Exception e)
+        {
+        }
     }
 
     // ------------
@@ -477,7 +553,7 @@ public class IRCMessageProcessor
         return sb.toString();
     }
 
-    protected List<String> extractCTCPMessages(String message)
+    protected List<String> extractCTCPMessages(String message, boolean dequoteCTCP)
     {
         List<String> list = new ArrayList<>();
 
@@ -485,7 +561,9 @@ public class IRCMessageProcessor
         for (int i = 0; i < ints.size(); i += 2)
         {
             // empty messages too
-            list.add(message.substring(ints.get(i) + 1, ints.get(i + 1)));
+            String m = message.substring(ints.get(i) + 1, ints.get(i + 1));
+            if (dequoteCTCP) m = this.dequoteCTCP(m);
+            list.add(m);
         }
 
         return list;
@@ -495,7 +573,7 @@ public class IRCMessageProcessor
     {
         List<ExtendedDataMessage> list = new ArrayList<>();
 
-        List<String> messages = this.extractCTCPMessages(message);
+        List<String> messages = this.extractCTCPMessages(message, true);
         for (String m : messages)
         {
             if (m.length() == 0)

@@ -13,9 +13,9 @@ public class IRCConnectEvent extends IRCNetworkEvent
 {
     private final static EventListenerList listeners = new EventListenerList();
 
-    public IRCConnectEvent(IRCNetwork source)
+    public IRCConnectEvent(IRCNetwork ircNetwork)
     {
-        super(source);
+        super(ircNetwork);
     }
 
     // ------------------------------------------------------------------------

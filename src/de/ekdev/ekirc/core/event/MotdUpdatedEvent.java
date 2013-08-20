@@ -19,9 +19,9 @@ public class MotdUpdatedEvent extends IRCNetworkEvent
     private final static EventListenerList listeners = new EventListenerList();
     private final List<String> motd;
 
-    public MotdUpdatedEvent(IRCNetwork source)
+    public MotdUpdatedEvent(IRCNetwork ircNetwork)
     {
-        super(source);
+        super(ircNetwork);
         this.motd = new ArrayList<>(this.getIRCNetworkInfo().getMotd());
     }
 

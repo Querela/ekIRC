@@ -10,9 +10,9 @@ import de.ekdev.ekirc.core.IRCNetwork;
  */
 public abstract class IRCNetworkEvent extends IRCEvent
 {
-    public IRCNetworkEvent(IRCNetwork source)
+    public IRCNetworkEvent(IRCNetwork ircNetwork)
     {
-        super(source);
+        super(ircNetwork);
     }
 
     // ------------------------------------------------------------------------

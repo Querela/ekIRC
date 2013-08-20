@@ -21,6 +21,10 @@ import de.ekdev.ekirc.core.IRCUsernameFormatException;
 import de.ekdev.ekirc.core.commands.connection.IRCNickCommand;
 import de.ekdev.ekirc.core.event.ChannelListUpdateEvent;
 import de.ekdev.ekirc.core.event.NickChangeEvent;
+import de.ekdev.ekirc.core.event.NoticeToChannelEvent;
+import de.ekdev.ekirc.core.event.NoticeToUserEvent;
+import de.ekdev.ekirc.core.event.PrivateMessageToChannelEvent;
+import de.ekdev.ekirc.core.event.PrivateMessageToUserEvent;
 import de.ekdev.ekirc.core.event.listener.AutoReconnector;
 import de.ekdev.ekirc.core.event.listener.UserConnectionRegistrator;
 
@@ -38,9 +42,9 @@ public class SimpleIRCServerContextTest
     {
 
         IRCManager ircManager = new IRCManager();
-        IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.irchighway.net", 6667);
+        // IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.irchighway.net", 6667);
         // IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.chatzona.org", 6667);
-        // IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.webchat.org", 6667);
+        IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.webchat.org", 6667);
 
         final String nick = "coor";
         // final String nick = "mike";
@@ -84,6 +88,44 @@ public class SimpleIRCServerContextTest
                             .message(
                                     "new channel list: delta users/channel = " + totalUsers
                                             / (float) ucle.getNewIRCChannelList().size());
+                }
+            });
+
+            ircManager.getEventManager().register(new EventListener() {
+                @EventHandler
+                public void onPrivMsgToMe(PrivateMessageToUserEvent event)
+                {
+                    event.getIRCNetwork()
+                            .getIRCConnectionLog()
+                            .object("PRIVMSG to user [" + event.getTargetIRCUser().getNickname() + "]",
+                                    event.getMessage());
+                }
+
+                @EventHandler
+                public void onPrivMsgToChan(PrivateMessageToChannelEvent event)
+                {
+                    event.getIRCNetwork()
+                            .getIRCConnectionLog()
+                            .object("PRIVMSG to chan [" + event.getTargetIRCChannel().getName() + "]",
+                                    event.getMessage());
+                }
+
+                @EventHandler
+                public void onNoticeToMe(NoticeToUserEvent event)
+                {
+                    event.getIRCNetwork()
+                            .getIRCConnectionLog()
+                            .object("NOTICE to user [" + event.getTargetIRCUser().getNickname() + "]",
+                                    event.getMessage());
+                }
+
+                @EventHandler
+                public void onNoticeToChan(NoticeToChannelEvent event)
+                {
+                    event.getIRCNetwork()
+                            .getIRCConnectionLog()
+                            .object("NOTICE to chan [" + event.getTargetIRCChannel().getName() + "]",
+                                    event.getMessage());
                 }
             });
 
@@ -141,7 +183,7 @@ public class SimpleIRCServerContextTest
                 @Override
                 public String asIRCMessageString()
                 {
-                    return "PRIVMSG #ebooks :@search David Thorpe";
+                    return "PRIVMSG #ebooks :@search Hohlbein Genesis";
                 }
 
                 @Override

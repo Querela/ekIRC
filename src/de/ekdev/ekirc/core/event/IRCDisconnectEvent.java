@@ -14,9 +14,9 @@ public class IRCDisconnectEvent extends IRCNetworkEvent
     private final static EventListenerList listeners = new EventListenerList();
     private final boolean reconnectPossible;
 
-    public IRCDisconnectEvent(IRCNetwork source, boolean reconnectPossible)
+    public IRCDisconnectEvent(IRCNetwork ircNetwork, boolean reconnectPossible)
     {
-        super(source);
+        super(ircNetwork);
         this.reconnectPossible = reconnectPossible;
     }
 
