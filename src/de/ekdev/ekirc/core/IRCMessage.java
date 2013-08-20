@@ -17,7 +17,7 @@ public class IRCMessage implements AsIRCMessage
     public final static String IRC_LINE_ENDING = "\r\n"; // CRLF,
 
     public final static char IRC_SPACE = ' '; // = 0x20; // SPACE,
-    public final static char IRC_COLON = ':'; // = 0x3b; // COLON
+    public final static char IRC_COLON = ':'; // = 0x3a; // COLON
 
     private final String prefix;
     private final String command;
@@ -70,6 +70,13 @@ public class IRCMessage implements AsIRCMessage
     public final boolean hasPrefix()
     {
         return (this.prefix != null);
+    }
+
+    public final boolean isServerPrefix()
+    {
+        if (!this.hasPrefix()) return true;
+
+        return this.prefix.indexOf("@") == -1 && (this.prefix.indexOf('.') != -1 || this.prefix.indexOf(':') != -1);
     }
 
     public final String getCommand()

@@ -35,10 +35,9 @@ public class IRCMessageProcessor
     public final static String MQUOTE = "\u0010";
     public final static String CTCP_XDELIM = "\u0001";
     public final static String CTCP_XQUOTE = "\\"; // "\u005C\u005C";
+    // http://www.robelle.com/smugbook/ascii.html
 
     private final IRCNetwork ircNetwork;
-
-    protected final IRCMessageParser parser;
 
     private IRCChannelList.Builder ircChannelListBuilder;
 
@@ -49,9 +48,79 @@ public class IRCMessageProcessor
         Objects.requireNonNull(ircNetwork, "ircNetwork must not be null!");
 
         this.ircNetwork = ircNetwork;
-        this.parser = this.createDefaultIRCMessageParser();
 
         this.ircChannelListBuilder = new IRCChannelList.Builder();
+    }
+
+    // ------------------------------------------------------------------------
+
+    protected IRCMessage parseRawLine(String line) throws IRCMessageFormatException
+    {
+        // throw more exceptions?
+        if (line == null || line.length() == 0) return null;
+
+        int i = line.indexOf(IRCMessage.IRC_SPACE);
+
+        // optional prefix
+        String prefix = null;
+        if (line.charAt(0) == IRCMessage.IRC_COLON)
+        {
+            // only prefix? -> not allowed
+            if (i == -1)
+            {
+                throw new IRCMessageFormatException("IRC message with a prefix only!");
+            }
+            // colon and prefix have to stand together
+            if (line.charAt(1) == IRCMessage.IRC_SPACE)
+            {
+                throw new IRCMessageFormatException(
+                        "Wrong IRC message format! after prefix colon can't follow a space.");
+            }
+
+            prefix = line.substring(1, i);
+            line = line.substring(i + 1);
+            i = line.indexOf(IRCMessage.IRC_SPACE);
+        }
+
+        String command;
+        if (i == -1)
+        {
+            command = line;
+            line = "";
+        }
+        else
+        {
+            command = line.substring(0, i);
+            line = line.substring(i + 1);
+        }
+
+        List<String> params = new ArrayList<String>(15);
+        while (line.length() > 0)
+        {
+            if (line.charAt(0) == IRCMessage.IRC_COLON)
+            {
+                // remove colon of trailing parameter
+                params.add(line.substring(1));
+                break;
+            }
+            i = line.indexOf(IRCMessage.IRC_SPACE);
+            if (i == -1)
+            {
+                params.add(line);
+                break;
+            }
+            else
+            {
+                params.add(line.substring(0, i));
+                line = line.substring(i + 1);
+            }
+        }
+        if (params.size() > IRCMessage.MAX_PARAM_COUNT)
+        {
+            throw new IRCMessageFormatException("IRC message with over 15 parameters!");
+        }
+
+        return new IRCMessage(prefix, command, params);
     }
 
     // ------------------------------------------------------------------------
@@ -61,7 +130,7 @@ public class IRCMessageProcessor
         IRCMessage im = null;
         try
         {
-            im = this.parser.parseRawLine(line);
+            im = this.parseRawLine(line);
         }
         catch (IRCMessageFormatException e)
         {
@@ -337,9 +406,6 @@ public class IRCMessageProcessor
 
     protected void processMessage(IRCMessage im)
     {
-        // TODO: raise event and react in event listener/handler and then here? static or dynamic binding?
-        this.ircNetwork.getIRCConnectionLog().object("im", im);
-
         // check command
         boolean isNotice = false;
         try
@@ -363,6 +429,10 @@ public class IRCMessageProcessor
         // lowlevel decode message
         message = this.dequoteLowLevel(message);
 
+        // TODO: allow inline new lines? max new lines?
+        // remove unallowed chars ...
+        message = this.stripMiddleLevel(message);
+
         // check for CTCP messages
         if (this.containsCTCPMessage(message))
         {
@@ -373,12 +443,10 @@ public class IRCMessageProcessor
 
         if (message != null && message.trim().length() > 0)
         {
-            // TODO: check if message from user or server
-            if (im.getPrefix().indexOf("@") == -1
-            /* && im.getPrefix().contains(this.ircNetwork.getIRCNetworkInfo().getServerName()) */)
+            // check if message from user or server
+            if (im.isServerPrefix())
             {
-                this.ircNetwork.getIRCConnectionLog().message("--> Is message from server? <--");
-                // TODO: do something ...
+                this.ircNetwork.raiseEvent(new IRCNetworkInfoEvent(this.ircNetwork, im));
                 return;
             }
 
@@ -432,7 +500,7 @@ public class IRCMessageProcessor
         String highLevelMessage = this.dequoteCTCP(this.removeCTCPMessages(middleLevelMessage));
         this.ircNetwork.getIRCConnectionLog().object("highLevelMessage  ", highLevelMessage);
 
-        List<ExtendedDataMessage> le = this.extractCTCPData(middleLevelMessage);
+        List<ExtendedDataMessage> le = this.extractCTCPDataMessages(middleLevelMessage);
         for (ExtendedDataMessage edm : le)
         {
             this.ircNetwork.getIRCConnectionLog().object("XXX extDataMsg", edm);
@@ -513,12 +581,12 @@ public class IRCMessageProcessor
         return sb.toString();
     }
 
+    // ------------
+
     protected boolean containsCTCPMessage(String message)
     {
         return (message != null && message.indexOf(IRCMessageProcessor.CTCP_XDELIM) != -1);
     }
-
-    // ------------
 
     protected List<Integer> getCTCPMessageIndizes(String message)
     {
@@ -553,7 +621,7 @@ public class IRCMessageProcessor
         return sb.toString();
     }
 
-    protected List<String> extractCTCPMessages(String message, boolean dequoteCTCP)
+    protected List<String> extractCTCPStrings(String message, boolean dequoteCTCP)
     {
         List<String> list = new ArrayList<>();
 
@@ -569,11 +637,11 @@ public class IRCMessageProcessor
         return list;
     }
 
-    protected List<ExtendedDataMessage> extractCTCPData(String message)
+    protected List<ExtendedDataMessage> extractCTCPDataMessages(String message)
     {
         List<ExtendedDataMessage> list = new ArrayList<>();
 
-        List<String> messages = this.extractCTCPMessages(message, true);
+        List<String> messages = this.extractCTCPStrings(message, true);
         for (String m : messages)
         {
             if (m.length() == 0)
@@ -692,6 +760,13 @@ public class IRCMessageProcessor
         return sb.toString();
     }
 
+    protected String stripMiddleLevel(String middleLevelMessage)
+    {
+        // TODO: overwrite in subclasses?
+        // TODO: remove chars we don't want to see ...
+        return middleLevelMessage;
+    }
+
     // ------------
 
     protected static class ExtendedDataMessage
@@ -729,6 +804,8 @@ public class IRCMessageProcessor
             return (this.extendedData != null && this.extendedData.length() > 0);
         }
 
+        // ----------------------------
+
         public static String getReadyForInsertEmpty()
         {
             return IRCMessageProcessor.CTCP_XDELIM + IRCMessageProcessor.CTCP_XDELIM;
@@ -746,6 +823,8 @@ public class IRCMessageProcessor
             // extendedData mustn't contain CTCP_XDELIM
             return IRCMessageProcessor.CTCP_XDELIM + tag + " " + extendedData + IRCMessageProcessor.CTCP_XDELIM;
         }
+
+        // ----------------------------
 
         public String getReadyForInsert()
         {
@@ -775,20 +854,8 @@ public class IRCMessageProcessor
 
     // ------------------------------------------------------------------------
 
-    protected IRCMessageParser createDefaultIRCMessageParser()
-    {
-        return new IRCMessageParser();
-    }
-
-    // ------------------------------------------------------------------------
-
     protected final IRCManager getIRCManager()
     {
         return this.ircNetwork.getIRCManager();
-    }
-
-    public final IRCMessageParser getIRCMessageParser()
-    {
-        return this.parser;
     }
 }
