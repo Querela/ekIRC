@@ -5,6 +5,7 @@ package de.ekdev.ekirc.core;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
@@ -163,6 +164,12 @@ public class IRCUser implements Comparable<IRCUser>
 
     // TODO: add nickname compare/equality especially for special chars
 
+    public static String nicknameToLowerCase(String nickname)
+    {
+        return nickname.toLowerCase(Locale.ENGLISH).replace('[', '{').replace(']', '}').replace('\\', '|')
+                .replace('~', '^');
+    }
+
     public static String getNickByPrefix(String prefix)
     {
         if (prefix == null) return null;
@@ -242,7 +249,7 @@ public class IRCUser implements Comparable<IRCUser>
     @Override
     public int compareTo(IRCUser other)
     {
-        // TODO: scandinavian compare ? []\~ == {}|^
-        return this.nickname.compareToIgnoreCase(other.getNickname());
+        // scandinavian compare? []\~ == {}|^
+        return IRCUser.nicknameToLowerCase(this.nickname).compareTo(IRCUser.nicknameToLowerCase(other.getNickname()));
     }
 }
