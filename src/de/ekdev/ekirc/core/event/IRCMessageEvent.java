@@ -4,7 +4,6 @@
 package de.ekdev.ekirc.core.event;
 
 import de.ekdev.ekirc.core.IRCNetwork;
-import de.ekdev.ekirc.core.IRCUser;
 
 /**
  * @author ekDev

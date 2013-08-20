@@ -407,7 +407,7 @@ public class IRCMessageProcessor
 
     protected void processMessage(IRCMessage im)
     {
-        // check command
+        // check command - abort if wrong
         boolean isNotice = false;
         try
         {
@@ -425,6 +425,19 @@ public class IRCMessageProcessor
         {
         }
 
+        // check if message from user or server
+        if (im.isServerPrefix())
+        {
+            this.ircNetwork.raiseEvent(new IRCNetworkInfoEvent(this.ircNetwork, im));
+            return;
+        }
+
+        // --------------------------------------------------------------------
+
+        // message sender
+        IRCUser sourceIRCUser = this.ircNetwork.getIRCUserManager().getIRCUserByPrefix(im.getPrefix());
+
+        // the message sent
         String message = im.getParams().get(1);
 
         // lowlevel decode message
@@ -434,25 +447,21 @@ public class IRCMessageProcessor
         // remove unallowed chars ...
         message = this.stripMiddleLevel(message);
 
-        // check for CTCP messages
+        // --------------------------------------------------------------------
+
+        // check for CTCP messages and process them
         if (this.containsCTCPMessage(message))
         {
-            this.processCTCP(im);
+            this.processCTCP(im, sourceIRCUser);
 
             message = this.removeCTCPMessages(message); // normal message part
         }
 
+        // --------------------------------------------------------------------
+
+        // process normal message part
         if (message != null && message.trim().length() > 0)
         {
-            // check if message from user or server
-            if (im.isServerPrefix())
-            {
-                this.ircNetwork.raiseEvent(new IRCNetworkInfoEvent(this.ircNetwork, im));
-                return;
-            }
-
-            IRCUser sourceIRCUser = this.ircNetwork.getIRCUserManager().getIRCUserByPrefix(im.getPrefix());
-
             // check recipient
             String target = im.getParams().get(0);
             if (IRCChannel.CHANNEL_PREFIXES.indexOf(target.charAt(0)) == -1)
@@ -489,7 +498,7 @@ public class IRCMessageProcessor
         // empty message -> ignore
     }
 
-    protected void processCTCP(IRCMessage im)
+    protected void processCTCP(IRCMessage im, IRCUser sourceIRCUser)
     {
         this.ircNetwork.getIRCConnectionLog().message("CTCP-" + im.getCommand());
 
@@ -501,7 +510,7 @@ public class IRCMessageProcessor
         String highLevelMessage = this.dequoteCTCP(this.removeCTCPMessages(middleLevelMessage));
         this.ircNetwork.getIRCConnectionLog().object("highLevelMessage  ", highLevelMessage);
 
-        // --------
+        // --------------------------------------------------------------------
 
         // check command (if request or reply ...)
         boolean isNotice = false;
@@ -524,12 +533,12 @@ public class IRCMessageProcessor
         List<IRCExtendedDataMessage> le = this.extractCTCPDataMessages(middleLevelMessage);
         for (IRCExtendedDataMessage edm : le)
         {
-            this.processCTCPCommand(im, edm, isNotice, false);
+            this.processCTCPCommand(im, sourceIRCUser, edm, isNotice, false);
         }
     }
 
-    protected void processCTCPCommand(IRCMessage im, IRCExtendedDataMessage edm, boolean isNotice,
-            boolean handledAlready)
+    protected void processCTCPCommand(IRCMessage im, IRCUser sourceIRCUser, IRCExtendedDataMessage edm,
+            boolean isNotice, boolean handledAlready)
     {
         IRCCTCPCommand icc = null;
         try
@@ -549,6 +558,11 @@ public class IRCMessageProcessor
         // TODO: do the magick
         switch (icc)
         {
+            case DCC:
+            {
+                // boolean result = this.ircNetwork.getIRCDCCManager()
+                //       .processRequest(sourceIRCUser, edm.getExtendedData());
+            }
             default:
             {
                 if (!handledAlready) this.ircNetwork.raiseEvent(new UnknownCTCPCommandEvent(this.ircNetwork, im, edm));

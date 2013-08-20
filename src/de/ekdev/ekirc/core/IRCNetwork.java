@@ -28,6 +28,8 @@ public class IRCNetwork implements IRCIOInterface
 
     private final IRCManager ircManager;
 
+    protected final IRCDCCManager ircDCCManager;
+
     protected final IRCChannelManager ircChannelManager;
     protected final IRCUserManager ircUserManager;
 
@@ -51,6 +53,8 @@ public class IRCNetwork implements IRCIOInterface
 
         // default network info
         this.ircNetworkInfo = new IRCNetworkInfo();
+
+        this.ircDCCManager = this.createDefaultIRCDCCManager();
 
         // default user/channel management
         this.ircChannelManager = this.createDefaultIRCChannelManager();
@@ -298,6 +302,11 @@ public class IRCNetwork implements IRCIOInterface
         return new IRCUserManager(this);
     }
 
+    protected IRCDCCManager createDefaultIRCDCCManager()
+    {
+        return new IRCDCCManager(this);
+    }
+
     protected IRCMessageProcessor createDefaultIRCMessageProcessor()
     {
         // TODO: create new or use from manager?
@@ -318,6 +327,11 @@ public class IRCNetwork implements IRCIOInterface
     public final IRCManager getIRCManager()
     {
         return this.ircManager;
+    }
+
+    public final IRCDCCManager getIRCDCCManager()
+    {
+        return this.ircDCCManager;
     }
 
     public final IRCChannelManager getIRCChannelManager()
