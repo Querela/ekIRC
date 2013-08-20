@@ -12,7 +12,8 @@ import de.ekdev.ekevent.EventHandler;
 import de.ekdev.ekevent.EventListener;
 import de.ekdev.ekevent.EventManager;
 import de.ekdev.ekirc.core.event.PingEvent;
-import de.ekdev.ekirc.core.event.IRCUnknownServerCommandEvent;
+import de.ekdev.ekirc.core.event.UnknownCTCPCommandEvent;
+import de.ekdev.ekirc.core.event.UnknownServerCommandEvent;
 
 /**
  * @author ekDev
@@ -81,15 +82,33 @@ public class IRCManager
     {
         return new EventListener() {
             @EventHandler
-            public void onUnknownCommandEvent(IRCUnknownServerCommandEvent iusce)
+            public void onUnknownCommandEvent(UnknownServerCommandEvent iusce)
             {
                 try
                 {
                     iusce.getIRCNetwork()
                             .getIRCConnectionLog()
                             .message(
-                                    iusce.getUnknownCommand() + " - Unknown Server Reply code! [Network: "
+                                    iusce.getUnknownCommand() + " - Unknown Server Reply code / command! [Network: "
                                             + iusce.getIRCNetwork().getName() + "]");
+                }
+                catch (Exception e)
+                {
+                }
+            }
+
+            @EventHandler
+            public void onUnknownCTCPCommandEvent(UnknownCTCPCommandEvent iucce)
+            {
+                try
+                {
+                    iucce.getIRCNetwork()
+                            .getIRCConnectionLog()
+                            .message(
+                                    iucce.getIRCMessage().getCommand() + " <~> " + iucce.getUnknownCommand()
+                                            + " - Unknown Server Command! [Network: " + iucce.getIRCNetwork().getName()
+                                            + "] [" + iucce.getIRCMessage() + "] [" + iucce.getIRCExtendedDataMessage()
+                                            + "]");
                 }
                 catch (Exception e)
                 {

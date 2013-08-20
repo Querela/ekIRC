@@ -11,7 +11,6 @@ import java.util.Objects;
 
 import de.ekdev.ekirc.core.event.ChannelListUpdateEvent;
 import de.ekdev.ekirc.core.event.IRCNetworkInfoEvent;
-import de.ekdev.ekirc.core.event.IRCUnknownServerCommandEvent;
 import de.ekdev.ekirc.core.event.JoinEvent;
 import de.ekdev.ekirc.core.event.KickEvent;
 import de.ekdev.ekirc.core.event.MotdUpdatedEvent;
@@ -25,6 +24,8 @@ import de.ekdev.ekirc.core.event.PingEvent;
 import de.ekdev.ekirc.core.event.PrivateMessageToChannelEvent;
 import de.ekdev.ekirc.core.event.PrivateMessageToUserEvent;
 import de.ekdev.ekirc.core.event.QuitEvent;
+import de.ekdev.ekirc.core.event.UnknownCTCPCommandEvent;
+import de.ekdev.ekirc.core.event.UnknownServerCommandEvent;
 
 /**
  * @author ekDev
@@ -263,7 +264,7 @@ public class IRCMessageProcessor
             // ----------------------------------------------------------------
             default:
             {
-                if (!handledAlready) this.ircNetwork.raiseEvent(new IRCUnknownServerCommandEvent(this.ircNetwork, im));
+                if (!handledAlready) this.ircNetwork.raiseEvent(new UnknownServerCommandEvent(this.ircNetwork, im));
                 break;
             }
         }
@@ -283,7 +284,7 @@ public class IRCMessageProcessor
 
         if (isc == null)
         {
-            this.ircNetwork.raiseEvent(new IRCUnknownServerCommandEvent(this.ircNetwork, im));
+            this.ircNetwork.raiseEvent(new UnknownServerCommandEvent(this.ircNetwork, im));
             return;
         }
 
@@ -500,15 +501,9 @@ public class IRCMessageProcessor
         String highLevelMessage = this.dequoteCTCP(this.removeCTCPMessages(middleLevelMessage));
         this.ircNetwork.getIRCConnectionLog().object("highLevelMessage  ", highLevelMessage);
 
-        List<ExtendedDataMessage> le = this.extractCTCPDataMessages(middleLevelMessage);
-        for (ExtendedDataMessage edm : le)
-        {
-            this.ircNetwork.getIRCConnectionLog().object("XXX extDataMsg", edm);
-        }
-
         // --------
 
-        // check command
+        // check command (if request or reply ...)
         boolean isNotice = false;
         try
         {
@@ -524,6 +519,31 @@ public class IRCMessageProcessor
         }
         catch (Exception e)
         {
+        }
+
+        List<IRCExtendedDataMessage> le = this.extractCTCPDataMessages(middleLevelMessage);
+        for (IRCExtendedDataMessage edm : le)
+        {
+            IRCCTCPCommand icc;
+            try
+            {
+                icc = IRCCTCPCommand.valueOf(edm.getTag());
+            }
+            catch (Exception e)
+            {
+                this.ircNetwork.raiseEvent(new UnknownCTCPCommandEvent(this.ircNetwork, im, edm));
+                continue; // skip to next ...
+            }
+
+            // TODO:
+            switch (icc)
+            {
+                default:
+                {
+                    this.ircNetwork.raiseEvent(new UnknownCTCPCommandEvent(this.ircNetwork, im, edm));
+                    break; // -------------------------------------------------
+                }
+            }
         }
     }
 
@@ -637,9 +657,9 @@ public class IRCMessageProcessor
         return list;
     }
 
-    protected List<ExtendedDataMessage> extractCTCPDataMessages(String message)
+    protected List<IRCExtendedDataMessage> extractCTCPDataMessages(String message)
     {
-        List<ExtendedDataMessage> list = new ArrayList<>();
+        List<IRCExtendedDataMessage> list = new ArrayList<>();
 
         List<String> messages = this.extractCTCPStrings(message, true);
         for (String m : messages)
@@ -647,7 +667,7 @@ public class IRCMessageProcessor
             if (m.length() == 0)
             {
                 // no tag -> empty message
-                list.add(new ExtendedDataMessage(null, null));
+                list.add(new IRCExtendedDataMessage(null, null));
                 continue;
             }
 
@@ -655,7 +675,7 @@ public class IRCMessageProcessor
             if (i == -1)
             {
                 // no space -> only tag
-                list.add(new ExtendedDataMessage(m, null));
+                list.add(new IRCExtendedDataMessage(m, null));
                 continue;
             }
             else
@@ -663,7 +683,7 @@ public class IRCMessageProcessor
                 // with space -> tag + opt. ext.data
                 String tag = m.substring(0, i);
                 String extData = ((m.length() > i + 1) ? m.substring(i + 1) : "");
-                list.add(new ExtendedDataMessage(tag, extData));
+                list.add(new IRCExtendedDataMessage(tag, extData));
                 continue;
             }
         }
@@ -765,81 +785,6 @@ public class IRCMessageProcessor
         // TODO: overwrite in subclasses?
         // TODO: remove chars we don't want to see ...
         return middleLevelMessage;
-    }
-
-    // ------------
-
-    protected static class ExtendedDataMessage
-    {
-        private final String tag;
-        private final String extendedData;
-
-        public ExtendedDataMessage(String tag, String extendedData)
-        {
-            // if tag == null or empty then empty message
-            // if extendedData == null then empty extendedData
-            // if extendedData is empty then tag only message
-
-            this.tag = tag;
-            this.extendedData = extendedData;
-        }
-
-        public String getTag()
-        {
-            return this.tag;
-        }
-
-        public String getExtendedData()
-        {
-            return this.extendedData;
-        }
-
-        public boolean isEmpty()
-        {
-            return (this.tag == null || this.tag.length() == 0);
-        }
-
-        public boolean hasExtendedData()
-        {
-            return (this.extendedData != null && this.extendedData.length() > 0);
-        }
-
-        // ----------------------------
-
-        public static String getReadyForInsertEmpty()
-        {
-            return IRCMessageProcessor.CTCP_XDELIM + IRCMessageProcessor.CTCP_XDELIM;
-        }
-
-        public static String getReadyForInsertTagOnly(String tag, boolean withSpace)
-        {
-            // tag mustn't contain space or CTCP_XDELIM
-            return IRCMessageProcessor.CTCP_XDELIM + tag + ((withSpace) ? " " : "") + IRCMessageProcessor.CTCP_XDELIM;
-        }
-
-        public static String getReadyForInsertAll(String tag, String extendedData)
-        {
-            // tag mustn't contain space or CTCP_XDELIM
-            // extendedData mustn't contain CTCP_XDELIM
-            return IRCMessageProcessor.CTCP_XDELIM + tag + " " + extendedData + IRCMessageProcessor.CTCP_XDELIM;
-        }
-
-        // ----------------------------
-
-        public String getReadyForInsert()
-        {
-            if (this.isEmpty()) return ExtendedDataMessage.getReadyForInsertEmpty();
-
-            if (this.hasExtendedData()) return ExtendedDataMessage.getReadyForInsertAll(this.tag, this.extendedData);
-
-            return ExtendedDataMessage.getReadyForInsertTagOnly(this.tag, (this.extendedData != null));
-        }
-
-        @Override
-        public String toString()
-        {
-            return "ExtendedDataMessage [tag=" + tag + ", extendedData=" + extendedData + "]";
-        }
     }
 
     // --------------------------------

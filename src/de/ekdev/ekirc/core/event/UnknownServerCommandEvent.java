@@ -1,5 +1,5 @@
 /**
- * IRCUnknownServerCommandEvent.java
+ * UnknownServerCommandEvent.java
  */
 package de.ekdev.ekirc.core.event;
 
@@ -10,12 +10,12 @@ import de.ekdev.ekirc.core.IRCNetwork;
 /**
  * @author ekDev
  */
-public class IRCUnknownServerCommandEvent extends IRCNetworkEvent
+public class UnknownServerCommandEvent extends IRCNetworkEvent
 {
     private final static EventListenerList listeners = new EventListenerList();
     private final IRCMessage ircMessage;
 
-    public IRCUnknownServerCommandEvent(IRCNetwork source, IRCMessage ircMessage)
+    public UnknownServerCommandEvent(IRCNetwork source, IRCMessage ircMessage)
     {
         super(source);
         this.ircMessage = ircMessage;
@@ -38,11 +38,11 @@ public class IRCUnknownServerCommandEvent extends IRCNetworkEvent
     @Override
     public EventListenerList getListeners()
     {
-        return IRCUnknownServerCommandEvent.listeners;
+        return UnknownServerCommandEvent.listeners;
     }
 
     public static EventListenerList getListenerList()
     {
-        return IRCUnknownServerCommandEvent.listeners;
+        return UnknownServerCommandEvent.listeners;
     }
 }
