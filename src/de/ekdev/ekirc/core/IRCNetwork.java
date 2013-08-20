@@ -322,6 +322,8 @@ public class IRCNetwork implements IRCIOInterface
         this.ircMessageProcessor = ircMessageProcessor;
     }
 
+    // TODO: create message processor with class and reflection?
+
     // ------------------------------------------------------------------------
 
     public final IRCManager getIRCManager()

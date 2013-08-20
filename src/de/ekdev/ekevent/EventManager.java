@@ -37,6 +37,11 @@ public class EventManager
         EventListenerList.unregisterAll(listener);
     }
 
+    public void unregisterAll()
+    {
+        EventListenerList.unregisterAll();
+    }
+
     // ------------------------------------------------------------------------
 
     public void dispatch(Event event)
@@ -75,6 +80,7 @@ public class EventManager
     {
         try
         {
+            System.err.println(type.getName());
             Method method = getRegistrationClass(type).getDeclaredMethod(Event.METHOD_LISTENERLIST);
             method.setAccessible(true);
             return (EventListenerList) method.invoke(null);

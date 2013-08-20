@@ -10,6 +10,7 @@ import java.util.List;
 import de.ekdev.ekevent.EventException;
 import de.ekdev.ekevent.EventHandler;
 import de.ekdev.ekevent.EventListener;
+import de.ekdev.ekevent.EventListenerList;
 import de.ekdev.ekevent.EventManager;
 import de.ekdev.ekirc.core.event.PingEvent;
 import de.ekdev.ekirc.core.event.UnknownCTCPCommandEvent;
@@ -136,9 +137,29 @@ public class IRCManager
 
     // --------------------------------
 
+    protected void shutAllIRCNetworksDown(boolean allowReconnect)
+    {
+        for (IRCNetwork ircNetwork : this.networks)
+        {
+            ircNetwork.shutdown(allowReconnect);
+        }
+    }
+
+    // --------------------------------
+
     public List<IRCNetwork> getNetworks()
     {
         return Collections.unmodifiableList(this.networks);
+    }
+
+    // ------------------------------------------------------------------------
+
+    public void shutdown()
+    {
+        this.shutAllIRCNetworksDown(false);
+
+        // TODO: ?
+        this.eventManager.unregisterAll();
     }
 
     // ------------------------------------------------------------------------

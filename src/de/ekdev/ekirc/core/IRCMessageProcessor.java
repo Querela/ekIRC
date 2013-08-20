@@ -834,6 +834,10 @@ public class IRCMessageProcessor
 
     // --------------------------------
 
+    // TODO: parse DCC message
+
+    // --------------------------------
+
     protected void processMode(IRCMessage im)
     {
         // TODO: ...
