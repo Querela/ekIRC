@@ -13,6 +13,8 @@ import java.util.Objects;
 public class IRCDCCMessage
 {
     public final static long INVALID_SIZE_ARGUMENT = -1;
+
+    // TODO: safe data in list? (passive dcc, varying argument count)
     private final String type;
     private final String argument;
     private final String address;

@@ -1,12 +1,12 @@
 /**
- * IRCCTCPCommand.java
+ * IRCCTCPType.java
  */
 package de.ekdev.ekirc.core;
 
 /**
  * @author ekDev
  */
-public enum IRCCTCPCommand
+public enum IRCCTCPType
 {
     // -> http://www.irchelp.org/irchelp/rfc/ctcpspec.html
 
