@@ -23,6 +23,7 @@ import de.ekdev.ekirc.core.event.ActionMessageToChannelEvent;
 import de.ekdev.ekirc.core.event.ActionMessageToUserEvent;
 import de.ekdev.ekirc.core.event.ChannelListUpdateEvent;
 import de.ekdev.ekirc.core.event.ChannelModeChangeEvent;
+import de.ekdev.ekirc.core.event.ChannelModeUpdateEvent;
 import de.ekdev.ekirc.core.event.NickChangeEvent;
 import de.ekdev.ekirc.core.event.NoticeToChannelEvent;
 import de.ekdev.ekirc.core.event.NoticeToUserEvent;
@@ -171,10 +172,18 @@ public class SimpleIRCServerContextTest
                     event.getIRCNetwork()
                             .getIRCConnectionLog()
                             .message(
-                                    "USERMODE change [" + event.getTargetIRCChannel().getName() + "] : '"
+                                    "CHANNELMODE change [" + event.getTargetIRCChannel().getName() + "] : '"
                                             + event.getOldMode() + "' + '" + event.getModeChange() + "' => '"
                                             + event.getNewMode() + "'");
                 }
+
+                @EventHandler
+                public void onChannelModeSet(ChannelModeUpdateEvent event)
+                {
+                    event.getIRCNetwork().getIRCConnectionLog()
+                            .object("CHANNEL-MODE [" + event.getIRCChannel().getName() + "]", event.getMode());
+                }
+
             });
 
             // reconnect
@@ -232,7 +241,7 @@ public class SimpleIRCServerContextTest
                 @Override
                 public String asIRCMessageString()
                 {
-                    return "PRIVMSG #ebooks :@search Hohlbein Genesis";
+                    return ""; // PRIVMSG #ebooks :@search Hohlbein Genesis";
                 }
 
                 @Override
