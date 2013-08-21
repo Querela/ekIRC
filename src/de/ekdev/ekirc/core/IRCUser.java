@@ -9,6 +9,9 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
+import de.ekdev.ekirc.core.commands.message.IRCNoticeCommand;
+import de.ekdev.ekirc.core.commands.message.IRCPrivateMessageCommand;
+
 /**
  * @author ekDev
  */
@@ -103,6 +106,7 @@ public class IRCUser implements Comparable<IRCUser>
     }
 
     // --------------------------------
+    // Update
 
     public Set<IRCChannel> getIRCChannels()
     {
@@ -121,6 +125,57 @@ public class IRCUser implements Comparable<IRCUser>
         if (ircChannel == null) return;
 
         this.channels.remove(ircChannel);
+    }
+
+    // ------------------------------------------------------------------------
+    // Actions
+
+    public void sendPrivateMessage(String message) throws NullPointerException
+    {
+        AsIRCMessage ircMessage = new IRCPrivateMessageCommand(this, message);
+
+        this.ircUserManager.getIRCNetwork().send(ircMessage);
+    }
+
+    public boolean sendPrivateMessageSilent(String message)
+    {
+        boolean ret = true;
+
+        try
+        {
+            this.sendPrivateMessage(message);
+        }
+        catch (Exception e)
+        {
+            this.ircUserManager.getIRCNetwork().getIRCConnectionLog().exception(e); // TODO: log?
+            ret = false;
+        }
+
+        return ret;
+    }
+
+    public void sendNotice(String message) throws NullPointerException
+    {
+        AsIRCMessage ircMessage = new IRCNoticeCommand(this, message);
+
+        this.ircUserManager.getIRCNetwork().send(ircMessage);
+    }
+
+    public boolean sendNoticeSilent(String message)
+    {
+        boolean ret = true;
+
+        try
+        {
+            this.sendNotice(message);
+        }
+        catch (Exception e)
+        {
+            this.ircUserManager.getIRCNetwork().getIRCConnectionLog().exception(e); // TODO: log?
+            ret = false;
+        }
+
+        return ret;
     }
 
     // ------------------------------------------------------------------------

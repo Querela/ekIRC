@@ -8,6 +8,9 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import de.ekdev.ekirc.core.commands.message.IRCNoticeCommand;
+import de.ekdev.ekirc.core.commands.message.IRCPrivateMessageCommand;
+
 /**
  * @author ekDev
  */
@@ -124,6 +127,54 @@ public class IRCChannel
     // ------------------------------------------------------------------------
     // Actions
 
+    public void sendPrivateMessage(String message) throws NullPointerException
+    {
+        AsIRCMessage ircMessage = new IRCPrivateMessageCommand(this, message);
+
+        this.ircChannelManager.getIRCNetwork().send(ircMessage);
+    }
+
+    public boolean sendPrivateMessageSilent(String message)
+    {
+        boolean ret = true;
+
+        try
+        {
+            this.sendPrivateMessage(message);
+        }
+        catch (Exception e)
+        {
+            this.ircChannelManager.getIRCNetwork().getIRCConnectionLog().exception(e); // TODO: log?
+            ret = false;
+        }
+
+        return ret;
+    }
+
+    public void sendNotice(String message) throws NullPointerException
+    {
+        AsIRCMessage ircMessage = new IRCNoticeCommand(this, message);
+
+        this.ircChannelManager.getIRCNetwork().send(ircMessage);
+    }
+
+    public boolean sendNoticeSilent(String message)
+    {
+        boolean ret = true;
+
+        try
+        {
+            this.sendNotice(message);
+        }
+        catch (Exception e)
+        {
+            this.ircChannelManager.getIRCNetwork().getIRCConnectionLog().exception(e); // TODO: log?
+            ret = false;
+        }
+
+        return ret;
+    }
+
     // ------------------------------------------------------------------------
 
     public static boolean validateChannelname(String channelname) throws NullPointerException,
@@ -134,7 +185,7 @@ public class IRCChannel
         {
             throw new IRCChannelNameFormatException("channelname must not be empty!");
         }
-        if (channelname.length() > 50)
+        if (channelname.length() > IRCChannel.MAX_CHANNEL_NAME_LENGTH)
         {
             throw new IRCChannelNameFormatException("channelname must not be longer than 50 characters!");
         }

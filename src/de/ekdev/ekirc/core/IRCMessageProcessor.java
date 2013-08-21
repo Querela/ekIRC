@@ -443,7 +443,7 @@ public class IRCMessageProcessor
         String message = im.getParams().get(1);
 
         // lowlevel decode message
-        message = this.dequoteLowLevel(message);
+        message = IRCMessageProcessor.dequoteLowLevel(message);
 
         // TODO: allow inline new lines? max new lines?
         // remove unallowed chars ...
@@ -507,9 +507,9 @@ public class IRCMessageProcessor
         String ctcpMessage = im.getParams().get(1);
 
         this.ircNetwork.getIRCConnectionLog().object("lowLevelMessage   ", ctcpMessage);
-        String middleLevelMessage = this.dequoteLowLevel(ctcpMessage);
+        String middleLevelMessage = IRCMessageProcessor.dequoteLowLevel(ctcpMessage);
         this.ircNetwork.getIRCConnectionLog().object("middleLevelMessage", middleLevelMessage);
-        String highLevelMessage = this.dequoteCTCP(this.removeCTCPMessages(middleLevelMessage));
+        String highLevelMessage = IRCMessageProcessor.dequoteCTCP(this.removeCTCPMessages(middleLevelMessage));
         this.ircNetwork.getIRCConnectionLog().object("highLevelMessage  ", highLevelMessage);
 
         // --------------------------------------------------------------------
@@ -594,7 +594,7 @@ public class IRCMessageProcessor
 
     // ------------
 
-    protected String quoteCTCP(String highLevelMessage)
+    public static String quoteCTCP(String highLevelMessage)
     {
         StringBuilder sb = new StringBuilder(highLevelMessage);
 
@@ -619,7 +619,7 @@ public class IRCMessageProcessor
         return sb.toString();
     }
 
-    protected String dequoteCTCP(String middleLevelMessage)
+    public static String dequoteCTCP(String middleLevelMessage)
     {
         StringBuilder sb = new StringBuilder(middleLevelMessage);
 
@@ -695,7 +695,7 @@ public class IRCMessageProcessor
         {
             // empty messages too
             String m = message.substring(ints.get(i) + 1, ints.get(i + 1));
-            if (dequoteCTCP) m = this.dequoteCTCP(m);
+            if (dequoteCTCP) m = IRCMessageProcessor.dequoteCTCP(m);
             list.add(m);
         }
 
@@ -738,7 +738,7 @@ public class IRCMessageProcessor
 
     // ------------
 
-    protected String quoteLowLevel(String middleLevelMessage)
+    public static String quoteLowLevel(String middleLevelMessage)
     {
         // middle level (can contain every character) -> low level
         StringBuilder sb = new StringBuilder(middleLevelMessage);
@@ -778,7 +778,7 @@ public class IRCMessageProcessor
         return sb.toString();
     }
 
-    protected String dequoteLowLevel(String lowLevelMessage)
+    public static String dequoteLowLevel(String lowLevelMessage)
     {
         // low level -> middle level
         StringBuilder sb = new StringBuilder(lowLevelMessage);
@@ -824,6 +824,8 @@ public class IRCMessageProcessor
 
         return sb.toString();
     }
+
+    // ------------
 
     protected String stripMiddleLevel(String middleLevelMessage)
     {
