@@ -29,8 +29,8 @@ public class QuotingTest
             {
                 String message1 = "\u0001ACTION :barfs on the floor\u0001";
                 System.out.println(message1);
-                System.out.println(this.quoteCTCP(message1));
-                System.out.println(this.dequoteCTCP(this.quoteCTCP(message1)));
+                System.out.println(IRCMessageProcessor.quoteCTCP(message1));
+                System.out.println(IRCMessageProcessor.dequoteCTCP(IRCMessageProcessor.quoteCTCP(message1)));
             }
         }.doSomething();
 
@@ -40,8 +40,8 @@ public class QuotingTest
                 // String message1 = "\\n\\t\\big\\020\\001\\000\\\\:";
                 String message1 = "\n\t\big\020\001\000\\:";
                 System.out.println(message1);
-                System.out.println(this.quoteCTCP(message1));
-                System.out.println(this.dequoteCTCP(this.quoteCTCP(message1)));
+                System.out.println(IRCMessageProcessor.quoteCTCP(message1));
+                System.out.println(IRCMessageProcessor.dequoteCTCP(IRCMessageProcessor.quoteCTCP(message1)));
             }
         }.doSomething();
 
@@ -50,7 +50,7 @@ public class QuotingTest
             {
                 String message1 = "PRIVMSG victim :\001SED \n\t\big\020\\a\000\\\\:\001";
                 System.out.println(message1);
-                System.out.println(this.dequoteCTCP(message1));
+                System.out.println(IRCMessageProcessor.dequoteCTCP(message1));
             }
         }.doSomething();
     }

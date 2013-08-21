@@ -21,7 +21,7 @@ public class IRCDCCManager
 
     // ------------------------------------------------------------------------
 
-    public boolean processRequest(IRCUser sourceIRCUser, String request)
+    public boolean processRequest(IRCUser sourceIRCUser, IRCDCCMessage ircDCCMessage)
     {
         return false;
     }

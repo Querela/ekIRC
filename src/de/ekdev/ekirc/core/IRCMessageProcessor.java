@@ -27,6 +27,7 @@ import de.ekdev.ekirc.core.event.PrivateMessageToChannelEvent;
 import de.ekdev.ekirc.core.event.PrivateMessageToUserEvent;
 import de.ekdev.ekirc.core.event.QuitEvent;
 import de.ekdev.ekirc.core.event.UnknownCTCPCommandEvent;
+import de.ekdev.ekirc.core.event.UnknownDCCCommandEvent;
 import de.ekdev.ekirc.core.event.UnknownServerCommandEvent;
 
 /**
@@ -581,8 +582,35 @@ public class IRCMessageProcessor
             }
             case DCC:
             {
-                // boolean result = this.ircNetwork.getIRCDCCManager()
-                // .processRequest(sourceIRCUser, edm.getExtendedData());
+                boolean ok = false;
+                IRCDCCMessage ircDCCMessage = null;
+
+                try
+                {
+                    ircDCCMessage = this.parseDCCMessage(edm.getExtendedData());
+
+                    ok = this.ircNetwork.getIRCDCCManager().processRequest(sourceIRCUser, ircDCCMessage);
+                }
+                catch (Exception e)
+                {
+                    // IRCDCCMessageFormatException
+                    // NullPointerException
+                    this.ircNetwork.getIRCConnectionLog().exception(e);
+                }
+
+                if (!ok)
+                {
+                    if (ircDCCMessage != null)
+                    {
+                        this.ircNetwork.raiseEvent(new UnknownDCCCommandEvent(this.ircNetwork, im, edm, ircDCCMessage));
+                    }
+                    else
+                    {
+                        this.ircNetwork.raiseEvent(new UnknownCTCPCommandEvent(this.ircNetwork, im, edm));
+                    }
+                }
+
+                break; // -----------------------------------------------------
             }
             default:
             {
@@ -836,7 +864,89 @@ public class IRCMessageProcessor
 
     // --------------------------------
 
-    // TODO: parse DCC message
+    protected IRCDCCMessage parseDCCMessage(String message) throws NullPointerException, IRCDCCMessageFormatException
+    {
+        Objects.requireNonNull(message, "message must not be null!");
+
+        // ----------------------------
+        // get type (first token)
+        int index = message.indexOf(' ');
+        if (index == -1)
+        {
+            throw new IRCDCCMessageFormatException(
+                    "DCC message must contain at least 4 tokens separated with space characters!");
+        }
+        String type = message.substring(0, index);
+        message = message.substring(index + 1);
+
+        // ----------------------------
+        // parse argument (can contain space characters, will be enclosed in quotes)
+        String argument = null;
+        if ('"' == message.charAt(0))
+        {
+            index = message.indexOf("\" ", 1);
+            if (index == -1)
+            {
+                throw new IRCDCCMessageFormatException("Could not parse String from argument token!");
+            }
+            argument = message.substring(1, index);
+            message = message.substring(index + 2);
+        }
+        else if ('\'' == message.charAt(0))
+        {
+            index = message.indexOf("' ", 1);
+            if (index == -1)
+            {
+                throw new IRCDCCMessageFormatException("Could not parse String from argument token!");
+            }
+            argument = message.substring(1, index);
+            message = message.substring(index + 2);
+        }
+        else
+        {
+            index = message.indexOf(' ');
+            if (index == -1)
+            {
+                throw new IRCDCCMessageFormatException(
+                        "DCC message must contain at least 4 tokens separated with space characters!");
+            }
+            argument = message.substring(0, index);
+            message = message.substring(index + 1);
+        }
+
+        // ----------------------------
+        // parse address
+        index = message.indexOf(' ');
+        if (index == -1)
+        {
+            throw new IRCDCCMessageFormatException(
+                    "DCC message must not contain only 2 tokens! (arguments <address> <port> missing)");
+        }
+
+        String address = message.substring(0, index);
+        message = message.substring(index + 1);
+
+        // ----------------------------
+        // parse port + optional size
+        String port = null;
+        String size = null;
+
+        index = message.indexOf(' ');
+        if (index == -1)
+        {
+            port = message;
+        }
+        else
+        {
+            port = message.substring(0, index);
+            message = message.substring(index + 1);
+
+            // parse size
+            size = message;
+        }
+
+        return new IRCDCCMessage(type, argument, address, port, size);
+    }
 
     // --------------------------------
 

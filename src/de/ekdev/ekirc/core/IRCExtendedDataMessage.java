@@ -45,22 +45,24 @@ public class IRCExtendedDataMessage
 
     // ------------------------------------------------------------------------
 
-    public static String getReadyForInsertEmpty()
+    protected static String getReadyForInsertEmpty()
     {
         return IRCMessageProcessor.CTCP_XDELIM + IRCMessageProcessor.CTCP_XDELIM;
     }
 
-    public static String getReadyForInsertTagOnly(String tag, boolean withSpace)
+    protected static String getReadyForInsertTagOnly(String tag, boolean withSpace)
     {
         // tag mustn't contain space or CTCP_XDELIM
         return IRCMessageProcessor.CTCP_XDELIM + tag + ((withSpace) ? " " : "") + IRCMessageProcessor.CTCP_XDELIM;
     }
 
-    public static String getReadyForInsertAll(String tag, String extendedData)
+    protected static String getReadyForInsertAll(String tag, String extendedData, boolean quoteCTCP)
     {
         // tag mustn't contain space or CTCP_XDELIM
         // extendedData mustn't contain CTCP_XDELIM
-        return IRCMessageProcessor.CTCP_XDELIM + tag + " " + extendedData + IRCMessageProcessor.CTCP_XDELIM;
+        return IRCMessageProcessor.CTCP_XDELIM + tag + " "
+                + ((quoteCTCP) ? IRCMessageProcessor.quoteCTCP(extendedData) : extendedData)
+                + IRCMessageProcessor.CTCP_XDELIM;
     }
 
     // ------------------------------------------------------------------------
@@ -69,7 +71,8 @@ public class IRCExtendedDataMessage
     {
         if (this.isEmpty()) return IRCExtendedDataMessage.getReadyForInsertEmpty();
 
-        if (this.hasExtendedData()) return IRCExtendedDataMessage.getReadyForInsertAll(this.tag, this.extendedData);
+        if (this.hasExtendedData())
+            return IRCExtendedDataMessage.getReadyForInsertAll(this.tag, this.extendedData, true);
 
         return IRCExtendedDataMessage.getReadyForInsertTagOnly(this.tag, (this.extendedData != null));
     }

@@ -21,6 +21,13 @@ public class UnknownServerCommandEvent extends IRCNetworkEvent
         this.ircMessage = ircMessage;
     }
 
+    // ------------------------------------------------------------------------
+
+    public boolean hasIRCMessage()
+    {
+        return this.ircMessage != null;
+    }
+
     public IRCMessage getIRCMessage()
     {
         return this.ircMessage;

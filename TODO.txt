@@ -93,4 +93,7 @@ ToDo / ToThinkAbout:
     -> with enum values for modes ? EnumSet?
 
 
+- toString() methods with StringBuilder() ?
+
+
 #####

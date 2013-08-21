@@ -25,6 +25,13 @@ public class UnknownCTCPCommandEvent extends UnknownServerCommandEvent
         this.ircExtendedDataMessage = ircExtendedDataMessage;
     }
 
+    // ------------------------------------------------------------------------
+
+    public boolean hasIRCExtendedDataMessage()
+    {
+        return this.ircExtendedDataMessage != null;
+    }
+
     public IRCExtendedDataMessage getIRCExtendedDataMessage()
     {
         return this.ircExtendedDataMessage;
@@ -33,7 +40,7 @@ public class UnknownCTCPCommandEvent extends UnknownServerCommandEvent
     @Override
     public String getUnknownCommand()
     {
-        if (this.ircExtendedDataMessage == null) return null;
+        if (this.ircExtendedDataMessage == null) return super.getUnknownCommand();
 
         return this.ircExtendedDataMessage.getTag();
     }
