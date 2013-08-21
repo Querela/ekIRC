@@ -375,7 +375,7 @@ public class IRCNumericServerReply
      */
     public final static int RPL_VERSION = 351;
     /**
-     * "&lt;channel&gt; &lt;user&gt; &lt;host&gt; &lt;server&gt; &lt;nick&gt; ( "H" / "G" &gt; ["*"] [ ( "@" / "+
+     * "&lt;channel&gt; &lt;user&gt; &lt;host&gt; &lt;server&gt; &lt;nick&gt; ( "H" / "G" ) ["*"] [ ( "@" / "+
      * " ) ] :&lt;hopcount&gt; &lt;real name&gt;"
      */
     public final static int RPL_WHOREPLY = 352;

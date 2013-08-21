@@ -27,6 +27,12 @@ public class IRCUser implements Comparable<IRCUser>
     private String username;
     private String host;
 
+    private String realname;
+    private String server;
+    private int hops;
+    private boolean isAway;
+    private boolean isIRCOperator;
+
     private final Set<IRCChannel> channels;
 
     // ------------------------------------------------------------------------
@@ -100,9 +106,61 @@ public class IRCUser implements Comparable<IRCUser>
         this.username = username;
     }
 
-    protected void setHostmask(String hostmask)
+    protected void setHost(String host)
     {
-        this.host = hostmask;
+        this.host = host;
+    }
+
+    // --------------------------------
+
+    public String getRealname()
+    {
+        return this.realname;
+    }
+
+    public String getServer()
+    {
+        return this.server;
+    }
+
+    public int getHopsAway()
+    {
+        return this.hops;
+    }
+
+    public boolean isAway()
+    {
+        return this.isAway;
+    }
+
+    public boolean isIRCOp()
+    {
+        return this.isIRCOperator;
+    }
+
+    protected void setRealname(String realname)
+    {
+        this.realname = realname;
+    }
+
+    protected void setServer(String server)
+    {
+        this.server = server;
+    }
+
+    protected void setHops(int hops)
+    {
+        this.hops = hops;
+    }
+
+    protected void setAway(boolean isAway)
+    {
+        this.isAway = isAway;
+    }
+
+    protected void setIRCOp(boolean isIRCOperator)
+    {
+        this.isIRCOperator = isIRCOperator;
     }
 
     // --------------------------------
@@ -176,6 +234,11 @@ public class IRCUser implements Comparable<IRCUser>
         }
 
         return ret;
+    }
+
+    public void updateInfos()
+    {
+
     }
 
     // ------------------------------------------------------------------------

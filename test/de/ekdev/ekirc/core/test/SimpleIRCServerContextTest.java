@@ -19,6 +19,7 @@ import de.ekdev.ekirc.core.IRCNetwork;
 import de.ekdev.ekirc.core.IRCNicknameFormatException;
 import de.ekdev.ekirc.core.IRCUsernameFormatException;
 import de.ekdev.ekirc.core.commands.channel.IRCChannelModeCommand;
+import de.ekdev.ekirc.core.commands.user.IRCWhoCommand;
 import de.ekdev.ekirc.core.event.ActionMessageToChannelEvent;
 import de.ekdev.ekirc.core.event.ActionMessageToUserEvent;
 import de.ekdev.ekirc.core.event.ChannelListUpdateEvent;
@@ -211,6 +212,7 @@ public class SimpleIRCServerContextTest
 
             // inet.send(new IRCNickCommand("nickles"));
             // inet.send(new IRCListCommand());
+            inet.send(new IRCWhoCommand());
 
             while ((line = br.readLine()) != null)
             {
@@ -249,7 +251,7 @@ public class SimpleIRCServerContextTest
                 {
                     return null;
                 }
-            });
+            }, new IRCWhoCommand((String) null, false));
 
             while ((line = br.readLine()) != null)
             {

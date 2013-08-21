@@ -66,6 +66,11 @@ public class IRCChannelManager
         return this.getOrCreateIRCChannel(name);
     }
 
+    // public boolean hasIRCChannel(String name)
+    // {
+    // return this.channels.containsKey(name);
+    // }
+
     protected void addIRCChannel(IRCChannel ircChannel)
     {
         if (ircChannel == null) return;

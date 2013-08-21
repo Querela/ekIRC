@@ -31,6 +31,7 @@ import de.ekdev.ekirc.core.event.QuitEvent;
 import de.ekdev.ekirc.core.event.UnknownCTCPCommandEvent;
 import de.ekdev.ekirc.core.event.UnknownDCCCommandEvent;
 import de.ekdev.ekirc.core.event.UnknownServerCommandEvent;
+import de.ekdev.ekirc.core.event.UserInfoUpdateEvent;
 import de.ekdev.ekirc.core.event.UserModeChangeEvent;
 
 /**
@@ -178,7 +179,7 @@ public class IRCMessageProcessor
                 IRCUser ircUser = new IRCUser(this.ircNetwork.getIRCUserManager(),
                         IRCUser.getNickByPrefix(nickuserhost));
                 ircUser.setUsername(IRCUser.getUsernameByPrefix(nickuserhost));
-                ircUser.setHostmask(IRCUser.getHostByPrefix(nickuserhost));
+                ircUser.setHost(IRCUser.getHostByPrefix(nickuserhost));
                 this.ircNetwork.getMyIRCIdentity().setIRCUser(ircUser);
                 this.ircNetwork.getIRCConnectionLog().object("ircUser", ircUser);
                 // go on
@@ -281,6 +282,53 @@ public class IRCMessageProcessor
                 break; // -----------------------------------------------------
             }
             // ----------------------------------------------------------------
+            // reply to WHO
+            case RPL_WHOREPLY:
+            {
+                IRCChannel ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(im.getParams().get(1));
+                IRCUser ircUser = this.ircNetwork.getIRCUserManager().getIRCUser(im.getParams().get(5));
+
+                ircChannel.addIRCUser(ircUser); // if not already there
+
+                ircUser.setUsername(im.getParams().get(2));
+                ircUser.setHost(im.getParams().get(3));
+                ircUser.setServer(im.getParams().get(4));
+                ircUser.setRealname(im.getParams().get(8));
+
+                // TODO: status parsing (in channel?)
+                String status = im.getParams().get(6);
+                ircUser.setIRCOp(status.indexOf('*') != -1);
+                ircUser.setAway(status.indexOf('G') != -1); // ?
+
+                try
+                {
+                    ircUser.setHops(Integer.valueOf(im.getParams().get(7).substring(1)));
+                }
+                catch (Exception e)
+                {
+                }
+
+                this.ircNetwork.raiseEvent(new UserInfoUpdateEvent(this.ircNetwork, ircUser));
+            }
+            case RPL_ENDOFWHO:
+            {
+                // TODO:
+                this.ircNetwork.getIRCConnectionLog().object("ENDOFWHO for query", im.getParams().get(1));
+
+                this.ircNetwork.raiseEvent(new IRCNetworkInfoEvent(this.ircNetwork, im));
+                break; // -----------------------------------------------------
+            }
+
+            // ----------------------------------------------------------------
+            // ERROR replies
+            case ERR_NOSUCHSERVER:
+            {
+                // TODO: Error reply event ?
+                this.ircNetwork.raiseEvent(new IRCNetworkInfoEvent(this.ircNetwork, im));
+                break; // -----------------------------------------------------
+            }
+
+            // ----------------------------------------------------------------
             default:
             {
                 if (!handledAlready) this.ircNetwork.raiseEvent(new UnknownServerCommandEvent(this.ircNetwork, im));
@@ -329,7 +377,8 @@ public class IRCMessageProcessor
                 if (ircUser.isMe())
                 {
                     // TODO: request information ... or as reaction to event?
-                    // TODO: WHO/NAMES, MODE
+                    // TODO: WHO/NAMES
+                    ircChannel.refreshMode(); // send MODE request
                 }
 
                 ircChannel.addIRCUser(ircUser);
