@@ -3,11 +3,14 @@
  */
 package de.ekdev.ekirc.core;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import de.ekdev.ekirc.core.commands.channel.IRCChannelModeCommand;
 import de.ekdev.ekirc.core.commands.message.IRCNoticeCommand;
 import de.ekdev.ekirc.core.commands.message.IRCPrivateMessageCommand;
 
@@ -25,7 +28,7 @@ public class IRCChannel
     private String topic;
 
     // http://webtoman.com/opera/panel/ircdmodes.html
-    private String modes; // -> EnumSet?
+    private String mode; // -> EnumSet?
 
     private final Set<IRCUser> users;
 
@@ -69,6 +72,11 @@ public class IRCChannel
         return this.name;
     }
 
+    public char getType()
+    {
+        return this.name.charAt(0);
+    }
+
     public String getTopic()
     {
         return this.topic;
@@ -77,6 +85,35 @@ public class IRCChannel
     protected void setTopic(String topic)
     {
         this.topic = topic;
+    }
+
+    // --------------------------------
+
+    public String getMode()
+    {
+        if (this.mode == null)
+        {
+            this.refreshMode();
+        }
+
+        return this.mode;
+    }
+
+    protected void setMode(String mode)
+    {
+        // as response to 324
+        if (mode == null) return;
+
+        this.mode = mode;
+    }
+
+    protected void updateMode(String mode, List<String> modeparams)
+    {
+        // as response to MODE
+        // TODO: parse mode ...
+        this.ircChannelManager.getIRCNetwork().getIRCConnectionLog().object(this.name + ".setMode ", mode);
+
+        this.mode = mode;
     }
 
     // --------------------------------
@@ -173,6 +210,43 @@ public class IRCChannel
         }
 
         return ret;
+    }
+
+    // --------------------------------
+
+    protected void changeMode(String mode)
+    {
+        this.changeMode(mode, new ArrayList<String>());
+    }
+
+    public void changeMode(String modes, List<String> modeparams)
+    {
+        if (modes == null || modes.trim().length() == 0)
+        {
+            this.refreshMode();
+            return;
+        }
+
+        this.ircChannelManager.getIRCNetwork().send(new IRCChannelModeCommand(this, modes, modeparams));
+    }
+
+    public void changeMode(String modes, String... modeparams)
+    {
+        List<String> mlist = new ArrayList<>();
+        if (modes != null && modeparams != null)
+        {
+            for (String modeparam : modeparams)
+            {
+                mlist.add(modeparam);
+            }
+        }
+
+        this.changeMode(modes, mlist);
+    }
+
+    public void refreshMode()
+    {
+        this.ircChannelManager.getIRCNetwork().send(new IRCChannelModeCommand(this));
     }
 
     // ------------------------------------------------------------------------

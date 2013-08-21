@@ -18,14 +18,17 @@ import de.ekdev.ekirc.core.IRCMessage;
 import de.ekdev.ekirc.core.IRCNetwork;
 import de.ekdev.ekirc.core.IRCNicknameFormatException;
 import de.ekdev.ekirc.core.IRCUsernameFormatException;
+import de.ekdev.ekirc.core.commands.channel.IRCChannelModeCommand;
 import de.ekdev.ekirc.core.event.ActionMessageToChannelEvent;
 import de.ekdev.ekirc.core.event.ActionMessageToUserEvent;
 import de.ekdev.ekirc.core.event.ChannelListUpdateEvent;
+import de.ekdev.ekirc.core.event.ChannelModeChangeEvent;
 import de.ekdev.ekirc.core.event.NickChangeEvent;
 import de.ekdev.ekirc.core.event.NoticeToChannelEvent;
 import de.ekdev.ekirc.core.event.NoticeToUserEvent;
 import de.ekdev.ekirc.core.event.PrivateMessageToChannelEvent;
 import de.ekdev.ekirc.core.event.PrivateMessageToUserEvent;
+import de.ekdev.ekirc.core.event.UserModeChangeEvent;
 import de.ekdev.ekirc.core.event.listener.AutoReconnector;
 import de.ekdev.ekirc.core.event.listener.UserConnectionRegistrator;
 
@@ -152,6 +155,28 @@ public class SimpleIRCServerContextTest
                 }
             });
 
+            // mode changes
+            ircManager.getEventManager().register(new EventListener() {
+                @EventHandler
+                public void onUserModeChange(UserModeChangeEvent event)
+                {
+                    event.getIRCNetwork()
+                            .getIRCConnectionLog()
+                            .object("USERMODE change [" + event.getTargetIRCUser().getNickname() + "]", event.getMode());
+                }
+
+                @EventHandler
+                public void onChannelModeChange(ChannelModeChangeEvent event)
+                {
+                    event.getIRCNetwork()
+                            .getIRCConnectionLog()
+                            .message(
+                                    "USERMODE change [" + event.getTargetIRCChannel().getName() + "] : '"
+                                            + event.getOldMode() + "' + '" + event.getModeChange() + "' => '"
+                                            + event.getNewMode() + "'");
+                }
+            });
+
             // reconnect
             // only on inet for 3 successful times
             ircManager.getEventManager().register(new AutoReconnector(inet, 15 * 1000, 3));
@@ -223,6 +248,7 @@ public class SimpleIRCServerContextTest
             }
 
             // inet.send(new IRCNickCommand("coor"));
+            inet.send(new IRCChannelModeCommand(inet.getIRCChannelManager().getIRCChannel("#ebooks")));
 
             while ((line = br.readLine()) != null)
             {

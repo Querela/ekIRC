@@ -12,6 +12,8 @@ import java.util.Objects;
 import de.ekdev.ekirc.core.event.ActionMessageToChannelEvent;
 import de.ekdev.ekirc.core.event.ActionMessageToUserEvent;
 import de.ekdev.ekirc.core.event.ChannelListUpdateEvent;
+import de.ekdev.ekirc.core.event.ChannelModeChangeEvent;
+import de.ekdev.ekirc.core.event.ChannelModeUpdateEvent;
 import de.ekdev.ekirc.core.event.IRCNetworkInfoEvent;
 import de.ekdev.ekirc.core.event.JoinEvent;
 import de.ekdev.ekirc.core.event.KickEvent;
@@ -29,6 +31,7 @@ import de.ekdev.ekirc.core.event.QuitEvent;
 import de.ekdev.ekirc.core.event.UnknownCTCPCommandEvent;
 import de.ekdev.ekirc.core.event.UnknownDCCCommandEvent;
 import de.ekdev.ekirc.core.event.UnknownServerCommandEvent;
+import de.ekdev.ekirc.core.event.UserModeChangeEvent;
 
 /**
  * @author ekDev
@@ -229,13 +232,26 @@ public class IRCMessageProcessor
             // reply to NAMES command
 
             // ----------------------------------------------------------------
+            // reply to MODE <channel> command
+            case RPL_CHANNELMODEIS:
+            {
+                IRCChannel ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(im.getParams().get(1));
+                ircChannel.setMode(im.getParams().get(2));
+
+                this.ircNetwork.raiseEvent(new ChannelModeUpdateEvent(this.ircNetwork, ircChannel, im.getParams()
+                        .get(2)));
+                break; // -----------------------------------------------------
+            }
+            // TODO: 329?
+
+            // ----------------------------------------------------------------
             // reply to LIST command
             case RPL_LISTSTART:
             {
                 // we could also ignore this reply ...
                 this.ircChannelListBuilder.clear();
                 this.ircNetwork.getIRCConnectionLog().object("im", im);
-                break;
+                break; // -----------------------------------------------------
             }
             case RPL_LIST:
             {
@@ -426,6 +442,7 @@ public class IRCMessageProcessor
         }
         catch (Exception e)
         {
+            throw new IllegalArgumentException("IRCMessage has unknown command!");
         }
 
         // check if message from user or server
@@ -531,6 +548,7 @@ public class IRCMessageProcessor
         }
         catch (Exception e)
         {
+            throw new IllegalArgumentException("IRCMessage has unknown command!");
         }
 
         List<IRCExtendedDataMessage> le = this.extractCTCPDataMessages(middleLevelMessage);
@@ -543,10 +561,10 @@ public class IRCMessageProcessor
     protected void processCTCPCommand(IRCMessage im, IRCUser sourceIRCUser, IRCExtendedDataMessage edm,
             boolean isNotice, boolean handledAlready)
     {
-        IRCCTCPCommand icc = null;
+        IRCCTCPType icc = null;
         try
         {
-            icc = IRCCTCPCommand.valueOf(edm.getTag());
+            icc = IRCCTCPType.valueOf(edm.getTag());
         }
         catch (Exception e)
         {
@@ -868,6 +886,8 @@ public class IRCMessageProcessor
     {
         Objects.requireNonNull(message, "message must not be null!");
 
+        // TODO: for later: check out different DCC standards, how to implement them, ...
+
         // ----------------------------
         // get type (first token)
         int index = message.indexOf(' ');
@@ -952,10 +972,58 @@ public class IRCMessageProcessor
 
     protected void processMode(IRCMessage im)
     {
-        // TODO: ...
-        this.ircNetwork.getIRCConnectionLog().object("im", im);
-        // - MODE
-        // - USERMODE
+        IRCServerCommand isc = null;
+        try
+        {
+            isc = IRCServerCommand.valueOf(im.getCommand());
+
+            if (isc != IRCServerCommand.MODE) isc = null;
+        }
+        catch (Exception e)
+        {
+        }
+
+        if (isc == null)
+        {
+            throw new IllegalArgumentException("Invalid IRCMessage! No MODE command found!");
+        }
+
+        IRCUser sourceIRCUser = this.ircNetwork.getIRCUserManager().getIRCUserByPrefix(im.getPrefix());
+
+        String target = im.getParams().get(0);
+        String mode = im.getParams().get(1);
+
+        if (IRCChannel.CHANNEL_PREFIXES.indexOf(target.charAt(0)) == -1)
+        {
+            // USER-MODE
+            IRCUser targetIRCUser = this.ircNetwork.getIRCUserManager().getIRCUser(target);
+
+            this.ircNetwork.raiseEvent(new UserModeChangeEvent(this.ircNetwork, sourceIRCUser, targetIRCUser, mode));
+        }
+        else
+        {
+            // (CHANNEL-) MODE
+            IRCChannel targetIRCChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(target);
+
+            String oldMode = targetIRCChannel.getMode();
+
+            // TODO: add code for immutable object creation ... here
+
+            List<String> modeparams = new ArrayList<>();
+            modeparams.addAll(im.getParams().subList(2, im.getParams().size()));
+
+            StringBuilder modeChange = new StringBuilder(mode);
+            for (int i = 2; i < im.getParams().size(); i++)
+            {
+                modeChange.append(' ').append(im.getParams().get(i));
+            }
+
+            // update channel mode
+            targetIRCChannel.updateMode(mode, modeparams);
+
+            this.ircNetwork.raiseEvent(new ChannelModeChangeEvent(this.ircNetwork, sourceIRCUser, targetIRCChannel,
+                    oldMode, modeChange.toString()));
+        }
     }
 
     // ------------------------------------------------------------------------
