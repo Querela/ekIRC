@@ -34,10 +34,10 @@ public class IRCUserManager
 
     // ------------------------------------------------------------------------
 
-    protected IRCUser getOrCreateIRCUser(String nick)
+    protected IRCUser getOrCreateIRCUser(String nick, boolean autoCreateIfNull)
     {
         IRCUser ircUser = this.users.get(nick);
-        if (ircUser == null)
+        if (ircUser == null && autoCreateIfNull)
         {
             ircUser = new IRCUser(this, nick);
         }
@@ -48,7 +48,7 @@ public class IRCUserManager
     {
         if (nick == null) return null;
 
-        return this.getOrCreateIRCUser(nick);
+        return this.getOrCreateIRCUser(nick, true);
     }
 
     public IRCUser getIRCUserByPrefix(String prefix)

@@ -61,7 +61,7 @@ public class IRCChannelManager
     {
         if (ircChannelListEntry == null) return;
 
-        IRCChannel ircChannel = this.getOrCreateIRCChannel(ircChannelListEntry.getName());
+        IRCChannel ircChannel = this.getOrCreateIRCChannel(ircChannelListEntry.getName(), true);
         ircChannel.setTopic(ircChannelListEntry.getTopic());
     }
 
@@ -77,10 +77,10 @@ public class IRCChannelManager
 
     // ------------------------------------------------------------------------
 
-    protected IRCChannel getOrCreateIRCChannel(String name)
+    protected IRCChannel getOrCreateIRCChannel(String name, boolean autoCreateIfNull)
     {
         IRCChannel ircChannel = this.channels.get(name);
-        if (ircChannel == null)
+        if (ircChannel == null && autoCreateIfNull)
         {
             ircChannel = new IRCChannel(this, name);
         }
@@ -91,7 +91,7 @@ public class IRCChannelManager
     {
         if (name == null) return null;
 
-        return this.getOrCreateIRCChannel(name);
+        return this.getOrCreateIRCChannel(name, true);
     }
 
     public boolean hasIRCChannel(String name)

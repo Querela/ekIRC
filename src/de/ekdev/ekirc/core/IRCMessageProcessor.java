@@ -14,6 +14,7 @@ import de.ekdev.ekirc.core.event.ActionMessageToUserEvent;
 import de.ekdev.ekirc.core.event.ChannelListUpdateEvent;
 import de.ekdev.ekirc.core.event.ChannelModeChangeEvent;
 import de.ekdev.ekirc.core.event.ChannelModeUpdateEvent;
+import de.ekdev.ekirc.core.event.ChannelTopicUpdateEvent;
 import de.ekdev.ekirc.core.event.IRCNetworkInfoEvent;
 import de.ekdev.ekirc.core.event.JoinEvent;
 import de.ekdev.ekirc.core.event.KickEvent;
@@ -229,6 +230,23 @@ public class IRCMessageProcessor
                 break; // -----------------------------------------------------
             }
             // ----------------------------------------------------------------
+            // reply to TOPIC command
+            case RPL_NOTOPIC:
+            {
+                IRCChannel ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(im.getParams().get(1));
+                ircChannel.setTopic(""); // e. g. 'No topic is set'
+                this.ircNetwork.raiseEvent(new ChannelTopicUpdateEvent(this.ircNetwork, ircChannel));
+                break; // -----------------------------------------------------
+            }
+            case RPL_TOPIC:
+            {
+                IRCChannel ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(im.getParams().get(1));
+                ircChannel.setTopic(im.getParams().get(2));
+                this.ircNetwork.raiseEvent(new ChannelTopicUpdateEvent(this.ircNetwork, ircChannel));
+                break; // -----------------------------------------------------
+            }
+            // 332? topic setter
+            // ----------------------------------------------------------------
             // reply to NAMES command
             case RPL_NAMREPLY:
             {
@@ -316,7 +334,7 @@ public class IRCMessageProcessor
 
                 try
                 {
-                    String last = im.getParams().get(7).substring(1);
+                    String last = im.getParams().get(7);
                     int index = last.indexOf(' ');
                     if (index != -1)
                     {

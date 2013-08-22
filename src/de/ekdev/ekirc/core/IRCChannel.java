@@ -14,6 +14,7 @@ import de.ekdev.ekirc.core.commands.channel.IRCChannelModeCommand;
 import de.ekdev.ekirc.core.commands.channel.IRCJoinCommand;
 import de.ekdev.ekirc.core.commands.channel.IRCNamesCommand;
 import de.ekdev.ekirc.core.commands.channel.IRCPartCommand;
+import de.ekdev.ekirc.core.commands.channel.IRCTopicCommand;
 import de.ekdev.ekirc.core.commands.message.IRCNoticeCommand;
 import de.ekdev.ekirc.core.commands.message.IRCPrivateMessageCommand;
 import de.ekdev.ekirc.core.commands.user.IRCWhoCommand;
@@ -82,9 +83,20 @@ public class IRCChannel
         return this.name.charAt(0);
     }
 
+    protected String getTopic(boolean autoRefreshIfNotAvailable)
+    {
+        if (this.topic == null)
+        {
+            // TODO: or get topic from IRCChannelList?
+            this.refreshTopic();
+        }
+
+        return this.topic;
+    }
+
     public String getTopic()
     {
-        return this.topic;
+        return this.getTopic(true);
     }
 
     protected void setTopic(String topic)
@@ -262,6 +274,11 @@ public class IRCChannel
     public void refreshMode()
     {
         this.ircChannelManager.getIRCNetwork().send(new IRCChannelModeCommand(this));
+    }
+
+    public void refreshTopic()
+    {
+        this.ircChannelManager.getIRCNetwork().send(new IRCTopicCommand(this));
     }
 
     public void refreshIRCUserList() throws NullPointerException
