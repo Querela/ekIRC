@@ -47,6 +47,17 @@ public class IRCChannelManager
         this.ircChannelList = ircChannelList;
     }
 
+    protected void createIRCChannelsFromIRCChannelList(IRCChannelList ircChannelList)
+    {
+        if (ircChannelList == null) return;
+
+        for (IRCChannelList.Entry entry : ircChannelList)
+        {
+            IRCChannel ircChannel = this.getOrCreateIRCChannel(entry.getName());
+            ircChannel.setTopic(entry.getTopic());
+        }
+    }
+
     // ------------------------------------------------------------------------
 
     protected IRCChannel getOrCreateIRCChannel(String name)
@@ -66,10 +77,12 @@ public class IRCChannelManager
         return this.getOrCreateIRCChannel(name);
     }
 
-    // public boolean hasIRCChannel(String name)
-    // {
-    // return this.channels.containsKey(name);
-    // }
+    public boolean hasIRCChannel(String name)
+    {
+        if (name == null) return false;
+
+        return this.channels.containsKey(name);
+    }
 
     protected void addIRCChannel(IRCChannel ircChannel)
     {

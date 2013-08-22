@@ -166,7 +166,6 @@ public class IRCMessageProcessor
     protected void processServerResponse(IRCMessage im, boolean handledAlready)
     {
         // im.getParams().get(0); // --> always me ?
-        // this.ircNetwork.ircConnectionLog.object("im", im);
 
         switch (im.getNumericReply())
         {
@@ -251,7 +250,6 @@ public class IRCMessageProcessor
             {
                 // we could also ignore this reply ...
                 this.ircChannelListBuilder.clear();
-                this.ircNetwork.getIRCConnectionLog().object("im", im);
                 break; // -----------------------------------------------------
             }
             case RPL_LIST:
@@ -324,9 +322,6 @@ public class IRCMessageProcessor
             }
             case RPL_ENDOFWHO:
             {
-                // TODO:
-                this.ircNetwork.getIRCConnectionLog().object("ENDOFWHO for query", im.getParams().get(1));
-
                 this.ircNetwork.raiseEvent(new IRCNetworkInfoEvent(this.ircNetwork, im));
                 break; // -----------------------------------------------------
             }
@@ -432,7 +427,6 @@ public class IRCMessageProcessor
             {
                 String sourceNick = IRCUser.getNickByPrefix(im.getPrefix());
                 IRCUser ircUser = this.ircNetwork.getIRCUserManager().getIRCUser(sourceNick);
-                if (ircUser == null) break;
 
                 ircUser.setNickname(im.getParams().get(0));
 
