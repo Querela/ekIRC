@@ -266,6 +266,22 @@ public class IRCMessageProcessor
             {
                 // TODO:
                 IRCChannel ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(im.getParams().get(1));
+
+                String users = im.getParams().get(2);
+                String[] userstokens = users.split(" ");
+                for (String usertoken : userstokens)
+                {
+                    char status = 0x00;
+                    if (IRCUser.USER_PREFIXES.indexOf(usertoken.charAt(0)) != -1)
+                    {
+                        status = usertoken.charAt(0);
+                        usertoken = usertoken.substring(1);
+                    }
+
+                    IRCUser ircUser = this.ircNetwork.getIRCUserManager().getIRCUser(usertoken);
+                    ircChannel.addIRCUser(ircUser);
+                }
+
                 this.ircNetwork.raiseEvent(new IRCChannelInfoEvent(this.ircNetwork, im, ircChannel));
                 break; // -----------------------------------------------------
             }

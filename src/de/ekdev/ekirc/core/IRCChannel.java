@@ -12,6 +12,7 @@ import java.util.Set;
 
 import de.ekdev.ekirc.core.commands.channel.IRCChannelModeCommand;
 import de.ekdev.ekirc.core.commands.channel.IRCJoinCommand;
+import de.ekdev.ekirc.core.commands.channel.IRCNamesCommand;
 import de.ekdev.ekirc.core.commands.channel.IRCPartCommand;
 import de.ekdev.ekirc.core.commands.channel.IRCTopicCommand;
 import de.ekdev.ekirc.core.commands.message.IRCNoticeCommand;
@@ -316,7 +317,7 @@ public class IRCChannel
     public void refreshIRCUserList() throws NullPointerException
     {
         // TODO: which one?
-        // this.ircChannelManager.getIRCNetwork().send(new IRCNamesCommand(this)); // short listing
+        this.ircChannelManager.getIRCNetwork().send(new IRCNamesCommand(this)); // short listing
         this.ircChannelManager.getIRCNetwork().send(new IRCWhoCommand(this)); // extensive listing
     }
 

@@ -20,6 +20,7 @@ public class IRCUser implements Comparable<IRCUser>
     public final static int MAX_USER_NAME_LENGTH = 9;
     public final static char USER_EXCLAMATION_MARK = '!';
     public final static char USER_AT = '@';
+    public final static String USER_PREFIXES = "!+%@&";
 
     private final IRCUserManager ircUserManager;
 
