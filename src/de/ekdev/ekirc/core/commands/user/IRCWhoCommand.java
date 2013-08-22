@@ -23,12 +23,10 @@ public class IRCWhoCommand implements AsIRCMessage
 
     public IRCWhoCommand(String mask, boolean onlyOperators)
     {
-        if (mask != null)
-        {
-            mask = mask.trim();
-            if (mask.length() == 0 || mask.indexOf(' ') != -1) mask = null;
-        }
+        if (mask != null && mask.trim().length() == 0) mask = null;
         if (mask == null && onlyOperators) mask = "0";
+
+        // mask of null will most probably trigger help for command ... or not
 
         this.mask = mask;
         this.onlyOperators = onlyOperators;

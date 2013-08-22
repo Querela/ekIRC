@@ -21,6 +21,7 @@ public class IRCChannel
 {
     public final static int MAX_CHANNEL_NAME_LENGTH = 50;
     public final static String CHANNEL_PREFIXES = "&#+!";
+    public final static String NO_CHANNEL = "*";
 
     private final IRCChannelManager ircChannelManager;
 

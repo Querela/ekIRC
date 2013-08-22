@@ -243,7 +243,7 @@ public class IRCMessageProcessor
                         .get(2)));
                 break; // -----------------------------------------------------
             }
-            // TODO: 329?
+            // TODO: 329? channel creator/creation date
 
             // ----------------------------------------------------------------
             // reply to LIST command
@@ -285,15 +285,20 @@ public class IRCMessageProcessor
             // reply to WHO
             case RPL_WHOREPLY:
             {
-                IRCChannel ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(im.getParams().get(1));
                 IRCUser ircUser = this.ircNetwork.getIRCUserManager().getIRCUser(im.getParams().get(5));
+                IRCChannel ircChannel = null;
 
-                ircChannel.addIRCUser(ircUser); // if not already there
+                // * are the channel-less un-invisible users ...
+                if (!im.getParams().get(1).equals(IRCChannel.NO_CHANNEL))
+                {
+                    ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(im.getParams().get(1));
+
+                    ircChannel.addIRCUser(ircUser); // if not already there
+                }
 
                 ircUser.setUsername(im.getParams().get(2));
                 ircUser.setHost(im.getParams().get(3));
                 ircUser.setServer(im.getParams().get(4));
-                ircUser.setRealname(im.getParams().get(8));
 
                 // TODO: status parsing (in channel?)
                 String status = im.getParams().get(6);
@@ -302,7 +307,14 @@ public class IRCMessageProcessor
 
                 try
                 {
-                    ircUser.setHops(Integer.valueOf(im.getParams().get(7).substring(1)));
+                    String last = im.getParams().get(7).substring(1);
+                    int index = last.indexOf(' ');
+                    if (index != -1)
+                    {
+                        ircUser.setRealname(last.substring(index + 1));
+
+                        ircUser.setHops(Integer.valueOf(last.substring(0, index)));
+                    }
                 }
                 catch (Exception e)
                 {
@@ -317,6 +329,10 @@ public class IRCMessageProcessor
 
                 this.ircNetwork.raiseEvent(new IRCNetworkInfoEvent(this.ircNetwork, im));
                 break; // -----------------------------------------------------
+            }
+            case 334:
+            {
+                // help to WHO ?
             }
 
             // ----------------------------------------------------------------
