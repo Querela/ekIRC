@@ -46,6 +46,8 @@ public class SomeTests
 
         // --------------------------------------------------------------------
 
+        // http://ip-lookup.net/
+
         System.out.println("// Get InetAddress by address bytes");
         InetAddress ia = InetAddress.getByAddress(addressBytes);
         System.out.println("address (ia) = " + ia.getHostAddress());
@@ -59,5 +61,27 @@ public class SomeTests
         System.out.println("// Get ip from address bytes from InetAddress");
         byte[] addressBytes2 = ia.getAddress();
         System.out.println("address (sb) = " + IRCDCCManager.ipToString(addressBytes2));
+
+        System.out.println("------------------------------------------------");
+
+        // String host = "irc.webchat.org";
+        String host = "irc.irchighway.net";
+        // String host = "irc.chatzona.org";
+
+        ia = InetAddress.getByName(host);
+        System.out.println(" - " + ia.getHostAddress());
+        System.out.println(" - " + ia.getHostName());
+        System.out.println(" - " + ia.getCanonicalHostName());
+
+        System.out.println("- - --------------------------------------------");
+
+        for (InetAddress ial : InetAddress.getAllByName(host))
+        {
+            System.out.print(" - " + ial.getHostAddress());
+            System.out.print(" - " + ial.getHostName());
+            System.out.println(" - " + ial.getCanonicalHostName());
+        }
+
+        System.out.println("- - --------------------------------------------");
     }
 }

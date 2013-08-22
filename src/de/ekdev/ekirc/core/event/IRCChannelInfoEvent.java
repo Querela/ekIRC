@@ -1,5 +1,5 @@
 /**
- * ChannelInfoEvent.java
+ * IRCChannelInfoEvent.java
  */
 package de.ekdev.ekirc.core.event;
 
@@ -11,13 +11,13 @@ import de.ekdev.ekirc.core.IRCNetwork;
 /**
  * @author ekDev
  */
-public class ChannelInfoEvent extends IRCNetworkInfoEvent
+public class IRCChannelInfoEvent extends IRCNetworkInfoEvent
 {
     private final static EventListenerList listeners = new EventListenerList();
 
     private final IRCChannel ircChannel;
 
-    public ChannelInfoEvent(IRCNetwork ircNetwork, IRCMessage ircMessage, IRCChannel ircChannel)
+    public IRCChannelInfoEvent(IRCNetwork ircNetwork, IRCMessage ircMessage, IRCChannel ircChannel)
     {
         super(ircNetwork, ircMessage);
 
@@ -34,11 +34,11 @@ public class ChannelInfoEvent extends IRCNetworkInfoEvent
     @Override
     public EventListenerList getListeners()
     {
-        return ChannelInfoEvent.listeners;
+        return IRCChannelInfoEvent.listeners;
     }
 
     public static EventListenerList getListenerList()
     {
-        return ChannelInfoEvent.listeners;
+        return IRCChannelInfoEvent.listeners;
     }
 }

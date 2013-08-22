@@ -12,7 +12,6 @@ import java.util.Set;
 
 import de.ekdev.ekirc.core.commands.channel.IRCChannelModeCommand;
 import de.ekdev.ekirc.core.commands.channel.IRCJoinCommand;
-import de.ekdev.ekirc.core.commands.channel.IRCNamesCommand;
 import de.ekdev.ekirc.core.commands.channel.IRCPartCommand;
 import de.ekdev.ekirc.core.commands.channel.IRCTopicCommand;
 import de.ekdev.ekirc.core.commands.message.IRCNoticeCommand;
@@ -32,6 +31,9 @@ public class IRCChannel
 
     private final String name;
     private String topic;
+    private long topicTimestamp;
+    private String topicSetter;
+    private long creationTimestamp;
 
     // http://webtoman.com/opera/panel/ircdmodes.html
     private String mode; // -> EnumSet?
@@ -102,6 +104,36 @@ public class IRCChannel
     protected void setTopic(String topic)
     {
         this.topic = topic;
+    }
+
+    public long getTopicTimestamp()
+    {
+        return this.topicTimestamp;
+    }
+
+    protected void setTopicTimestamp(long topicTimestamp)
+    {
+        this.topicTimestamp = topicTimestamp;
+    }
+
+    public String getTopicSetter()
+    {
+        return this.topicSetter;
+    }
+
+    protected void setTopicSetter(String topicSetter)
+    {
+        this.topicSetter = topicSetter;
+    }
+
+    public long getCreationTimestamp()
+    {
+        return this.creationTimestamp;
+    }
+
+    protected void setCreationTimestamp(long creationTimestamp)
+    {
+        this.creationTimestamp = creationTimestamp;
     }
 
     // --------------------------------
@@ -284,8 +316,8 @@ public class IRCChannel
     public void refreshIRCUserList() throws NullPointerException
     {
         // TODO: which one?
-        this.ircChannelManager.getIRCNetwork().send(new IRCNamesCommand(this));
-        this.ircChannelManager.getIRCNetwork().send(new IRCWhoCommand(this));
+        // this.ircChannelManager.getIRCNetwork().send(new IRCNamesCommand(this)); // short listing
+        this.ircChannelManager.getIRCNetwork().send(new IRCWhoCommand(this)); // extensive listing
     }
 
     // --------------------------------

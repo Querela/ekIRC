@@ -107,7 +107,8 @@ public class IRCNumericServerReply
      */
     public final static int ERR_BADMASK = 415;
     /**
-     * "&lt;command&gt; [&ltmask&gt;] :&ltinfo&gt;" ?
+     * "&lt;command&gt; [&ltmask&gt;] :&ltinfo&gt;"<br />
+     * TODO: check
      */
     public final static int ERR_TOOMANYMATCHES = 416;
     /**
@@ -343,6 +344,10 @@ public class IRCNumericServerReply
      */
     public final static int RPL_CHANNELMODEIS = 324;
     /**
+     * TODO: check
+     */
+    public final static int RPL_CREATIONTIME = 329;
+    /**
      * "&lt;channel&gt; :No topic is set"
      */
     public final static int RPL_NOTOPIC = 331;
@@ -350,6 +355,16 @@ public class IRCNumericServerReply
      * "&lt;channel&gt; :&lt;topic&gt;"
      */
     public final static int RPL_TOPIC = 332;
+    /**
+     * "&lt;channel&gt; &lt;topic setter&gt; &lt;time&gt;"
+     * 
+     * @see RPL_TOPICWHOTIME
+     */
+    public final static int RPL_TOPICINFO = 333;
+    /**
+     * TODO: check
+     */
+    public final static int RPL_COMMANDSYNTAX = 334;
     /**
      * "&lt;channel&gt; &lt;nick&gt;"
      */

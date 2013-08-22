@@ -48,9 +48,9 @@ public class SimpleIRCServerContextTest
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         IRCManager ircManager = new IRCManager();
-        // IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.irchighway.net", 6667);
+        IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.irchighway.net", 6667);
         // IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.chatzona.org", 6667);
-        IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.webchat.org", 6667);
+        // IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.webchat.org", 6667);
 
         final String nick = "coor";
         // final String nick = "mike";
@@ -226,6 +226,8 @@ public class SimpleIRCServerContextTest
         {
             System.out.println(ircChannel.getName() + " - " + ircChannel.getTopic() + " - " + ircChannel.getMode());
         }
+
+        send(inet, "TOPIC #ebooks");
 
         // inet.send(new IRCNickCommand("coor"));
         // inet.send(new IRCChannelModeCommand(inet.getIRCChannelManager().getIRCChannel("#ebooks")));

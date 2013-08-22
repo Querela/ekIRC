@@ -11,6 +11,7 @@ import java.util.Objects;
 
 import de.ekdev.ekirc.core.event.ActionMessageToChannelEvent;
 import de.ekdev.ekirc.core.event.ActionMessageToUserEvent;
+import de.ekdev.ekirc.core.event.IRCChannelInfoEvent;
 import de.ekdev.ekirc.core.event.ChannelListUpdateEvent;
 import de.ekdev.ekirc.core.event.ChannelModeChangeEvent;
 import de.ekdev.ekirc.core.event.ChannelModeUpdateEvent;
@@ -232,12 +233,6 @@ public class IRCMessageProcessor
             // ----------------------------------------------------------------
             // reply to TOPIC command
             case RPL_NOTOPIC:
-            {
-                IRCChannel ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(im.getParams().get(1));
-                ircChannel.setTopic(""); // e. g. 'No topic is set'
-                this.ircNetwork.raiseEvent(new ChannelTopicUpdateEvent(this.ircNetwork, ircChannel));
-                break; // -----------------------------------------------------
-            }
             case RPL_TOPIC:
             {
                 IRCChannel ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(im.getParams().get(1));
@@ -245,17 +240,39 @@ public class IRCMessageProcessor
                 this.ircNetwork.raiseEvent(new ChannelTopicUpdateEvent(this.ircNetwork, ircChannel));
                 break; // -----------------------------------------------------
             }
-            // 332? topic setter
+            case RPL_TOPICINFO:
+            {
+                IRCChannel ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(im.getParams().get(1));
+
+                // timestamp when topic was set
+                try
+                {
+                    long time = Long.valueOf(im.getParams().get(3)) * 1000;
+                    ircChannel.setTopicTimestamp(time);
+                }
+                catch (NumberFormatException e)
+                {
+                }
+
+                // topic setter
+                ircChannel.setTopicSetter(im.getParams().get(2));
+
+                this.ircNetwork.raiseEvent(new ChannelTopicUpdateEvent(this.ircNetwork, ircChannel));
+                break; // -----------------------------------------------------
+            }
             // ----------------------------------------------------------------
             // reply to NAMES command
             case RPL_NAMREPLY:
             {
-
+                // TODO:
+                IRCChannel ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(im.getParams().get(1));
+                this.ircNetwork.raiseEvent(new IRCChannelInfoEvent(this.ircNetwork, im, ircChannel));
                 break; // -----------------------------------------------------
             }
             case RPL_ENDOFNAMES:
             {
-
+                IRCChannel ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(im.getParams().get(1));
+                this.ircNetwork.raiseEvent(new IRCChannelInfoEvent(this.ircNetwork, im, ircChannel));
                 break; // -----------------------------------------------------
             }
             // ----------------------------------------------------------------
@@ -269,7 +286,26 @@ public class IRCMessageProcessor
                         .get(2)));
                 break; // -----------------------------------------------------
             }
-            // TODO: 329? channel creator/creation date
+            case RPL_CREATIONTIME:
+            {
+                // TODO: channel creator/creation time
+                IRCChannel ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(im.getParams().get(1));
+
+                try
+                {
+                    // in seconds (need millis)
+                    long time = Long.valueOf(im.getParams().get(im.getParams().size() - 1)) * 1000;
+                    ircChannel.setCreationTimestamp(time);
+                }
+                catch (NumberFormatException e)
+                {
+                    break; // no update ...
+                }
+
+                this.ircNetwork.raiseEvent(new ChannelModeUpdateEvent(this.ircNetwork, ircChannel, im.getParams()
+                        .get(2)));
+                break; // -----------------------------------------------------
+            }
 
             // ----------------------------------------------------------------
             // reply to LIST command
@@ -357,6 +393,8 @@ public class IRCMessageProcessor
             case 334:
             {
                 // help to WHO ?
+                this.ircNetwork.raiseEvent(new IRCNetworkInfoEvent(this.ircNetwork, im));
+                break; // -----------------------------------------------------
             }
 
             // ----------------------------------------------------------------
