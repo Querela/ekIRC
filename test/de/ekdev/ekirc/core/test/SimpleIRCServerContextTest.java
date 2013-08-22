@@ -46,7 +46,7 @@ public class SimpleIRCServerContextTest
             IRCUsernameFormatException
     {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        
+
         IRCManager ircManager = new IRCManager();
         // IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.irchighway.net", 6667);
         // IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.chatzona.org", 6667);
@@ -200,7 +200,7 @@ public class SimpleIRCServerContextTest
         }
 
         inet.connect();
-        
+
         waitForInput(br);
 
         // inet.send(new IRCNickCommand("nickles"));

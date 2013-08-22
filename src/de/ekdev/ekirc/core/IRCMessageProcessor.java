@@ -1084,7 +1084,7 @@ public class IRCMessageProcessor
             // (CHANNEL-) MODE
             IRCChannel targetIRCChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(target);
 
-            String oldMode = targetIRCChannel.getMode();
+            String oldMode = targetIRCChannel.getMode(false); // dont't want to trigger request
 
             // TODO: add code for immutable object creation ... here
 

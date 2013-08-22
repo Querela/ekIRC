@@ -99,14 +99,19 @@ public class IRCChannel
         return this.mode != null;
     }
 
-    public String getMode()
+    protected String getMode(boolean autoRefreshIfNotAvailable)
     {
-        if (this.mode == null)
+        if (this.mode == null && autoRefreshIfNotAvailable)
         {
             this.refreshMode();
         }
 
         return this.mode;
+    }
+
+    public String getMode()
+    {
+        return this.getMode(true);
     }
 
     protected void setMode(String mode)
