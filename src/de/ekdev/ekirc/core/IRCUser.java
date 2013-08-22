@@ -243,7 +243,7 @@ public class IRCUser implements Comparable<IRCUser>
 
     // ------------------------------------------------------------------------
 
-    public static boolean validateNickname(String nickname) throws NullPointerException, IRCNicknameFormatException
+    public static String validateNickname(String nickname) throws NullPointerException, IRCNicknameFormatException
     {
         Objects.requireNonNull(nickname, "Invalid nickname format: nickname must not be null!");
         if (nickname.length() == 0)
@@ -282,10 +282,10 @@ public class IRCUser implements Comparable<IRCUser>
             }
         }
 
-        return true;
+        return nickname;
     }
 
-    public static boolean validateUsername(String username) throws NullPointerException, IRCUsernameFormatException
+    public static String validateUsername(String username) throws NullPointerException, IRCUsernameFormatException
     {
         Objects.requireNonNull(username, "Invalid username format: username must not be null!");
         if (username.length() == 0)
@@ -314,12 +314,12 @@ public class IRCUser implements Comparable<IRCUser>
             throw new IRCUsernameFormatException("username must not contain a 0x40 (at / @) character!");
         }
 
-        return true;
+        return username;
     }
 
-    public static boolean validateHost(String hostmask) throws NullPointerException, IRCHostFormatException
+    public static String validateHost(String host) throws NullPointerException, IRCHostFormatException
     {
-        Objects.requireNonNull(hostmask, "Invalid host format: host must not be null!");
+        Objects.requireNonNull(host, "Invalid host format: host must not be null!");
 
         // TODO: validateHostmask
 
@@ -328,7 +328,7 @@ public class IRCUser implements Comparable<IRCUser>
         // ipv6: ?
         // "([0-9A-Fa-f]{0,4}(:[0-9A-Fa-f]{0,4}){1,7})\\b([12][0-9]{2}|[1-9]?[0-9])(\\.([12][0-9]{2}|[1-9]?[0-9])){3}"
 
-        return true;
+        return host;
     }
 
     // TODO: add nickname compare/equality especially for special chars

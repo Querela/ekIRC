@@ -6,7 +6,7 @@ package de.ekdev.ekirc.core;
 /**
  * @author ekDev
  */
-public class IRCException extends Exception
+public class IRCException extends RuntimeException
 {
     private static final long serialVersionUID = 1L;
 

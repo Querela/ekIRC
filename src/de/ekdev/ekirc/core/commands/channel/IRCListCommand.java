@@ -5,12 +5,12 @@ package de.ekdev.ekirc.core.commands.channel;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import de.ekdev.ekirc.core.AsIRCMessage;
 import de.ekdev.ekirc.core.IRCMessage;
+import de.ekdev.ekirc.core.IRCUtils;
 
 /**
  * @author ekDev
@@ -19,12 +19,12 @@ public class IRCListCommand implements AsIRCMessage
 {
     public final static String COMMAND = "LIST";
 
-    private final List<String> channels;
+    private final String channels;
     private final String targetServer;
 
     public IRCListCommand()
     {
-        this.channels = Collections.emptyList();
+        this.channels = null;
         this.targetServer = null;
     }
 
@@ -33,23 +33,15 @@ public class IRCListCommand implements AsIRCMessage
         Objects.requireNonNull(channels, "channels must not be null!");
         // TODO: check null channels
 
-        this.channels = new ArrayList<>(channels);
-        this.targetServer = targetServer;
+        this.channels = this.concatenateChannels(new ArrayList<String>(channels));
+        this.targetServer = IRCUtils.emptyToNull(targetServer);
     }
 
     // ------------------------------------------------------------------------
 
     protected String concatenateChannels(List<String> channels)
     {
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = 0; i < this.channels.size(); i++)
-        {
-            sb.append(this.channels.get(i)).append(',');
-        }
-        sb.deleteCharAt(sb.length() - 1);
-
-        return sb.toString();
+        return IRCUtils.emptyToNull(IRCUtils.concatenate(channels, ","));
     }
 
     @Override
@@ -57,9 +49,9 @@ public class IRCListCommand implements AsIRCMessage
     {
         List<String> params = new ArrayList<String>(2);
 
-        if (this.channels.size() > 0)
+        if (this.channels != null)
         {
-            params.add(this.concatenateChannels(this.channels));
+            params.add(this.channels);
 
             if (this.targetServer != null) params.add(this.targetServer);
         }
@@ -70,13 +62,13 @@ public class IRCListCommand implements AsIRCMessage
     @Override
     public String asIRCMessageString()
     {
-        StringBuilder sb = new StringBuilder(510);
+        StringBuilder sb = new StringBuilder();
         sb.append(IRCListCommand.COMMAND);
 
-        if (this.channels.size() > 0)
+        if (this.channels != null)
         {
             // add channels
-            sb.append(' ').append(this.concatenateChannels(this.channels));
+            sb.append(' ').append(this.channels);
 
             // add target server which should respond to this command
             if (this.targetServer != null) sb.append(' ').append(this.targetServer);

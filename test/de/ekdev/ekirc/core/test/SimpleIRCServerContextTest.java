@@ -212,7 +212,7 @@ public class SimpleIRCServerContextTest
 
             // inet.send(new IRCNickCommand("nickles"));
             // inet.send(new IRCListCommand());
-            inet.send(new IRCWhoCommand());
+            //inet.send(new IRCWhoCommand());
 
             while ((line = br.readLine()) != null)
             {
@@ -231,7 +231,7 @@ public class SimpleIRCServerContextTest
                 @Override
                 public String asIRCMessageString()
                 {
-                    return "JOIN #ebooks";
+                    return "JOIN ";
                 }
 
                 @Override

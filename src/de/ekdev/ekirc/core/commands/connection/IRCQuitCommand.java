@@ -8,6 +8,7 @@ import java.util.List;
 
 import de.ekdev.ekirc.core.AsIRCMessage;
 import de.ekdev.ekirc.core.IRCMessage;
+import de.ekdev.ekirc.core.IRCUtils;
 
 /**
  * @author ekDev
@@ -19,8 +20,7 @@ public final class IRCQuitCommand implements AsIRCMessage
 
     public IRCQuitCommand(String reason)
     {
-        if (reason != null && reason.length() == 0) reason = null;
-        this.quitReason = reason;
+        this.quitReason = IRCUtils.emptyToNull(reason);
     }
 
     public IRCQuitCommand()

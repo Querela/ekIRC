@@ -21,9 +21,7 @@ public final class IRCNickCommand implements AsIRCMessage
 
     public IRCNickCommand(String nick) throws NullPointerException, IRCNicknameFormatException
     {
-        IRCUser.validateNickname(nick);
-
-        this.nick = nick;
+        this.nick = IRCUser.validateNickname(nick);
     }
 
     @Override
@@ -38,6 +36,6 @@ public final class IRCNickCommand implements AsIRCMessage
     @Override
     public String asIRCMessageString()
     {
-        return IRCNickCommand.COMMAND + " " + this.nick;
+        return IRCNickCommand.COMMAND + ' ' + this.nick;
     }
 }

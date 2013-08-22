@@ -66,7 +66,7 @@ public class IRCIdentity
 
     // ------------------------------------------------------------------------
 
-    public static boolean validatePassword(String password) throws NullPointerException, IllegalArgumentException
+    public static String validatePassword(String password) throws NullPointerException, IllegalArgumentException
     {
         Objects.requireNonNull(password, "Invalid password format: password must not be null!");
         if (password.length() == 0)
@@ -78,6 +78,6 @@ public class IRCIdentity
             throw new IllegalArgumentException("Invalid password format: password can't contain a space character!");
         }
         // TODO: validatePassword
-        return true;
+        return password;
     }
 }

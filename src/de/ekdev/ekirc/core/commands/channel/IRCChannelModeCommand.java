@@ -10,6 +10,7 @@ import java.util.Objects;
 import de.ekdev.ekirc.core.AsIRCMessage;
 import de.ekdev.ekirc.core.IRCChannel;
 import de.ekdev.ekirc.core.IRCMessage;
+import de.ekdev.ekirc.core.IRCUtils;
 
 /**
  * @author ekDev
@@ -18,21 +19,19 @@ public class IRCChannelModeCommand implements AsIRCMessage
 {
     public final static String COMMAND = "MODE";
 
-    private final IRCChannel ircChannel;
+    private final String ircChannel;
     private final String modes;
     private final List<String> modeparams;
 
     public IRCChannelModeCommand(IRCChannel ircChannel, String modes, List<String> modeparams)
     {
-        Objects.requireNonNull(ircChannel, "ircChannel must not be null!");
+        this.ircChannel = Objects.requireNonNull(ircChannel, "ircChannel must not be null!").getName();
 
         // TODO: mode validation
-        if (modes != null && modes.trim().length() == 0)
+        if (IRCUtils.emptyToNull(modes) == null)
         {
             throw new IllegalArgumentException("Invalid channel mode argument!");
         }
-
-        this.ircChannel = ircChannel;
         this.modes = modes; // if null then requesting channel mode info
 
         this.modeparams = new ArrayList<>();
@@ -63,7 +62,7 @@ public class IRCChannelModeCommand implements AsIRCMessage
     public IRCMessage asIRCMessage()
     {
         List<String> params = new ArrayList<String>(2 + this.modeparams.size());
-        params.add(this.ircChannel.getName());
+        params.add(this.ircChannel);
         if (this.modes != null)
         {
             params.add(this.modes);
@@ -77,7 +76,7 @@ public class IRCChannelModeCommand implements AsIRCMessage
     public String asIRCMessageString()
     {
         StringBuilder sb = new StringBuilder().append(IRCChannelModeCommand.COMMAND);
-        sb.append(' ').append(this.ircChannel.getName());
+        sb.append(' ').append(this.ircChannel);
 
         if (this.modes != null)
         {

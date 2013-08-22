@@ -21,7 +21,8 @@ public final class IRCUserCommand implements AsIRCMessage
     private final boolean invisible;
     public final static String COMMAND = "USER";
 
-    public IRCUserCommand(String username, boolean invisible, String realname) throws NullPointerException, IRCUsernameFormatException
+    public IRCUserCommand(String username, boolean invisible, String realname) throws NullPointerException,
+            IRCUsernameFormatException
     {
         IRCUser.validateUsername(username);
 
@@ -50,6 +51,6 @@ public final class IRCUserCommand implements AsIRCMessage
     @Override
     public String asIRCMessageString()
     {
-        return IRCUserCommand.COMMAND + " " + this.username + ((this.invisible) ? " 8 * :" : " 0 * :") + this.realname;
+        return IRCUserCommand.COMMAND + ' ' + this.username + ((this.invisible) ? " 8 * :" : " 0 * :") + this.realname;
     }
 }

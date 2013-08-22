@@ -11,6 +11,8 @@ import java.util.Objects;
 import java.util.Set;
 
 import de.ekdev.ekirc.core.commands.channel.IRCChannelModeCommand;
+import de.ekdev.ekirc.core.commands.channel.IRCJoinCommand;
+import de.ekdev.ekirc.core.commands.channel.IRCPartCommand;
 import de.ekdev.ekirc.core.commands.message.IRCNoticeCommand;
 import de.ekdev.ekirc.core.commands.message.IRCPrivateMessageCommand;
 
@@ -114,7 +116,7 @@ public class IRCChannel
         // TODO: parse mode ...
         this.ircChannelManager.getIRCNetwork().getIRCConnectionLog().object(this.name + ".setMode ", mode);
 
-        this.mode = mode;
+        this.mode += mode;
     }
 
     // --------------------------------
@@ -250,9 +252,27 @@ public class IRCChannel
         this.ircChannelManager.getIRCNetwork().send(new IRCChannelModeCommand(this));
     }
 
+    // --------------------------------
+
+    public void join(String key)
+    {
+        // TODO: store key?
+        this.ircChannelManager.getIRCNetwork().send(new IRCJoinCommand(this.name, key));
+    }
+
+    public void part(String reason)
+    {
+        this.ircChannelManager.getIRCNetwork().send(new IRCPartCommand(this, reason));
+    }
+
+    public void part()
+    {
+        this.ircChannelManager.getIRCNetwork().send(new IRCPartCommand(this));
+    }
+
     // ------------------------------------------------------------------------
 
-    public static boolean validateChannelname(String channelname) throws NullPointerException,
+    public static String validateChannelname(String channelname) throws NullPointerException,
             IRCChannelNameFormatException
     {
         Objects.requireNonNull(channelname, "Invalid channelname format: channelname must not be null!");
@@ -301,10 +321,10 @@ public class IRCChannel
         // throw new IRCChannelNameFormatException("channelname must not contain a 0x3A (colon) character!");
         // }
 
-        return true;
+        return channelname;
     }
 
-    public static boolean validateChannelkey(String channelkey) throws NullPointerException,
+    public static String validateChannelkey(String channelkey) throws NullPointerException,
             IRCChannelKeyFormatException
     {
         Objects.requireNonNull(channelkey, "Invalid channelname format: channelname must not be null!");
@@ -348,7 +368,7 @@ public class IRCChannel
             throw new IRCChannelKeyFormatException("channelkey must not contain a 0x20 (space) character!");
         }
 
-        return true;
+        return channelkey;
     }
 
     // ------------------------------------------------------------------------

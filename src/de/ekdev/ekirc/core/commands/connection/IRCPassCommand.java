@@ -20,9 +20,7 @@ public final class IRCPassCommand implements AsIRCMessage
 
     public IRCPassCommand(String password)
     {
-        IRCIdentity.validatePassword(password);
-
-        this.password = password;
+        this.password = IRCIdentity.validatePassword(password);
     }
 
     @Override
@@ -37,6 +35,6 @@ public final class IRCPassCommand implements AsIRCMessage
     @Override
     public String asIRCMessageString()
     {
-        return IRCPassCommand.COMMAND + " " + this.password;
+        return IRCPassCommand.COMMAND + ' ' + this.password;
     }
 }

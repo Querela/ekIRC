@@ -63,6 +63,6 @@ public class IRCNoticeCommand implements AsIRCMessage
     @Override
     public String asIRCMessageString()
     {
-        return IRCNoticeCommand.COMMAND + " " + this.target + " :" + this.message;
+        return IRCNoticeCommand.COMMAND + ' ' + this.target + " :" + this.message;
     }
 }

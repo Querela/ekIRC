@@ -64,6 +64,6 @@ public class IRCPrivateMessageCommand implements AsIRCMessage
     @Override
     public String asIRCMessageString()
     {
-        return IRCPrivateMessageCommand.COMMAND + " " + this.target + " :" + this.message;
+        return IRCPrivateMessageCommand.COMMAND + ' ' + this.target + " :" + this.message;
     }
 }
