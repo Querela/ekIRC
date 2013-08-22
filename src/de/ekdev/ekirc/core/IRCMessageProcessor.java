@@ -265,9 +265,9 @@ public class IRCMessageProcessor
             case RPL_NAMREPLY:
             {
                 // TODO:
-                IRCChannel ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(im.getParams().get(1));
+                IRCChannel ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(im.getParams().get(2));
 
-                String users = im.getParams().get(2);
+                String users = im.getParams().get(3);
                 String[] userstokens = users.split(" ");
                 for (String usertoken : userstokens)
                 {
