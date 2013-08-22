@@ -11,6 +11,7 @@ import de.ekdev.ekevent.EventException;
 import de.ekdev.ekevent.EventHandler;
 import de.ekdev.ekevent.EventListener;
 import de.ekdev.ekirc.core.AsIRCMessage;
+import de.ekdev.ekirc.core.IRCChannel;
 import de.ekdev.ekirc.core.IRCChannelList;
 import de.ekdev.ekirc.core.IRCIdentity;
 import de.ekdev.ekirc.core.IRCManager;
@@ -18,8 +19,6 @@ import de.ekdev.ekirc.core.IRCMessage;
 import de.ekdev.ekirc.core.IRCNetwork;
 import de.ekdev.ekirc.core.IRCNicknameFormatException;
 import de.ekdev.ekirc.core.IRCUsernameFormatException;
-import de.ekdev.ekirc.core.commands.channel.IRCChannelModeCommand;
-import de.ekdev.ekirc.core.commands.user.IRCWhoCommand;
 import de.ekdev.ekirc.core.event.ActionMessageToChannelEvent;
 import de.ekdev.ekirc.core.event.ActionMessageToUserEvent;
 import de.ekdev.ekirc.core.event.ChannelListUpdateEvent;
@@ -46,7 +45,8 @@ public class SimpleIRCServerContextTest
     public static void main(String[] args) throws NullPointerException, IRCNicknameFormatException,
             IRCUsernameFormatException
     {
-
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        
         IRCManager ircManager = new IRCManager();
         // IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.irchighway.net", 6667);
         // IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.chatzona.org", 6667);
@@ -200,87 +200,96 @@ public class SimpleIRCServerContextTest
         }
 
         inet.connect();
+        
+        waitForInput(br);
 
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        // inet.send(new IRCNickCommand("nickles"));
+        // inet.send(new IRCListCommand());
+        // inet.send(new IRCWhoCommand());
+
+        waitForInput(br);
+
+        // inet.disconnect();
+        //
+        // inet.reconnect();
+
+        // inet.getIRCConnectionLog().tryMoveLogFile("src/newlog.txt");
+
+        // inet.send(new IRCNickCommand("nick"));
+
+        send(inet, "JOIN #ebooks");
+        send(inet, "PRIVMSG #ebooks :@search Hohlbein Genesis");
+
+        waitForInput(br);
+
+        for (IRCChannel ircChannel : inet.getIRCChannelManager().getIRCChannels())
+        {
+            System.out.println(ircChannel.getName() + " - " + ircChannel.getTopic() + " - " + ircChannel.getMode());
+        }
+
+        // inet.send(new IRCNickCommand("coor"));
+        // inet.send(new IRCChannelModeCommand(inet.getIRCChannelManager().getIRCChannel("#ebooks")));
+
+        waitForInput(br);
+
+        inet.quit("-)");
+
+        sleep(3000);
+
+        if (inet.isConnected()) inet.disconnect(false);
+        inet.closeConnectionLog();
+    }
+
+    // ------------------------------------------------------------------------
+
+    public static void send(IRCNetwork inet, final String line)
+    {
+        inet.send(new AsIRCMessage() {
+            @Override
+            public String asIRCMessageString()
+            {
+                return line;
+            }
+
+            @Override
+            public IRCMessage asIRCMessage()
+            {
+                return null;
+            }
+        });
+    }
+
+    public static void send(IRCNetwork inet, AsIRCMessage ircMessage)
+    {
+        inet.send(ircMessage);
+    }
+
+    public static void sleep(long millisec)
+    {
         try
         {
-            String line;
+            Thread.sleep(millisec);
+        }
+        catch (InterruptedException e)
+        {
+        }
+    }
+
+    public static String waitForInput(BufferedReader br)
+    {
+        String line;
+        try
+        {
             while ((line = br.readLine()) != null)
             {
-                if (line.equals("")) break;
-            }
-
-            // inet.send(new IRCNickCommand("nickles"));
-            // inet.send(new IRCListCommand());
-            //inet.send(new IRCWhoCommand());
-
-            while ((line = br.readLine()) != null)
-            {
-                if (line.equals("")) break;
-            }
-
-            // inet.disconnect();
-            //
-            // inet.reconnect();
-
-            // inet.getIRCConnectionLog().tryMoveLogFile("src/newlog.txt");
-
-            // inet.send(new IRCNickCommand("nick"));
-
-            inet.send(new AsIRCMessage() {
-                @Override
-                public String asIRCMessageString()
-                {
-                    return "JOIN ";
-                }
-
-                @Override
-                public IRCMessage asIRCMessage()
-                {
-                    return null;
-                }
-            }, new AsIRCMessage() {
-                @Override
-                public String asIRCMessageString()
-                {
-                    return ""; // PRIVMSG #ebooks :@search Hohlbein Genesis";
-                }
-
-                @Override
-                public IRCMessage asIRCMessage()
-                {
-                    return null;
-                }
-            });
-
-            while ((line = br.readLine()) != null)
-            {
-                if (line.equals("")) break;
-            }
-
-            // inet.send(new IRCNickCommand("coor"));
-            inet.send(new IRCChannelModeCommand(inet.getIRCChannelManager().getIRCChannel("#ebooks")));
-
-            while ((line = br.readLine()) != null)
-            {
-                if (line.equals("")) break;
+                return line;
             }
         }
         catch (IOException e)
         {
         }
 
-        inet.quit("-)");
-
-        try
-        {
-            Thread.sleep(3000);
-        }
-        catch (InterruptedException e)
-        {
-        }
-
-        if (inet.isConnected()) inet.disconnect(false);
-        inet.closeConnectionLog();
+        return null;
     }
+
 }

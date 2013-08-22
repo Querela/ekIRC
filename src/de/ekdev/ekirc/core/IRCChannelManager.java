@@ -3,8 +3,13 @@
  */
 package de.ekdev.ekirc.core;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import de.ekdev.ekirc.core.commands.channel.IRCListCommand;
 
 /**
  * @author ekDev
@@ -35,6 +40,11 @@ public class IRCChannelManager
 
     // --------------------------------
 
+    public Set<IRCChannel> getIRCChannels()
+    {
+        return Collections.unmodifiableSet(new HashSet<IRCChannel>(this.channels.values()));
+    }
+
     public IRCChannelList getIRCChannelList()
     {
         return this.ircChannelList;
@@ -47,14 +57,21 @@ public class IRCChannelManager
         this.ircChannelList = ircChannelList;
     }
 
+    protected void createIRCChannelFromIRCChannelListEntry(IRCChannelList.Entry ircChannelListEntry)
+    {
+        if (ircChannelListEntry == null) return;
+
+        IRCChannel ircChannel = this.getOrCreateIRCChannel(ircChannelListEntry.getName());
+        ircChannel.setTopic(ircChannelListEntry.getTopic());
+    }
+
     protected void createIRCChannelsFromIRCChannelList(IRCChannelList ircChannelList)
     {
         if (ircChannelList == null) return;
 
         for (IRCChannelList.Entry entry : ircChannelList)
         {
-            IRCChannel ircChannel = this.getOrCreateIRCChannel(entry.getName());
-            ircChannel.setTopic(entry.getTopic());
+            this.createIRCChannelFromIRCChannelListEntry(entry);
         }
     }
 
@@ -115,5 +132,12 @@ public class IRCChannelManager
         {
             ircChannel.removeIRCUser(ircUser);
         }
+    }
+
+    // ------------------------------------------------------------------------
+
+    public void refreshChannelList()
+    {
+        this.ircNetwork.send(new IRCListCommand());
     }
 }

@@ -107,6 +107,10 @@ public class IRCNumericServerReply
      */
     public final static int ERR_BADMASK = 415;
     /**
+     * "&lt;command&gt; [&ltmask&gt;] :&ltinfo&gt;" ?
+     */
+    public final static int ERR_TOOMANYMATCHES = 416;
+    /**
      * "&lt;command&gt; :Unknown command"
      */
     public final static int ERR_UNKNOWNCOMMAND = 421;

@@ -50,6 +50,10 @@ ToDo / ToThinkAbout:
     - how to create / getter-setter (immutable?, builder?)
 
 
+- IRCConfiguration?
+    - YAML, XML, JSON, ...
+
+
 - IRCUser/IRCChannel
     - store what?
 
@@ -94,6 +98,11 @@ ToDo / ToThinkAbout:
 
 
 - toString() methods with StringBuilder() ?
+
+
+- methods signatures of IRCCommands ...
+    - type safe? (less Strings more Objects)
+    - @Deprecated for Strings arguments
 
 
 #####

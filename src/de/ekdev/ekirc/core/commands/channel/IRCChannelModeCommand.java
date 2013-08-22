@@ -10,7 +10,6 @@ import java.util.Objects;
 import de.ekdev.ekirc.core.AsIRCMessage;
 import de.ekdev.ekirc.core.IRCChannel;
 import de.ekdev.ekirc.core.IRCMessage;
-import de.ekdev.ekirc.core.IRCUtils;
 
 /**
  * @author ekDev
@@ -28,7 +27,7 @@ public class IRCChannelModeCommand implements AsIRCMessage
         this.ircChannel = Objects.requireNonNull(ircChannel, "ircChannel must not be null!").getName();
 
         // TODO: mode validation
-        if (IRCUtils.emptyToNull(modes) == null)
+        if (modes != null && modes.trim().length() == 0)
         {
             throw new IllegalArgumentException("Invalid channel mode argument!");
         }

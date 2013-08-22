@@ -230,7 +230,16 @@ public class IRCMessageProcessor
             }
             // ----------------------------------------------------------------
             // reply to NAMES command
+            case RPL_NAMREPLY:
+            {
 
+                break; // -----------------------------------------------------
+            }
+            case RPL_ENDOFNAMES:
+            {
+
+                break; // -----------------------------------------------------
+            }
             // ----------------------------------------------------------------
             // reply to MODE <channel> command
             case RPL_CHANNELMODEIS:
@@ -284,12 +293,14 @@ public class IRCMessageProcessor
             case RPL_WHOREPLY:
             {
                 IRCUser ircUser = this.ircNetwork.getIRCUserManager().getIRCUser(im.getParams().get(5));
-                IRCChannel ircChannel = null;
 
-                // * are the channel-less un-invisible users ...
-                if (!im.getParams().get(1).equals(IRCChannel.NO_CHANNEL))
+                String chnl = im.getParams().get(1);
+                if (!chnl.equals(IRCChannel.NO_CHANNEL) && this.ircNetwork.getIRCChannelManager().hasIRCChannel(chnl))
                 {
-                    ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(im.getParams().get(1));
+                    // * are the channel-less un-invisible users ...
+                    // only continue here if channel exists because we don't want to create lots of channel we aren't
+                    // in ...
+                    IRCChannel ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(chnl);
 
                     ircChannel.addIRCUser(ircUser); // if not already there
                 }
@@ -332,6 +343,7 @@ public class IRCMessageProcessor
 
             // ----------------------------------------------------------------
             // ERROR replies
+            case ERR_TOOMANYMATCHES: // e. g. too many WHO-lines ... need stricter query
             case ERR_NOSUCHSERVER:
             {
                 // TODO: Error reply event ?
@@ -350,7 +362,6 @@ public class IRCMessageProcessor
 
     protected void processCommand(IRCMessage im, boolean handledAlready)
     {
-        // TODO: EnumMap ?
         IRCServerCommand isc = null;
         try
         {
@@ -387,9 +398,8 @@ public class IRCMessageProcessor
 
                 if (ircUser.isMe())
                 {
-                    // TODO: request information ... or as reaction to event?
-                    // TODO: WHO/NAMES
                     ircChannel.refreshMode(); // send MODE request
+                    ircChannel.refreshIRCUserList(); // send WHO/NAMES?
                 }
 
                 ircChannel.addIRCUser(ircUser);
@@ -403,14 +413,18 @@ public class IRCMessageProcessor
                 IRCChannel ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(im.getParams().get(0));
                 String reason = (im.getParams().size() > 1) ? im.getParams().get(1) : null;
 
+                // TODO: to get a snapshot add code here
+
                 if (ircUser.isMe())
                 {
                     // remove channel?
-                    // this.ircNetwork.getIRCChannelManager().removeIRCChannel(ircChannel);
+                    this.ircNetwork.getIRCChannelManager().removeIRCChannel(ircChannel);
                 }
-
-                // TODO: to get a snapshot add code here
-                ircChannel.removeIRCUser(ircUser);
+                else
+                {
+                    // remove the parting user
+                    ircChannel.removeIRCUser(ircUser);
+                }
 
                 this.ircNetwork.raiseEvent(new PartEvent(this.ircNetwork, ircChannel, ircUser, reason));
                 break; // -----------------------------------------------------
@@ -418,7 +432,9 @@ public class IRCMessageProcessor
             case QUIT:
             {
                 IRCUser ircUser = this.ircNetwork.getIRCUserManager().getIRCUserByPrefix(im.getPrefix());
+
                 // TODO: to get a snapshot add code here
+
                 this.ircNetwork.getIRCUserManager().removeIRCUser(ircUser);
                 this.ircNetwork.raiseEvent(new QuitEvent(this.ircNetwork, ircUser, im.getParams().get(0)));
                 break; // -----------------------------------------------------
@@ -441,12 +457,16 @@ public class IRCMessageProcessor
                 IRCUser recipient = this.ircNetwork.getIRCUserManager().getIRCUser(im.getParams().get(1));
                 String reason = (im.getParams().size() > 2) ? im.getParams().get(2) : null;
 
+                // TODO: add code here to get a snapshot
+
                 if (recipient.isMe())
                 {
-                    // kill the source ... ;-)
+                    this.ircNetwork.getIRCChannelManager().removeIRCChannel(ircChannel);
                 }
-
-                ircChannel.removeIRCUser(recipient);
+                else
+                {
+                    ircChannel.removeIRCUser(recipient);
+                }
 
                 this.ircNetwork.raiseEvent(new KickEvent(this.ircNetwork, ircChannel, source, recipient, reason));
                 break; // -----------------------------------------------------

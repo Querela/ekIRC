@@ -12,9 +12,11 @@ import java.util.Set;
 
 import de.ekdev.ekirc.core.commands.channel.IRCChannelModeCommand;
 import de.ekdev.ekirc.core.commands.channel.IRCJoinCommand;
+import de.ekdev.ekirc.core.commands.channel.IRCNamesCommand;
 import de.ekdev.ekirc.core.commands.channel.IRCPartCommand;
 import de.ekdev.ekirc.core.commands.message.IRCNoticeCommand;
 import de.ekdev.ekirc.core.commands.message.IRCPrivateMessageCommand;
+import de.ekdev.ekirc.core.commands.user.IRCWhoCommand;
 
 /**
  * @author ekDev
@@ -91,6 +93,11 @@ public class IRCChannel
     }
 
     // --------------------------------
+
+    public boolean hasMode()
+    {
+        return this.mode != null;
+    }
 
     public String getMode()
     {
@@ -250,6 +257,13 @@ public class IRCChannel
     public void refreshMode()
     {
         this.ircChannelManager.getIRCNetwork().send(new IRCChannelModeCommand(this));
+    }
+
+    public void refreshIRCUserList() throws NullPointerException
+    {
+        // TODO: which one?
+        this.ircChannelManager.getIRCNetwork().send(new IRCNamesCommand(this));
+        this.ircChannelManager.getIRCNetwork().send(new IRCWhoCommand(this));
     }
 
     // --------------------------------

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Objects;
 
 import de.ekdev.ekirc.core.AsIRCMessage;
+import de.ekdev.ekirc.core.IRCChannel;
 import de.ekdev.ekirc.core.IRCMessage;
 import de.ekdev.ekirc.core.IRCUtils;
 
@@ -28,21 +29,35 @@ public class IRCListCommand implements AsIRCMessage
         this.targetServer = null;
     }
 
-    public IRCListCommand(Collection<String> channels, String targetServer)
+    public IRCListCommand(IRCChannel ircChannel, String targetServer)
     {
-        Objects.requireNonNull(channels, "channels must not be null!");
-        // TODO: check null channels
-
-        this.channels = this.concatenateChannels(new ArrayList<String>(channels));
+        this.channels = Objects.requireNonNull(ircChannel, "ircChannels must not be null!").getName();
         this.targetServer = IRCUtils.emptyToNull(targetServer);
     }
 
-    // ------------------------------------------------------------------------
-
-    protected String concatenateChannels(List<String> channels)
+    public IRCListCommand(IRCChannel ircChannel)
     {
-        return IRCUtils.emptyToNull(IRCUtils.concatenate(channels, ","));
+        this(ircChannel, null);
     }
+
+    public IRCListCommand(Collection<IRCChannel> ircChannels, String targetServer)
+    {
+        this.channels = Objects.requireNonNull(
+                IRCUtils.concatenateChannelNames(Objects.requireNonNull(ircChannels, "ircChannels must not be null!")),
+                "ircChannels must not be empty");
+        this.targetServer = IRCUtils.emptyToNull(targetServer);
+    }
+
+    public IRCListCommand(Collection<IRCChannel> ircChannels)
+    {
+        this(ircChannels, null);
+    }
+
+    // --------------------------------
+
+    // constructors for IRCChannelList(.Entry)?
+
+    // ------------------------------------------------------------------------
 
     @Override
     public IRCMessage asIRCMessage()

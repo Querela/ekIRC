@@ -36,7 +36,7 @@ public class IRCPartCommand implements AsIRCMessage
 
     public IRCPartCommand(Collection<IRCChannel> ircChannels, String reason)
     {
-        this.ircChannel = IRCPartCommand.concatenateChannelNames(Objects.requireNonNull(ircChannels,
+        this.ircChannel = IRCUtils.concatenateChannelNames(Objects.requireNonNull(ircChannels,
                 "ircChannels must not be null!"));
         this.reason = IRCUtils.emptyToNull(reason);
     }
@@ -47,23 +47,6 @@ public class IRCPartCommand implements AsIRCMessage
     }
 
     // ------------------------------------------------------------------------
-
-    protected static String concatenateChannelNames(final Collection<IRCChannel> ircChannels)
-    {
-        List<String> list = new ArrayList<String>() {
-            private static final long serialVersionUID = 1L;
-            {
-                for (IRCChannel ircChannel : ircChannels)
-                {
-                    if (ircChannel != null)
-                    {
-                        this.add(ircChannel.getName());
-                    }
-                }
-            }
-        };
-        return IRCUtils.emptyToNull(IRCUtils.concatenate(list, ","));
-    }
 
     @Override
     public IRCMessage asIRCMessage()
