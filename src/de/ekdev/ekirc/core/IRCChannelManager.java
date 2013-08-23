@@ -79,7 +79,7 @@ public class IRCChannelManager
 
     protected IRCChannel getOrCreateIRCChannel(String name, boolean autoCreateIfNull)
     {
-        IRCChannel ircChannel = this.channels.get(name);
+        IRCChannel ircChannel = this.channels.get(name.toLowerCase());
         if (ircChannel == null && autoCreateIfNull)
         {
             ircChannel = new IRCChannel(this, name);
@@ -98,21 +98,21 @@ public class IRCChannelManager
     {
         if (name == null) return false;
 
-        return this.channels.containsKey(name);
+        return this.channels.containsKey(name.toLowerCase());
     }
 
     protected void addIRCChannel(IRCChannel ircChannel)
     {
         if (ircChannel == null) return;
 
-        this.channels.put(ircChannel.getName(), ircChannel);
+        this.channels.put(ircChannel.getName().toLowerCase(), ircChannel);
     }
 
     protected void removeIRCCChannel(String name)
     {
         if (name == null) return;
 
-        IRCChannel ircChannel = this.channels.remove(name);
+        IRCChannel ircChannel = this.channels.remove(name.toLowerCase());
 
         if (ircChannel != null) ircChannel.removeAllIRCUsers();
     }

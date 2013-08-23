@@ -16,6 +16,7 @@ import de.ekdev.ekirc.core.event.ChannelListUpdateEvent;
 import de.ekdev.ekirc.core.event.ChannelModeChangeEvent;
 import de.ekdev.ekirc.core.event.ChannelModeUpdateEvent;
 import de.ekdev.ekirc.core.event.ChannelTopicUpdateEvent;
+import de.ekdev.ekirc.core.event.IRCErrorReplyEvent;
 import de.ekdev.ekirc.core.event.IRCNetworkInfoEvent;
 import de.ekdev.ekirc.core.event.JoinEvent;
 import de.ekdev.ekirc.core.event.KickEvent;
@@ -228,6 +229,7 @@ public class IRCMessageProcessor
             case ERR_NICKNAMEINUSE:
             {
                 this.ircNetwork.raiseEvent(new NickAlreadyInUseEvent(this.ircNetwork, im));
+                // this.ircNetwork.raiseEvent(new IRCErrorReplyEvent(this.ircNetwork, im));
                 break; // -----------------------------------------------------
             }
             // ----------------------------------------------------------------
@@ -287,6 +289,8 @@ public class IRCMessageProcessor
             }
             case RPL_ENDOFNAMES:
             {
+                if (im.getParams().get(1).equals(IRCChannel.NO_CHANNEL)) break; // channel '*'
+
                 IRCChannel ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(im.getParams().get(1));
                 this.ircNetwork.raiseEvent(new IRCChannelInfoEvent(this.ircNetwork, im, ircChannel));
                 break; // -----------------------------------------------------
@@ -415,14 +419,101 @@ public class IRCMessageProcessor
 
             // ----------------------------------------------------------------
             // ERROR replies
+
+            // Command (argument) errors
+            case ERR_NOSUCHNICK: // invalid <nick>
+            case ERR_NOSUCHSERVER: // invalid <server>
+            case ERR_NOSUCHCHANNEL: // invalid <channel>
+            case ERR_CANNOTSENDTOCHAN: // PRIVMSG (rights)
+            case ERR_TOOMANYCHANNELS: // JOIN
+            case ERR_WASNOSUCHNICK: // WHOWAS
+            case ERR_TOOMANYTARGETS: // PRIVMSG/NOTICE (too many), JOIN (ambiguous)
+            case ERR_NOSUCHSERVICE: // ?
+            case ERR_NOORIGIN: // PING/PONG
+
+            case ERR_NORECIPIENT: // PRIVMSG (,NOTICE) (arguments)
+            case ERR_NOTEXTTOSEND: // ...
+            case ERR_NOTOPLEVEL: // .....
+            case ERR_WILDTOPLEVEL: // ...
+            case ERR_BADMASK: // ........
+
             case ERR_TOOMANYMATCHES: // e. g. too many WHO-lines ... need stricter query
-            case ERR_NOSUCHSERVER:
+
+            case ERR_UNKNOWNCOMMAND:
+
+            case ERR_NONICKNAMEGIVEN: // missing argument <nickname>
+            case ERR_ERRONEUSNICKNAME: // invalid <nickname> // in registration, too?
+                // case ERR_NICKNAMEINUSE: // ignore, use autorename, may result in too many messages
+            case ERR_NICKCOLLISION:
+
+            case ERR_UNAVAILRESOURCE: // <channel> / <nicname> can't be used
+            case ERR_USERNOTINCHANNEL: // <nick> not on <channel>
+            case ERR_NOTONCHANNEL: // me not on <channel>
+
+            case ERR_USERONCHANNEL: // <user> already on <channel> - INVITE failed
+            case ERR_NOLOGIN: // SUMMON failed
+            case ERR_SUMMONDISABLED: // ...
+            case ERR_USERSDISABLED: // USERS failed
+
+            case ERR_NEEDMOREPARAMS: // command needs more params
+
+            case ERR_ALREADYREGISTRED: // already registered (USER, PASS failed)
+
+            case ERR_CHANNELISFULL: // cannot join
+            case ERR_INVITEONLYCHAN: // ...
+            case ERR_BANNEDFROMCHAN: // ...
+            case ERR_BADCHANNELKEY: // ....
+            case ERR_BADCHANMASK: // <channel mask> bad
+
+            case ERR_CANTKILLSERVER: // KILL
+
+            case ERR_UMODEUNKNOWNFLAG: // mode unknown
+            case ERR_USERSDONTMATCH:
             {
-                // TODO: Error reply event ?
-                this.ircNetwork.raiseEvent(new IRCNetworkInfoEvent(this.ircNetwork, im));
+                this.ircNetwork
+                        .raiseEvent(new IRCErrorReplyEvent(this.ircNetwork, im, IRCErrorReplyEvent.Usage.COMMAND));
                 break; // -----------------------------------------------------
             }
+            // Server errors
+            case ERR_NOMOTD:
+            case ERR_NOADMININFO:
+            case ERR_FILEERROR:
+            {
+                this.ircNetwork
+                        .raiseEvent(new IRCErrorReplyEvent(this.ircNetwork, im, IRCErrorReplyEvent.Usage.SERVER));
+                break; // -----------------------------------------------------
+            }
+            // Registration
+            case ERR_NOTREGISTERED: // or in commands?
+            case ERR_NOPERMFORHOST: // ?
+            case ERR_PASSWDMISMATCH: //
 
+            case ERR_YOUREBANNEDCREEP: // can register - banned
+
+            case ERR_YOUWILLBEBANNED: // will be banned later ...
+
+            case ERR_NOPRIVILEGES: // missing privileges
+
+            case ERR_RESTRICTED: // restricted connection
+
+            case ERR_NOOPERHOST: // OPER failed, ?
+            {
+                this.ircNetwork.raiseEvent(new IRCErrorReplyEvent(this.ircNetwork, im,
+                        IRCErrorReplyEvent.Usage.REGISTRATION));
+                break; // -----------------------------------------------------
+            }
+            // Channel
+            case ERR_KEYSET: // channel key already set
+            case ERR_UNKNOWNMODE: // mode char for me invalid for <channel>
+            case ERR_NOCHANMODES: // no modes in channel supported
+            case ERR_BANLISTFULL: // ?
+            case ERR_CHANOPRIVSNEEDED: // missing chan op privileges
+            case ERR_UNIQOPPRIVSNEEDED: // ... (creator)
+            {
+                this.ircNetwork
+                        .raiseEvent(new IRCErrorReplyEvent(this.ircNetwork, im, IRCErrorReplyEvent.Usage.CHANNEL));
+                break; // -----------------------------------------------------
+            }
             // ----------------------------------------------------------------
             default:
             {

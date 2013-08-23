@@ -19,11 +19,13 @@ import de.ekdev.ekirc.core.IRCMessage;
 import de.ekdev.ekirc.core.IRCNetwork;
 import de.ekdev.ekirc.core.IRCNicknameFormatException;
 import de.ekdev.ekirc.core.IRCUsernameFormatException;
+import de.ekdev.ekirc.core.commands.channel.IRCNamesCommand;
 import de.ekdev.ekirc.core.event.ActionMessageToChannelEvent;
 import de.ekdev.ekirc.core.event.ActionMessageToUserEvent;
 import de.ekdev.ekirc.core.event.ChannelListUpdateEvent;
 import de.ekdev.ekirc.core.event.ChannelModeChangeEvent;
 import de.ekdev.ekirc.core.event.ChannelModeUpdateEvent;
+import de.ekdev.ekirc.core.event.IRCErrorReplyEvent;
 import de.ekdev.ekirc.core.event.NickChangeEvent;
 import de.ekdev.ekirc.core.event.NoticeToChannelEvent;
 import de.ekdev.ekirc.core.event.NoticeToUserEvent;
@@ -187,6 +189,19 @@ public class SimpleIRCServerContextTest
 
             });
 
+            // error messages
+            ircManager.getEventManager().register(new EventListener() {
+                @EventHandler
+                public void onErrorReply(IRCErrorReplyEvent event)
+                {
+                    event.getIRCNetwork()
+                            .getIRCConnectionLog()
+                            .message(
+                                    "ERROR [" + event.getErrorName() + " (" + event.getErrorCode() + ")]: "
+                                            + event.getErrorMessage());
+                }
+            });
+
             // reconnect
             // only on inet for 3 successful times
             ircManager.getEventManager().register(new AutoReconnector(inet, 15 * 1000, 3));
@@ -207,6 +222,8 @@ public class SimpleIRCServerContextTest
         // inet.send(new IRCListCommand());
         // inet.send(new IRCWhoCommand());
 
+        inet.send(new IRCNamesCommand());
+
         waitForInput(br);
 
         // inet.disconnect();
@@ -218,6 +235,7 @@ public class SimpleIRCServerContextTest
         // inet.send(new IRCNickCommand("nick"));
 
         send(inet, "JOIN #ebooks");
+        send(inet, "JOIN #eBOoks");
         send(inet, "PRIVMSG #ebooks :@search Hohlbein Genesis");
 
         waitForInput(br);
