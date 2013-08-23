@@ -4,6 +4,7 @@
 package de.ekdev.ekirc.core.test;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -25,6 +26,7 @@ import de.ekdev.ekirc.core.event.ActionMessageToUserEvent;
 import de.ekdev.ekirc.core.event.ChannelListUpdateEvent;
 import de.ekdev.ekirc.core.event.ChannelModeChangeEvent;
 import de.ekdev.ekirc.core.event.ChannelModeUpdateEvent;
+import de.ekdev.ekirc.core.event.DCCFileTransferEvent;
 import de.ekdev.ekirc.core.event.IRCErrorReplyEvent;
 import de.ekdev.ekirc.core.event.NickChangeEvent;
 import de.ekdev.ekirc.core.event.NoticeToChannelEvent;
@@ -202,6 +204,15 @@ public class SimpleIRCServerContextTest
                 }
             });
 
+            // dcc
+            ircManager.getEventManager().register(new EventListener() {
+                @EventHandler
+                public void onNewFileTransfer(DCCFileTransferEvent event)
+                {
+                    event.getIRCDCCFileTransfer().startTransfer(new File("localfile.zip"), false);
+                }
+            });
+
             // reconnect
             // only on inet for 3 successful times
             ircManager.getEventManager().register(new AutoReconnector(inet, 15 * 1000, 3));
@@ -221,8 +232,7 @@ public class SimpleIRCServerContextTest
         // inet.send(new IRCNickCommand("nickles"));
         // inet.send(new IRCListCommand());
         // inet.send(new IRCWhoCommand());
-
-        inet.send(new IRCNamesCommand());
+        // inet.send(new IRCNamesCommand());
 
         waitForInput(br);
 
@@ -235,7 +245,6 @@ public class SimpleIRCServerContextTest
         // inet.send(new IRCNickCommand("nick"));
 
         send(inet, "JOIN #ebooks");
-        send(inet, "JOIN #eBOoks");
         send(inet, "PRIVMSG #ebooks :@search Hohlbein Genesis");
 
         waitForInput(br);
@@ -245,7 +254,7 @@ public class SimpleIRCServerContextTest
             System.out.println(ircChannel.getName() + " - " + ircChannel.getTopic() + " - " + ircChannel.getMode());
         }
 
-        send(inet, "TOPIC #ebooks");
+        // send(inet, "TOPIC #ebooks");
 
         // inet.send(new IRCNickCommand("coor"));
         // inet.send(new IRCChannelModeCommand(inet.getIRCChannelManager().getIRCChannel("#ebooks")));

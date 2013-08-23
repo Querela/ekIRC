@@ -12,7 +12,7 @@ import de.ekdev.ekirc.core.event.DCCFileTransferEvent;
  */
 public class IRCDCCManager
 {
-    public final static long TIMEOUT = 30 * 1000; // 30 sec
+    public final static int TIMEOUT = 30 * 1000; // 30 sec
     public final static int BUFFER_SIZE = 8 * 1024; // 8 KB
 
     private final IRCNetwork ircNetwork;
