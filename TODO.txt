@@ -85,6 +85,10 @@ ToDo / ToThinkAbout:
     - use literal server commands from command classes or from enum
 
 
+- rename fields/methods(properties)?
+    - no sourceIRCUser -> sender?
+
+
 - change 'null' value if nothing is present to default-objects? / skip null checks ...
     - empty-objects / static final ...
 

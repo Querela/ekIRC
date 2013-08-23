@@ -5,11 +5,16 @@ package de.ekdev.ekirc.core;
 
 import java.util.Objects;
 
+import de.ekdev.ekirc.core.event.DCCFileTransferEvent;
+
 /**
  * @author ekDev
  */
 public class IRCDCCManager
 {
+    public final static long TIMEOUT = 30 * 1000; // 30 sec
+    public final static int BUFFER_SIZE = 8 * 1024; // 8 KB
+
     private final IRCNetwork ircNetwork;
 
     public IRCDCCManager(IRCNetwork ircNetwork)
@@ -23,12 +28,50 @@ public class IRCDCCManager
 
     public boolean processRequest(IRCUser sourceIRCUser, IRCDCCMessage ircDCCMessage)
     {
-        return false;
+        if (sourceIRCUser == null) return false;
+        if (ircDCCMessage == null) return false;
+
+        IRCDCCType dccType = IRCDCCType.valueOf(ircDCCMessage.getType()); // .toUpperCase()
+
+        switch (dccType)
+        {
+            case SEND:
+            {
+                IRCDCCFileTransfer ircDCCFileTransfer = null;
+                try
+                {
+                    ircDCCFileTransfer = IRCDCCFileTransfer.fromIRCDCCMessage(this, sourceIRCUser, ircDCCMessage);
+                }
+                catch (Exception e)
+                {
+                    // NullPointerException
+                    // IllegalArgumentException
+                    this.ircNetwork.getIRCConnectionLog().exception(e);
+                    return false;
+                }
+                this.ircNetwork.raiseEvent(new DCCFileTransferEvent(this.ircNetwork, ircDCCFileTransfer));
+                return true;
+            }
+            // case ACCEPT:
+            // {
+            //
+            // }
+            // case CHAT:
+            // {
+            //
+            // }
+            default:
+            {
+                return false;
+            }
+        }
     }
 
     // ------------------------------------------------------------------------
 
     // http://www.silisoftware.com/tools/ipconverter.php
+
+    // using long to avoid the sign: ... int i = 4294967295
 
     public static byte[] longToIP(long address)
     {
