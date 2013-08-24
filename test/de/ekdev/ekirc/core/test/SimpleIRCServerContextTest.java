@@ -25,7 +25,9 @@ import de.ekdev.ekirc.core.event.ActionMessageToUserEvent;
 import de.ekdev.ekirc.core.event.ChannelListUpdateEvent;
 import de.ekdev.ekirc.core.event.ChannelModeChangeEvent;
 import de.ekdev.ekirc.core.event.ChannelModeUpdateEvent;
+import de.ekdev.ekirc.core.event.DCCFileTransferEndEvent;
 import de.ekdev.ekirc.core.event.DCCFileTransferEvent;
+import de.ekdev.ekirc.core.event.DCCFileTransferStartEvent;
 import de.ekdev.ekirc.core.event.IRCErrorReplyEvent;
 import de.ekdev.ekirc.core.event.NickChangeEvent;
 import de.ekdev.ekirc.core.event.NoticeToChannelEvent;
@@ -51,7 +53,7 @@ public class SimpleIRCServerContextTest
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         IRCManager ircManager = new IRCManager();
-        IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.irchighway.net", 6667);
+        IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea x-mas", "passt"), "irc.irchighway.net", 6667);
         // IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.chatzona.org", 6667);
         // IRCNetwork inet = new IRCNetwork(ircManager, new IRCIdentity("rea ree", "pass"), "irc.webchat.org", 6667);
 
@@ -208,9 +210,21 @@ public class SimpleIRCServerContextTest
                 @EventHandler
                 public void onNewFileTransfer(DCCFileTransferEvent event)
                 {
-                    System.err.println("DCCFileTransferEvent");
                     event.getIRCDCCFileTransfer().startTransfer(new File(event.getIRCDCCFileTransfer().getFilename()),
                             false);
+                }
+
+                @EventHandler
+                public void dccStart(DCCFileTransferStartEvent event)
+                {
+                    System.err.println("Start " + event.getIRCDCCFileTransfer().getLongDescription());
+                }
+
+                @EventHandler
+                public void dccStop(DCCFileTransferEndEvent event)
+                {
+                    System.err.println("Stop (Successful=" + event.successful() + ") "
+                            + event.getIRCDCCFileTransfer().getLongDescription());
                 }
             });
 

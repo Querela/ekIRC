@@ -103,6 +103,8 @@ public class IRCDCCFileTransfer implements Runnable
     // ------------------------------------------------------------------------
     // Outgoing file transfers
 
+    // TODO: add constructors
+
     // ------------------------------------------------------------------------
 
     public final IRCUser getIRCUser()
@@ -149,8 +151,8 @@ public class IRCDCCFileTransfer implements Runnable
         return this.direction;
     }
 
-    // TODO: generate identifier (filename, nick, ip+port, thread?)
     // TODO: toString()
+
     public String getLongDescription()
     {
         StringBuilder sb = new StringBuilder();
@@ -160,7 +162,7 @@ public class IRCDCCFileTransfer implements Runnable
                 .append(this.status.toString()).append(")") // status
                 .append(": ").append(String.format("%,d", this.size)).append("/") // current size
                 .append(String.format("%,d", this.totalSize)).append(" byte [") // total size
-                .append(String.format("%03.2", this.getProgress() * 100.0f)).append(" %] - ") // percentage
+                .append(String.format("%03.2f", this.getProgress() * 100.0f)).append(" %] - ") // percentage
                 .append(this.getSourceString()).append(" \"") // user (nickname), ip & port
                 .append(this.getFilename()).append("\""); // filename
         if (this.filename != null) sb.append("->\"").append(this.localFile.getAbsolutePath()).append("\" (local)");
@@ -236,6 +238,34 @@ public class IRCDCCFileTransfer implements Runnable
         return this.endTime - this.startTime;
     }
 
+    // --------------------------------
+
+    public long getMaxDelay()
+    {
+        return this.maxDelay;
+    }
+
+    public long getMinDelay()
+    {
+        return this.minDelay;
+    }
+
+    public void setMaxDelay(long maxDelay)
+    {
+        // TODO: check for maxDelay > minDelay?
+        if (maxDelay < 0L) maxDelay = 0L;
+
+        this.maxDelay = maxDelay;
+    }
+
+    public void setMinDelay(long minDelay)
+    {
+        // TODO: check for maxDelay > minDelay?
+        if (minDelay < 0L) minDelay = 0L;
+
+        this.minDelay = minDelay;
+    }
+
     // ------------------------------------------------------------------------
 
     public void startTransfer(File localFile, boolean allowResume)
@@ -243,10 +273,18 @@ public class IRCDCCFileTransfer implements Runnable
         this.localFile = Objects.requireNonNull(localFile, "localFile must not be null!");
         this.allowResume = allowResume;
 
+        if (!this.checkFile()) return;
+
         // run asynchronously
         this.thread = new Thread(this);
         this.thread.setName(this.getClass().getSimpleName() + "-Thread-" + threadCount.getAndIncrement());
         this.thread.start();
+    }
+
+    public void startTransfer(File localFile)
+    {
+        // no append/resume ...
+        this.startTransfer(localFile, false);
     }
 
     public void resumeTransfer(long fileOffset)
@@ -299,16 +337,14 @@ public class IRCDCCFileTransfer implements Runnable
 
         if (this.direction == IRCDCCFileTransfer.Direction.INCOMING)
         {
-            if (this.status == IRCDCCFileTransfer.Status.WAITING)
-            {
-                if (this.checkFile())
-                {
-                    receive();
-                }
-            }
-            else if (this.status == IRCDCCFileTransfer.Status.RESUMING)
+            if (this.status == IRCDCCFileTransfer.Status.WAITING || this.status == IRCDCCFileTransfer.Status.RESUMING)
             {
                 receive();
+            }
+            else
+            {
+                this.ircDCCManager.getIRCNetwork().getIRCConnectionLog()
+                        .message("Wrong file transfer status :" + this.status.toString() + ". Aborting.");
             }
         }
         else
@@ -329,7 +365,13 @@ public class IRCDCCFileTransfer implements Runnable
         // check if a file is already there
         if (this.size > this.totalSize)
         {
-            // TODO: output message
+            // TODO: check ?
+            this.ircDCCManager
+                    .getIRCNetwork()
+                    .getIRCConnectionLog()
+                    .message(
+                            "Local file \"" + this.localFile.getAbsolutePath()
+                                    + "\" is larger than the receiving file. Aborting.");
             return false;
         }
         else if (this.size > 0)
@@ -360,14 +402,15 @@ public class IRCDCCFileTransfer implements Runnable
                 });
                 this.status = IRCDCCFileTransfer.Status.RESUMING;
 
-                // store this object ...
+                // TODO: store this object ... ?
 
                 return false;
             }
             else
             {
                 // this.localFile.delete();
-                // TODO: output message
+                this.ircDCCManager.getIRCNetwork().getIRCConnectionLog()
+                        .message("Overwriting file \"" + this.localFile.getAbsolutePath() + "\"");
                 this.size = 0L;
             }
         }
@@ -394,6 +437,9 @@ public class IRCDCCFileTransfer implements Runnable
         }
     }
 
+    // TODO: receive with OutputStream os
+    // TODO: how to open/close?
+    // TODO: output-adapter-interface? start->os, finish->(close?) ?, for File, Zip, ... ?
     protected boolean receive()
     {
         SocketChannel sockChannel;
@@ -543,7 +589,11 @@ public class IRCDCCFileTransfer implements Runnable
             {
                 if (sock_bi != null) sock_bi.close();
                 if (sock_bo != null) sock_bo.close();
-                if (file_bo != null) file_bo.close();
+                if (file_bo != null)
+                {
+                    file_bo.flush();
+                    file_bo.close();
+                }
             }
             catch (IOException e)
             {
