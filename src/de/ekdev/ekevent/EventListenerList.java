@@ -34,7 +34,7 @@ public class EventListenerList
     {
         // now iterating over the list won't throw a ConcurrentModificationException
         // because it is operation on a static copy
-        return Collections.unmodifiableList(new CopyOnWriteArrayList<RegisteredEventListener>(this.listeners));
+        return Collections.unmodifiableList(new ArrayList<RegisteredEventListener>(this.listeners));
     }
 
     public static List<EventListenerList> getEventListenerLists()
