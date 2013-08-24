@@ -6,12 +6,16 @@ package de.ekdev.ekirc.core;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.nio.file.FileAlreadyExistsException;
+import java.nio.channels.SocketChannel;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -38,9 +42,15 @@ public class IRCDCCFileTransfer implements Runnable
     private boolean allowResume;
     private long startTime;
     private long endTime;
-    private double transferRate;
+    private float transferRate;
     private Thread thread;
     private final static AtomicInteger threadCount = new AtomicInteger();
+
+    private long minDelay = 0L;
+    private long maxDelay = 0L;
+
+    protected final static float alphaOld = 0.5f;
+    protected final static float alphaNew = 1.0f - alphaOld;
 
     // ------------------------------------------------------------------------
     // Incoming file transfers
@@ -111,7 +121,7 @@ public class IRCDCCFileTransfer implements Runnable
         return this.port;
     }
 
-    public long getSize()
+    public long getTotalSize()
     {
         return this.totalSize;
     }
@@ -121,9 +131,41 @@ public class IRCDCCFileTransfer implements Runnable
         return this.direction;
     }
 
+    // TODO: generate identifier (filename, nick, ip+port, thread?)
+    // TODO: toString()
+
+    // --------------------------------
+
     public IRCDCCFileTransfer.Status getStatus()
     {
         return this.status;
+    }
+
+    public long getSize()
+    {
+        return this.size;
+    }
+
+    public float getTransferRate()
+    {
+        return this.transferRate;
+    }
+
+    public float getProgress()
+    {
+        return (float) this.size / this.totalSize;
+    }
+
+    // --------------------------------
+
+    public long getStartTime()
+    {
+        return this.startTime;
+    }
+
+    public long getEndTime()
+    {
+        return this.endTime;
     }
 
     // ------------------------------------------------------------------------
@@ -139,12 +181,33 @@ public class IRCDCCFileTransfer implements Runnable
         this.thread.start();
     }
 
+    public void resumeTransfer(long fileOffset)
+    {
+        if (this.status != IRCDCCFileTransfer.Status.RESUMING) return;
+
+        this.size = fileOffset;
+        this.size = (this.size < 0) ? 0L : this.size;
+
+        // run asynchronously
+        this.thread = new Thread(this);
+        this.thread.setName(this.getClass().getSimpleName() + "-Thread-" + threadCount.getAndIncrement());
+        this.thread.start();
+    }
+
     public void abort()
     {
         if (this.isRunning())
         {
             this.status = IRCDCCFileTransfer.Status.ABORTED;
             this.thread.interrupt();
+
+            try
+            {
+                this.thread.join();
+            }
+            catch (InterruptedException e)
+            {
+            }
         }
     }
 
@@ -159,17 +222,21 @@ public class IRCDCCFileTransfer implements Runnable
     public void run()
     {
         // abort if already working or finished
-        if (this.status != IRCDCCFileTransfer.Status.WAITING) return;
+        if (this.status != IRCDCCFileTransfer.Status.WAITING && this.status != IRCDCCFileTransfer.Status.RESUMING)
+            return;
 
         if (this.direction == IRCDCCFileTransfer.Direction.INCOMING)
         {
-            try
+            if (this.status == IRCDCCFileTransfer.Status.WAITING)
+            {
+                if (this.checkFile())
+                {
+                    receive();
+                }
+            }
+            else if (this.status == IRCDCCFileTransfer.Status.RESUMING)
             {
                 receive();
-            }
-            catch (FileAlreadyExistsException e)
-            {
-                this.ircDCCManager.getIRCNetwork().getIRCConnectionLog().exception(e);
             }
         }
         else
@@ -179,21 +246,27 @@ public class IRCDCCFileTransfer implements Runnable
         }
     }
 
-    protected void receive() throws FileAlreadyExistsException
+    protected boolean checkFile()
     {
         this.size = this.localFile.length();
 
-        // check if file is already there
+        // check if a file is already there
         if (this.size > this.totalSize)
         {
-            // another file
-            throw new FileAlreadyExistsException(this.localFile.getAbsolutePath());
+            // TODO: output message
+            return false;
         }
         else if (this.size > 0)
         {
             // may be our file
             if (this.allowResume)
             {
+                this.ircDCCManager
+                        .getIRCNetwork()
+                        .getIRCConnectionLog()
+                        .message(
+                                "Try to resume transfer <\"" + this.getFilename() + "\"> from "
+                                        + this.ircUser.getNickname());
                 this.ircDCCManager.getIRCNetwork().send(new AsIRCMessage() {
                     @Override
                     public String asIRCMessageString()
@@ -211,42 +284,131 @@ public class IRCDCCFileTransfer implements Runnable
                 });
                 this.status = IRCDCCFileTransfer.Status.RESUMING;
 
-                return;
+                // store this object ...
+
+                return false;
             }
             else
             {
-                this.localFile.delete();
-
-                return;
+                // this.localFile.delete();
+                // TODO: output message
+                this.size = 0L;
             }
         }
 
-        // new file
+        return true;
+    }
+
+    protected void delay(long maxDelay, long minDelay, long off)
+    {
+        long delay = maxDelay - off;
+        delay = (delay > maxDelay) ? maxDelay : delay; // not too much
+        delay = (delay < minDelay) ? minDelay : delay; // not too less
+        delay = (delay < 0L) ? 0L : delay; // not less zero
+        // long delay = Math.min(Math.min(0, minDelay), maxDelay - off);
+
+        if (delay < 10L) return;
+
         try
         {
-            Socket sock = new Socket(InetAddress.getByName(this.address), this.port);
+            Thread.sleep(delay);
+        }
+        catch (InterruptedException e)
+        {
+        }
+    }
+
+    protected boolean receive()
+    {
+        SocketChannel sockChannel;
+        Socket sock;
+
+        try
+        {
+            sockChannel = SocketChannel.open();
+            sockChannel.configureBlocking(true);
+            sock = sockChannel.socket();
+            sock.connect(new InetSocketAddress(InetAddress.getByName(this.address), this.port), IRCDCCManager.TIMEOUT);
             sock.setSoTimeout(IRCDCCManager.TIMEOUT);
+        }
+        catch (UnknownHostException e)
+        {
+            this.ircDCCManager.getIRCNetwork().getIRCConnectionLog().exception(e);
+            this.status = IRCDCCFileTransfer.Status.FAILED;
+            return false;
+        }
+        catch (SocketException e)
+        {
+            this.ircDCCManager.getIRCNetwork().getIRCConnectionLog().exception(e);
+            this.status = IRCDCCFileTransfer.Status.FAILED;
+            return false;
+        }
+        catch (IOException e)
+        {
+            this.ircDCCManager.getIRCNetwork().getIRCConnectionLog().exception(e);
+            this.status = IRCDCCFileTransfer.Status.FAILED;
+            return false;
+        }
 
-            this.startTime = System.currentTimeMillis();
+        this.startTime = System.currentTimeMillis();
 
-            BufferedInputStream sock_bi = new BufferedInputStream(sock.getInputStream());
-            BufferedOutputStream sock_bo = new BufferedOutputStream(sock.getOutputStream());
+        BufferedInputStream sock_bi = null;
+        BufferedOutputStream sock_bo = null;
+        BufferedOutputStream file_bo = null;
+        try
+        {
+            sock_bi = new BufferedInputStream(sock.getInputStream());
+            sock_bo = new BufferedOutputStream(sock.getOutputStream());
 
-            BufferedOutputStream file_bo = new BufferedOutputStream(new FileOutputStream(this.localFile,
-                    this.allowResume));
+            file_bo = new BufferedOutputStream(new FileOutputStream(this.localFile, this.allowResume));
+
+            // ----------------------------------------------------------------
+            // do action ...
+
+            this.status = IRCDCCFileTransfer.Status.TRANSFERING;
+            this.ircDCCManager
+                    .getIRCNetwork()
+                    .getIRCConnectionLog()
+                    .message(
+                            "Start receiving file <\"" + this.getFilename() + "\"> from " + this.ircUser.getNickname()
+                                    + "[" + IRCDCCManager.ipToString(sock.getInetAddress().getAddress()) + ":"
+                                    + this.port + "]" + " (Storing in: \"" + this.localFile.getAbsolutePath()
+                                    + "\") ... [" + Thread.currentThread().getName() + "]");
 
             byte[] buffer = new byte[IRCDCCManager.BUFFER_SIZE];
             byte[] ack = new byte[4];
 
-            long t1 = System.currentTimeMillis();
+            long t1;
             long t2;
+
             int bytesRead = -1;
-            while ((bytesRead = sock_bi.read(buffer)) != -1)
+
+            while (this.status == IRCDCCFileTransfer.Status.TRANSFERING)
             {
+                // read from stream
+                t1 = System.currentTimeMillis();
+                bytesRead = sock_bi.read(buffer);
                 t2 = System.currentTimeMillis();
+
+                if (bytesRead == -1)
+                {
+                    if (this.thread.isInterrupted())
+                    {
+                        this.status = IRCDCCFileTransfer.Status.ABORTED;
+                    }
+                    else
+                    {
+                        this.status = IRCDCCFileTransfer.Status.FINISHED;
+                    }
+
+                    break;
+                }
+
+                // write to file
                 file_bo.write(buffer, 0, bytesRead);
                 this.size += bytesRead;
 
+                // send ack
                 ack[0] = (byte) ((this.size >> 24) & 0xff);
                 ack[1] = (byte) ((this.size >> 16) & 0xff);
                 ack[2] = (byte) ((this.size >> 8) & 0xff);
@@ -254,31 +416,84 @@ public class IRCDCCFileTransfer implements Runnable
                 sock_bo.write(ack);
                 sock_bo.flush();
 
+                long deltaTime = t2 - t1;
+                deltaTime = (deltaTime == 0) ? 1L : deltaTime;
+
                 // do delay?
+                this.delay(this.maxDelay, this.minDelay, deltaTime);
 
-                // TODO: compute transferRate ...
-                this.transferRate = 0.6 * this.transferRate + 0.4 * bytesRead / (t2 - t1 + 1.0);
-                this.ircDCCManager.getIRCNetwork().getIRCConnectionLog().object("transferRate", this.transferRate);
+                // compute transferRate ...
+                this.transferRate = IRCDCCFileTransfer.alphaOld * this.transferRate + // old transferRate
+                        IRCDCCFileTransfer.alphaNew * bytesRead / deltaTime * 1000.0f; // new transferRate
 
-                t1 = System.currentTimeMillis();
+                this.ircDCCManager
+                        .getIRCNetwork()
+                        .getIRCConnectionLog()
+                        .object("transferRate [" + Thread.currentThread().getName() + "] (Byte/sec)  ",
+                                this.transferRate);
+                this.ircDCCManager
+                        .getIRCNetwork()
+                        .getIRCConnectionLog()
+                        .object("progress     [" + Thread.currentThread().getName() + "] (percentage)",
+                                this.getProgress() * 100.0f);
             }
 
             file_bo.flush();
-            this.endTime = System.currentTimeMillis();
 
-            file_bo.close();
-            sock_bo.close();
-            sock_bi.close();
-            sock.close();
+            // ----------------------------------------------------------------
         }
-        catch (UnknownHostException e)
+        catch (FileNotFoundException e)
         {
             this.ircDCCManager.getIRCNetwork().getIRCConnectionLog().exception(e);
+            this.status = IRCDCCFileTransfer.Status.FAILED;
+        }
+        catch (SocketTimeoutException e)
+        {
+            this.ircDCCManager.getIRCNetwork().getIRCConnectionLog().exception(e);
+            this.status = IRCDCCFileTransfer.Status.ABORTED;
         }
         catch (IOException e)
         {
             this.ircDCCManager.getIRCNetwork().getIRCConnectionLog().exception(e);
+            this.status = IRCDCCFileTransfer.Status.FAILED;
         }
+        finally
+        {
+            this.endTime = System.currentTimeMillis();
+
+            // close the buffered streams
+            try
+            {
+                if (sock_bi != null) sock_bi.close();
+                if (sock_bo != null) sock_bo.close();
+                if (file_bo != null) file_bo.close();
+            }
+            catch (IOException e)
+            {
+                this.ircDCCManager.getIRCNetwork().getIRCConnectionLog().exception(e);
+            }
+
+            // close the socket & socket channel
+            try
+            {
+                sock.close();
+                sockChannel.close();
+            }
+            catch (IOException e)
+            {
+                this.ircDCCManager.getIRCNetwork().getIRCConnectionLog().exception(e);
+            }
+        }
+
+        this.ircDCCManager
+                .getIRCNetwork()
+                .getIRCConnectionLog()
+                .message(
+                        "Finished receiving file <\"" + this.getFilename() + "\"> from " + this.ircUser.getNickname()
+                                + "[" + IRCDCCManager.ipToString(sock.getInetAddress().getAddress()) + ":" + this.port
+                                + "]" + " with status: " + this.status.toString());
+
+        return this.status == IRCDCCFileTransfer.Status.FINISHED;
     }
 
     private void send()
@@ -296,7 +511,7 @@ public class IRCDCCFileTransfer implements Runnable
 
     public static enum Status
     {
-        WAITING, RESUMING, TRANSFERING, FINISHED, ABORTED // PAUSED/PAUSING
+        WAITING, RESUMING, TRANSFERING, FINISHED, ABORTED, FAILED // PAUSED/PAUSING
     }
 
     // ------------------------------------------------------------------------

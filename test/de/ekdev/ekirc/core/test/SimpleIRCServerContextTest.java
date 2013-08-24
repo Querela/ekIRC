@@ -20,7 +20,6 @@ import de.ekdev.ekirc.core.IRCMessage;
 import de.ekdev.ekirc.core.IRCNetwork;
 import de.ekdev.ekirc.core.IRCNicknameFormatException;
 import de.ekdev.ekirc.core.IRCUsernameFormatException;
-import de.ekdev.ekirc.core.commands.channel.IRCNamesCommand;
 import de.ekdev.ekirc.core.event.ActionMessageToChannelEvent;
 import de.ekdev.ekirc.core.event.ActionMessageToUserEvent;
 import de.ekdev.ekirc.core.event.ChannelListUpdateEvent;
@@ -209,7 +208,9 @@ public class SimpleIRCServerContextTest
                 @EventHandler
                 public void onNewFileTransfer(DCCFileTransferEvent event)
                 {
-                    event.getIRCDCCFileTransfer().startTransfer(new File("localfile.zip"), false);
+                    System.err.println("DCCFileTransferEvent");
+                    event.getIRCDCCFileTransfer().startTransfer(new File(event.getIRCDCCFileTransfer().getFilename()),
+                            false);
                 }
             });
 
@@ -245,7 +246,11 @@ public class SimpleIRCServerContextTest
         // inet.send(new IRCNickCommand("nick"));
 
         send(inet, "JOIN #ebooks");
-        send(inet, "PRIVMSG #ebooks :@search Hohlbein Genesis");
+        // send(inet, "PRIVMSG #ebooks :@search Hohlbein Genesis");
+
+        send(inet, "PRIVMSG #ebooks :" + waitForInput(br));
+        send(inet, "PRIVMSG #ebooks :" + waitForInput(br));
+        send(inet, "PRIVMSG #ebooks :" + waitForInput(br));
 
         waitForInput(br);
 
