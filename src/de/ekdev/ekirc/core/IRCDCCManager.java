@@ -3,7 +3,10 @@
  */
 package de.ekdev.ekirc.core;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import de.ekdev.ekirc.core.event.DCCFileTransferEvent;
 
@@ -17,11 +20,63 @@ public class IRCDCCManager
 
     private final IRCNetwork ircNetwork;
 
+    private final Set<IRCDCCFileTransfer> allDCCFileTransfers;
+
     public IRCDCCManager(IRCNetwork ircNetwork)
     {
         Objects.requireNonNull(ircNetwork, "ircNetwork must not be null!");
 
         this.ircNetwork = ircNetwork;
+
+        this.allDCCFileTransfers = Collections.synchronizedSet(new LinkedHashSet<IRCDCCFileTransfer>());
+    }
+
+    // ------------------------------------------------------------------------
+
+    public Set<IRCDCCFileTransfer> getAllIRCDCCFileTransfers()
+    {
+        return Collections.unmodifiableSet(this.allDCCFileTransfers);
+    }
+
+    public void addIRCDCCFileTransfer(IRCDCCFileTransfer ircDCCFileTransfer)
+    {
+        if (ircDCCFileTransfer == null) return;
+
+        this.allDCCFileTransfers.add(ircDCCFileTransfer);
+    }
+
+    public Set<IRCDCCFileTransfer> getIRCDCCFileTransfersWithStatus(IRCDCCFileTransfer.Status status)
+    {
+        LinkedHashSet<IRCDCCFileTransfer> lhs = new LinkedHashSet<>();
+
+        for (IRCDCCFileTransfer transfer : this.allDCCFileTransfers)
+        {
+            if (transfer.getStatus() == status) lhs.add(transfer);
+        }
+
+        return lhs;
+    }
+
+    public Set<IRCDCCFileTransfer> getIRCDCCFileTransfersWithUser(IRCUser ircUser)
+    {
+        LinkedHashSet<IRCDCCFileTransfer> lhs = new LinkedHashSet<>();
+
+        for (IRCDCCFileTransfer transfer : this.allDCCFileTransfers)
+        {
+            if (transfer.getIRCUser().equals(ircUser)) lhs.add(transfer);
+        }
+
+        return lhs;
+    }
+
+    public IRCDCCFileTransfer getIRCDCCFileTransfer(IRCUser ircUser, int port)
+    {
+        for (IRCDCCFileTransfer transfer : this.allDCCFileTransfers)
+        {
+            if (transfer.getIRCUser().equals(ircUser) && transfer.getPort() == port) return transfer;
+        }
+
+        return null;
     }
 
     // ------------------------------------------------------------------------

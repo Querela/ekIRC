@@ -19,6 +19,9 @@ import java.nio.channels.SocketChannel;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import de.ekdev.ekirc.core.event.DCCFileTransferEndEvent;
+import de.ekdev.ekirc.core.event.DCCFileTransferStartEvent;
+
 /**
  * @author ekDev
  */
@@ -77,6 +80,9 @@ public class IRCDCCFileTransfer implements Runnable
 
         this.direction = IRCDCCFileTransfer.Direction.INCOMING;
         this.status = IRCDCCFileTransfer.Status.WAITING;
+
+        // add to manager
+        this.ircDCCManager.addIRCDCCFileTransfer(this);
     }
 
     public IRCDCCFileTransfer(IRCDCCManager ircDCCManager, IRCUser sourceIRCUser, String filename, String address,
@@ -116,6 +122,18 @@ public class IRCDCCFileTransfer implements Runnable
         return this.address;
     }
 
+    public String getIPAddress()
+    {
+        try
+        {
+            return IRCDCCManager.ipToString(IRCDCCManager.longToIP(Long.valueOf(this.address)));
+        }
+        catch (NumberFormatException e)
+        {
+            return this.address;
+        }
+    }
+
     public int getPort()
     {
         return this.port;
@@ -133,6 +151,41 @@ public class IRCDCCFileTransfer implements Runnable
 
     // TODO: generate identifier (filename, nick, ip+port, thread?)
     // TODO: toString()
+    public String getLongDescription()
+    {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(this.getClass().getSimpleName()) // class name
+                .append(" (").append(this.direction.toString()).append(",") // direction
+                .append(this.status.toString()).append(")") // status
+                .append(": ").append(String.format("%,d", this.size)).append("/") // current size
+                .append(String.format("%,d", this.totalSize)).append(" byte [") // total size
+                .append(String.format("%03.2", this.getProgress() * 100.0f)).append(" %] - ") // percentage
+                .append(this.getSourceString()).append(" \"") // user (nickname), ip & port
+                .append(this.getFilename()).append("\""); // filename
+        if (this.filename != null) sb.append("->\"").append(this.localFile.getAbsolutePath()).append("\" (local)");
+        if (this.thread.equals(Thread.currentThread())) sb.append(" - [").append(this.getThreadName()).append("]");
+
+        return sb.toString();
+    }
+
+    public String getSourceString()
+    {
+        return new StringBuilder(this.ircUser.getNickname()).append(" [").append(this.getIPAddress()).append(":")
+                .append(this.getPort()).append("]").toString();
+    }
+
+    public String getID()
+    {
+        return new StringBuilder(this.ircUser.getNickname()).append(" [").append(this.getPort()).append("]").toString();
+    }
+
+    public String getThreadName()
+    {
+        if (this.thread == null) return null;
+
+        return this.thread.getName();
+    }
 
     // --------------------------------
 
@@ -156,6 +209,16 @@ public class IRCDCCFileTransfer implements Runnable
         return (float) this.size / this.totalSize;
     }
 
+    public File getLocalFile()
+    {
+        return this.localFile;
+    }
+
+    public boolean isResumeAllowed()
+    {
+        return this.allowResume;
+    }
+
     // --------------------------------
 
     public long getStartTime()
@@ -166,6 +229,11 @@ public class IRCDCCFileTransfer implements Runnable
     public long getEndTime()
     {
         return this.endTime;
+    }
+
+    public long getTotalTime()
+    {
+        return this.endTime - this.startTime;
     }
 
     // ------------------------------------------------------------------------
@@ -225,6 +293,10 @@ public class IRCDCCFileTransfer implements Runnable
         if (this.status != IRCDCCFileTransfer.Status.WAITING && this.status != IRCDCCFileTransfer.Status.RESUMING)
             return;
 
+        // start event
+        this.ircDCCManager.getIRCNetwork().raiseEvent(
+                new DCCFileTransferStartEvent(this.ircDCCManager.getIRCNetwork(), this));
+
         if (this.direction == IRCDCCFileTransfer.Direction.INCOMING)
         {
             if (this.status == IRCDCCFileTransfer.Status.WAITING)
@@ -244,6 +316,10 @@ public class IRCDCCFileTransfer implements Runnable
         {
             send();
         }
+
+        // end event
+        this.ircDCCManager.getIRCNetwork().raiseEvent(
+                new DCCFileTransferEndEvent(this.ircDCCManager.getIRCNetwork(), this));
     }
 
     protected boolean checkFile()
@@ -355,6 +431,7 @@ public class IRCDCCFileTransfer implements Runnable
         BufferedInputStream sock_bi = null;
         BufferedOutputStream sock_bo = null;
         BufferedOutputStream file_bo = null;
+
         try
         {
             sock_bi = new BufferedInputStream(sock.getInputStream());
