@@ -17,6 +17,7 @@ import de.ekdev.ekirc.core.event.ChannelModeChangeEvent;
 import de.ekdev.ekirc.core.event.ChannelModeUpdateEvent;
 import de.ekdev.ekirc.core.event.ChannelTopicUpdateEvent;
 import de.ekdev.ekirc.core.event.IRCErrorReplyEvent;
+import de.ekdev.ekirc.core.event.IRCLoggedInEvent;
 import de.ekdev.ekirc.core.event.IRCNetworkInfoEvent;
 import de.ekdev.ekirc.core.event.JoinEvent;
 import de.ekdev.ekirc.core.event.KickEvent;
@@ -184,11 +185,24 @@ public class IRCMessageProcessor
                 ircUser.setHost(IRCUser.getHostByPrefix(nickuserhost));
                 this.ircNetwork.getMyIRCIdentity().setIRCUser(ircUser);
                 this.ircNetwork.getIRCConnectionLog().object("ircUser", ircUser);
-                // go on
+
+                // continue ...
             }
             case RPL_YOURHOST:
             case RPL_CREATED:
+            {
+                this.ircNetwork.raiseEvent(new IRCNetworkInfoEvent(this.ircNetwork, im));
+                // this.ircNetwork.getIRCNetworkInfo().update(im); // ?
+                break; // -----------------------------------------------------
+            }
             case RPL_MYINFO:
+            {
+                this.ircNetwork.raiseEvent(new IRCNetworkInfoEvent(this.ircNetwork, im));
+                this.ircNetwork.getIRCNetworkInfo().update(im);
+                // logged successfully in
+                this.ircNetwork.raiseEvent(new IRCLoggedInEvent(this.ircNetwork));
+                break; // -----------------------------------------------------
+            }
             case RPL_ISUPPORT:
             {
                 this.ircNetwork.raiseEvent(new IRCNetworkInfoEvent(this.ircNetwork, im));
