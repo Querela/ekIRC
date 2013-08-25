@@ -23,40 +23,46 @@ public class IRCNetworkInfo
     // reply 005 RPL_???
     private HashMap<String, String> supported;
 
-    private String prefixes;
-    private String channelTypes;
-    private String channelModes2;
-    private int maxModes;
-    private int maxChannels;
-    private String chanLimit;
-    private int nickLength;
-    private int maxBans;
-    private String maxList;
-    private String network;
-    private String exceptBans;
-    private String exceptInvites;
-    private boolean wallOps;
-    private boolean wallVoices;
-    private String statusMessage;
-    private String caseMapping;
-    private String charset;
-    private String eList;
-    private int topicLength;
-    private int kickLength;
-    private int channelLength;
-    private String channelIDLength;
-    private String standard;
-    private int silence;
-    private boolean rfc2812;
-    private boolean penalty;
-    private boolean cPrivMsgExists;
-    private boolean cNoticeExists;
-    private boolean safeList;
-    private boolean knockExists;
-    private boolean whoX;
-    private boolean callerID;
-    private boolean userIPExists;
-    private int maxWatch;
+    public final static String KEY_AWAYLEN = "AWAYLEN";
+    public final static String KEY_CALLERID = "CALLERID";
+    public final static String KEY_CASEMAPPING = "CASEMAPPING";
+    public final static String KEY_CHANLIMIT = "CHANLIMIT";
+    public final static String KEY_CHANMODES = "CHANMODES";
+    public final static String KEY_CHANNELLEN = "CHANNELLEN";
+    public final static String KEY_CHANTYPES = "CHANTYPES";
+    public final static String KEY_CHARSET = "CHARSET";
+    public final static String KEY_CLIENTVER = "CLIENTVER";
+    public final static String KEY_CNOTICE = "CNOTICE";
+    public final static String KEY_CPRIVMSG = "CPRIVMSG";
+    public final static String KEY_DEAF = "DEAF";
+    public final static String KEY_ELIST = "ELIST";
+    public final static String KEY_ETRACE = "ETRACE";
+    public final static String KEY_EXCEPTS = "EXCEPTS";
+    public final static String KEY_EXTBAN = "EXTBAN";
+    public final static String KEY_FNC = "FNC";
+    public final static String KEY_INVEX = "INVEX";
+    public final static String KEY_KICKLEN = "KICKLEN";
+    public final static String KEY_KNOCK = "KNOCK";
+    public final static String KEY_MAXCHANNELS = "MAXCHANNELS";
+    public final static String KEY_MAXLIST = "MAXLIST";
+    public final static String KEY_MODES = "MODES";
+    public final static String KEY_MONITOR = "MONITOR";
+    public final static String KEY_NAMESX = "NAMESX";
+    public final static String KEY_NETWORK = "NETWORK";
+    public final static String KEY_NICKLEN = "NICKLEN";
+    public final static String KEY_PREFIX = "PREFIX";
+    public final static String KEY_RFC2812 = "RFC2812";
+    public final static String KEY_SAFELIST = "SAFELIST";
+    public final static String KEY_STATUSMSG = "STATUSMSG";
+    public final static String KEY_STD = "STD";
+    public final static String KEY_TARGMAX = "TARGMAX";
+    public final static String KEY_TOPICLEN = "TOPICLEN";
+    public final static String KEY_UHNAMES = "UHNAMES";
+    public final static String KEY_USERIP = "USERIP";
+    public final static String KEY_WALLCHOPS = "WALLCHOPS";
+    public final static String KEY_WALLVOICES = "WALLVOICES";
+    public final static String KEY_WATCH = "WATCH";
+    public final static String KEY_WHOX = "WHOX";
 
     //
     private List<String> motd;
@@ -86,41 +92,6 @@ public class IRCNetworkInfo
         // copy all entries
         this.supported.putAll(ircNetworkInfo.supported);
 
-        this.prefixes = ircNetworkInfo.prefixes;
-        this.channelTypes = ircNetworkInfo.channelTypes;
-        this.channelModes2 = ircNetworkInfo.channelModes2;
-        this.maxModes = ircNetworkInfo.maxModes;
-        this.maxChannels = ircNetworkInfo.maxChannels;
-        this.chanLimit = ircNetworkInfo.chanLimit;
-        this.nickLength = ircNetworkInfo.nickLength;
-        this.maxBans = ircNetworkInfo.maxBans;
-        this.maxList = ircNetworkInfo.maxList;
-        this.network = ircNetworkInfo.network;
-        this.exceptBans = ircNetworkInfo.exceptBans;
-        this.exceptInvites = ircNetworkInfo.exceptInvites;
-        this.wallOps = ircNetworkInfo.wallOps;
-        this.wallVoices = ircNetworkInfo.wallVoices;
-        this.statusMessage = ircNetworkInfo.statusMessage;
-        this.caseMapping = ircNetworkInfo.caseMapping;
-        this.charset = ircNetworkInfo.charset;
-        this.eList = ircNetworkInfo.eList;
-        this.topicLength = ircNetworkInfo.topicLength;
-        this.kickLength = ircNetworkInfo.kickLength;
-        this.channelLength = ircNetworkInfo.channelLength;
-        this.channelIDLength = ircNetworkInfo.channelIDLength;
-        this.standard = ircNetworkInfo.standard;
-        this.silence = ircNetworkInfo.silence;
-        this.rfc2812 = ircNetworkInfo.rfc2812;
-        this.penalty = ircNetworkInfo.penalty;
-        this.cPrivMsgExists = ircNetworkInfo.cPrivMsgExists;
-        this.cNoticeExists = ircNetworkInfo.cNoticeExists;
-        this.safeList = ircNetworkInfo.safeList;
-        this.knockExists = ircNetworkInfo.knockExists;
-        this.whoX = ircNetworkInfo.whoX;
-        this.callerID = ircNetworkInfo.callerID;
-        this.userIPExists = ircNetworkInfo.userIPExists;
-        this.maxWatch = ircNetworkInfo.maxWatch;
-
         this.motd = new ArrayList<>(ircNetworkInfo.motd);
         this.tempMotd = new ArrayList<>(ircNetworkInfo.tempMotd);
     }
@@ -145,167 +116,19 @@ public class IRCNetworkInfo
             {
                 String token = ircMessage.getParams().get(i);
                 int index = token.indexOf('=');
-                String key = (i == -1) ? token : token.substring(0, index);
+                String key = (index == -1) ? token : token.substring(0, index);
                 key = key.toUpperCase();
                 String value = (i == -1) ? null : token.substring(index + 1);
 
+                // add the modes
                 this.supported.put(key, value);
+                // System.err.println("NETWORK MODE = " + token);
 
-                System.err.println("NETWORK MODE = " + token);
-
-                if (key.equals("CASEMAPPING"))
-                {
-                    this.caseMapping = value;
-                }
-                else if (key.equals("CHANTYPES"))
-                {
-                    this.channelTypes = value;
-                }
-                else if (key.equals("CHANNELLEN"))
-                {
-                    try
-                    {
-                        this.channelLength = Integer.valueOf(value);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                    }
-                }
-                else if (key.equals("CHANMODES"))
-                {
-                    this.channelModes2 = value;
-                    // TODO: debug ...
-                    System.err.println("chanmodes1 = " + this.channelModes);
-                    System.err.println("chanmodes2 = " + this.channelModes2);
-                }
-                else if (key.equals("CHANLIMIT"))
-                {
-                    this.chanLimit = value;
-                }
-                else if (key.equals("ELIST"))
-                {
-                    this.eList = value;
-                }
-                else if (key.equals("EXCEPTS"))
-                {
-                    this.exceptBans = value;
-                }
-                // else if (key.equals("FNC"))
+                // if (key.equals("CHANMODES"))
                 // {
-                // // TODO:
+                // System.err.println("chanmodes1 = " + this.channelModes);
+                // System.err.println("chanmodes2 = " + value);
                 // }
-                else if (key.equals("INVEX"))
-                {
-                    this.exceptInvites = value;
-                }
-                else if (key.equals("KICKLEN"))
-                {
-                    try
-                    {
-                        this.kickLength = Integer.valueOf(value);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                    }
-                }
-                else if (key.equals("KNOCK"))
-                {
-                    this.knockExists = true;
-                }
-                else if (key.equals("MAXCHANNELS"))
-                {
-                    try
-                    {
-                        this.maxChannels = Integer.valueOf(value);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                    }
-                }
-                else if (key.equals("MAXLIST"))
-                {
-                    this.maxList = value;
-                }
-                else if (key.equals("MODES"))
-                {
-                    try
-                    {
-                        this.maxModes = Integer.valueOf(value);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                    }
-                }
-                else if (key.equals("NETWORK"))
-                {
-                    this.network = value;
-                }
-                else if (key.equals("NICKLEN"))
-                {
-                    try
-                    {
-                        this.nickLength = Integer.valueOf(value);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                    }
-                }
-                else if (key.equals("PREFIX"))
-                {
-                    this.prefixes = value;
-                }
-                else if (key.equals("RFC2812"))
-                {
-                    this.rfc2812 = true;
-                }
-                else if (key.equals("SAFELIST"))
-                {
-                    this.safeList = true;
-                }
-                // else if (key.equals("SILENCE"))
-                // {
-                // // TODO:
-                // }
-                else if (key.equals("STATUSMSG"))
-                {
-                    this.statusMessage = value;
-                }
-                else if (key.equals("STD"))
-                {
-                    this.standard = value;
-                }
-                else if (key.equals("TOPICLEN"))
-                {
-                    try
-                    {
-                        this.topicLength = Integer.valueOf(value);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                    }
-                }
-                else if (key.equals("WALLCHOPS"))
-                {
-                    this.wallOps = true;
-                }
-                else if (key.equals("WALLVOICES"))
-                {
-                    this.wallVoices = true;
-                }
-                else if (key.equals("WATCH"))
-                {
-                    try
-                    {
-                        this.topicLength = Integer.valueOf(value);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                    }
-                }
-                else
-                {
-                    // unknown - ignore
-                }
             }
         }
 
@@ -340,211 +163,6 @@ public class IRCNetworkInfo
         return this;
     }
 
-    protected IRCNetworkInfo setPrefixes(String prefixes)
-    {
-        this.prefixes = prefixes;
-        return this;
-    }
-
-    protected IRCNetworkInfo setChannelTypes(String channelTypes)
-    {
-        this.channelTypes = channelTypes;
-        return this;
-    }
-
-    protected IRCNetworkInfo setChannelModes2(String channelModes2)
-    {
-        // TODO: ?
-        this.channelModes2 = channelModes2;
-        return this;
-    }
-
-    protected IRCNetworkInfo setMaxModes(int maxModes)
-    {
-        this.maxModes = maxModes;
-        return this;
-    }
-
-    protected IRCNetworkInfo setMaxChannels(int maxChannels)
-    {
-        this.maxChannels = maxChannels;
-        return this;
-    }
-
-    protected IRCNetworkInfo setChanLimit(String chanLimit)
-    {
-        this.chanLimit = chanLimit;
-        return this;
-    }
-
-    protected IRCNetworkInfo setMaxNickLength(int maxNickLength)
-    {
-        this.nickLength = maxNickLength;
-        return this;
-    }
-
-    protected IRCNetworkInfo setMaxBans(int maxBans)
-    {
-        this.maxBans = maxBans;
-        return this;
-    }
-
-    protected IRCNetworkInfo setMaxList(String maxList)
-    {
-        this.maxList = maxList;
-        return this;
-    }
-
-    protected IRCNetworkInfo setNetwork(String network)
-    {
-        this.network = network;
-        return this;
-    }
-
-    protected IRCNetworkInfo setExceptBans(String exceptBans)
-    {
-        this.exceptBans = exceptBans;
-        return this;
-    }
-
-    protected IRCNetworkInfo setExceptInvites(String exceptInvites)
-    {
-        this.exceptInvites = exceptInvites;
-        return this;
-    }
-
-    protected IRCNetworkInfo setWallOps(boolean wallOps)
-    {
-        this.wallOps = wallOps;
-        return this;
-    }
-
-    protected IRCNetworkInfo setWallVoices(boolean wallVoices)
-    {
-        this.wallVoices = wallVoices;
-        return this;
-    }
-
-    protected IRCNetworkInfo setStatusMessage(String statusMessage)
-    {
-        this.statusMessage = statusMessage;
-        return this;
-    }
-
-    protected IRCNetworkInfo setCaseMapping(String caseMapping)
-    {
-        this.caseMapping = caseMapping;
-        return this;
-    }
-
-    protected IRCNetworkInfo setCharset(String charset)
-    {
-        this.charset = charset;
-        return this;
-    }
-
-    protected IRCNetworkInfo seteList(String eList)
-    {
-        this.eList = eList;
-        return this;
-    }
-
-    protected IRCNetworkInfo setTopicLength(int topicLength)
-    {
-        this.topicLength = topicLength;
-        return this;
-    }
-
-    protected IRCNetworkInfo setKickLength(int kickLength)
-    {
-        this.kickLength = kickLength;
-        return this;
-    }
-
-    protected IRCNetworkInfo setChannelLength(int channelLength)
-    {
-        this.channelLength = channelLength;
-        return this;
-    }
-
-    protected IRCNetworkInfo setChannelIDLength(String channelIDLength)
-    {
-        this.channelIDLength = channelIDLength;
-        return this;
-    }
-
-    protected IRCNetworkInfo setStandard(String standard)
-    {
-        this.standard = standard;
-        return this;
-    }
-
-    protected IRCNetworkInfo setSilence(int silence)
-    {
-        this.silence = silence;
-        return this;
-    }
-
-    protected IRCNetworkInfo setRfc2812(boolean rfc2812)
-    {
-        this.rfc2812 = rfc2812;
-        return this;
-    }
-
-    protected IRCNetworkInfo setPenalty(boolean penalty)
-    {
-        this.penalty = penalty;
-        return this;
-    }
-
-    protected IRCNetworkInfo setcPrivMsgExists(boolean cPrivMsgExists)
-    {
-        this.cPrivMsgExists = cPrivMsgExists;
-        return this;
-    }
-
-    protected IRCNetworkInfo setcNoticeExists(boolean cNoticeExists)
-    {
-        this.cNoticeExists = cNoticeExists;
-        return this;
-    }
-
-    protected IRCNetworkInfo setSafeList(boolean safeList)
-    {
-        this.safeList = safeList;
-        return this;
-    }
-
-    protected IRCNetworkInfo setKnockExists(boolean knockExists)
-    {
-        this.knockExists = knockExists;
-        return this;
-    }
-
-    protected IRCNetworkInfo setWhoX(boolean whoX)
-    {
-        this.whoX = whoX;
-        return this;
-    }
-
-    protected IRCNetworkInfo setCallerID(boolean callerID)
-    {
-        this.callerID = callerID;
-        return this;
-    }
-
-    protected IRCNetworkInfo setUserIPExists(boolean userIPExists)
-    {
-        this.userIPExists = userIPExists;
-        return this;
-    }
-
-    protected IRCNetworkInfo setMaxWatch(int maxWatch)
-    {
-        this.maxWatch = maxWatch;
-        return this;
-    }
-
     // --------------------------------------------------------------------
 
     protected IRCNetworkInfo newMotd()
@@ -571,6 +189,35 @@ public class IRCNetworkInfo
     // --------------------------------------------------------------------
     // --------------------------------------------------------------------
 
+    public String getSupported(String key)
+    {
+        return this.supported.get(key);
+    }
+
+    public int getSupportedInt(String key, int defaultValue)
+    {
+        try
+        {
+            return Integer.valueOf(this.supported.get(key));
+        }
+        catch (NumberFormatException e)
+        {
+            return defaultValue;
+        }
+    }
+
+    public int getSupportedInt(String key)
+    {
+        return this.getSupportedInt(key, -1);
+    }
+
+    public boolean isSupported(String key)
+    {
+        return this.supported.containsKey(key);
+    }
+
+    // --------------------------------
+
     public String getServerName()
     {
         return serverName;
@@ -591,175 +238,159 @@ public class IRCNetworkInfo
         return channelModes;
     }
 
+    // --------------------------------
+
     public String getPrefixes()
     {
-        return prefixes;
+        return this.getSupported(KEY_PREFIX);
     }
 
     public String getChannelTypes()
     {
-        return channelTypes;
+        return this.getSupported(KEY_CHANTYPES);
     }
 
     public String getChannelModes2()
     {
-        return channelModes2;
+        return this.getSupported(KEY_CHANMODES);
     }
 
     public int getMaxModes()
     {
-        return maxModes;
+        return this.getSupportedInt(KEY_MODES, -1);
     }
 
     public int getMaxChannels()
     {
-        return maxChannels;
+        return this.getSupportedInt(KEY_MAXCHANNELS, -1);
     }
 
     public String getChanLimit()
     {
-        return chanLimit;
+        return this.getSupported(KEY_CHANLIMIT);
     }
 
     public int getMaxNickLength()
     {
-        return nickLength;
+        return this.getSupportedInt(KEY_NICKLEN, -1);
     }
 
     public int getMaxBans()
     {
-        return maxBans;
+        return this.getSupportedInt(KEY_MAXLIST, -1);
     }
 
     public String getMaxList()
     {
-        return maxList;
+        return this.getSupported(KEY_MAXLIST);
     }
 
     public String getNetwork()
     {
-        return network;
+        return this.getSupported(KEY_NETWORK);
     }
 
     public String getExceptBans()
     {
-        return exceptBans;
+        return this.getSupported(KEY_EXCEPTS);
     }
 
     public String getExceptInvites()
     {
-        return exceptInvites;
+        return this.getSupported(KEY_INVEX);
     }
 
     public boolean isWallOps()
     {
-        return wallOps;
+        return this.isSupported(KEY_WALLCHOPS);
     }
 
     public boolean isWallVoices()
     {
-        return wallVoices;
+        return this.isSupported(KEY_WALLVOICES);
     }
 
     public String getStatusMessage()
     {
-        return statusMessage;
+        return this.getSupported(KEY_STATUSMSG);
     }
 
     public String getCaseMapping()
     {
-        return caseMapping;
+        return this.getSupported(KEY_CASEMAPPING);
     }
 
     public String getCharset()
     {
-        return charset;
+        return this.getSupported(KEY_CHARSET);
     }
 
     public String geteList()
     {
-        return eList;
+        return this.getSupported(KEY_ELIST);
     }
 
     public int getTopicLength()
     {
-        return topicLength;
+        return this.getSupportedInt(KEY_TOPICLEN, -1);
     }
 
     public int getKickLength()
     {
-        return kickLength;
+        return this.getSupportedInt(KEY_KICKLEN, -1);
     }
 
     public int getChannelLength()
     {
-        return channelLength;
-    }
-
-    public String getChannelIDLength()
-    {
-        return channelIDLength;
+        return this.getSupportedInt(KEY_CHANNELLEN, -1);
     }
 
     public String getStandard()
     {
-        return standard;
-    }
-
-    public int getSilence()
-    {
-        return silence;
+        return this.getSupported(KEY_STD);
     }
 
     public boolean isRFC2812()
     {
-        return rfc2812;
-    }
-
-    public boolean isPenalty()
-    {
-        return penalty;
+        return this.isSupported(KEY_RFC2812);
     }
 
     public boolean iscPrivMsgExists()
     {
-        return cPrivMsgExists;
+        return this.isSupported(KEY_CPRIVMSG);
     }
 
     public boolean iscNoticeExists()
     {
-        return cNoticeExists;
+        return this.isSupported(KEY_CNOTICE);
     }
 
     public boolean isSafeList()
     {
-        return safeList;
+        return this.isSupported(KEY_SAFELIST);
     }
 
     public boolean isKnockExists()
     {
-        return knockExists;
+        return this.isSupported(KEY_KNOCK);
     }
 
     public boolean isWhoX()
     {
-        return whoX;
-    }
-
-    public boolean isCallerID()
-    {
-        return callerID;
+        return this.isSupported(KEY_WHOX);
     }
 
     public boolean isUserIPExists()
     {
-        return userIPExists;
+        return this.isSupported(KEY_USERIP);
     }
 
     public int getMaxWatch()
     {
-        return this.maxWatch;
+        return this.getSupportedInt(KEY_WATCH, -1);
     }
+
+    // --------------------------------
 
     public List<String> getMotd()
     {
