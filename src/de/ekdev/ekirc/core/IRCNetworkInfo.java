@@ -5,6 +5,7 @@ package de.ekdev.ekirc.core;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -20,13 +21,15 @@ public class IRCNetworkInfo
     private String channelModes;
 
     // reply 005 RPL_???
+    private HashMap<String, String> supported;
+
     private String prefixes;
     private String channelTypes;
     private String channelModes2;
     private int maxModes;
     private int maxChannels;
     private String chanLimit;
-    private int maxNickLength;
+    private int nickLength;
     private int maxBans;
     private String maxList;
     private String network;
@@ -53,6 +56,7 @@ public class IRCNetworkInfo
     private boolean whoX;
     private boolean callerID;
     private boolean userIPExists;
+    private int maxWatch;
 
     //
     private List<String> motd;
@@ -63,6 +67,8 @@ public class IRCNetworkInfo
 
     public IRCNetworkInfo()
     {
+        this.supported = new HashMap<String, String>();
+
         this.motd = new ArrayList<>();
         this.tempMotd = new ArrayList<>();
     }
@@ -77,13 +83,16 @@ public class IRCNetworkInfo
         this.userModes = ircNetworkInfo.userModes;
         this.channelModes = ircNetworkInfo.channelModes;
 
+        // copy all entries
+        this.supported.putAll(ircNetworkInfo.supported);
+
         this.prefixes = ircNetworkInfo.prefixes;
         this.channelTypes = ircNetworkInfo.channelTypes;
         this.channelModes2 = ircNetworkInfo.channelModes2;
         this.maxModes = ircNetworkInfo.maxModes;
         this.maxChannels = ircNetworkInfo.maxChannels;
         this.chanLimit = ircNetworkInfo.chanLimit;
-        this.maxNickLength = ircNetworkInfo.maxNickLength;
+        this.nickLength = ircNetworkInfo.nickLength;
         this.maxBans = ircNetworkInfo.maxBans;
         this.maxList = ircNetworkInfo.maxList;
         this.network = ircNetworkInfo.network;
@@ -110,6 +119,7 @@ public class IRCNetworkInfo
         this.whoX = ircNetworkInfo.whoX;
         this.callerID = ircNetworkInfo.callerID;
         this.userIPExists = ircNetworkInfo.userIPExists;
+        this.maxWatch = ircNetworkInfo.maxWatch;
 
         this.motd = new ArrayList<>(ircNetworkInfo.motd);
         this.tempMotd = new ArrayList<>(ircNetworkInfo.tempMotd);
@@ -117,18 +127,186 @@ public class IRCNetworkInfo
 
     // --------------------------------------------------------------------
 
-    public IRCNetworkInfo update(IRCMessage ircMessage)
+    protected IRCNetworkInfo update(IRCMessage ircMessage)
     {
         if (ircMessage == null) return this;
         if (!ircMessage.isNumericReply()) return this;
 
         if (ircMessage.getNumericReply() == IRCNumericServerReply.RPL_MYINFO)
         {
-
+            this.serverName = ircMessage.getParams().get(1);
+            this.serverVersion = ircMessage.getParams().get(2);
+            this.userModes = ircMessage.getParams().get(3);
+            this.channelModes = ircMessage.getParams().get(4);
         }
         else if (ircMessage.getNumericReply() == IRCNumericServerReply.RPL_ISUPPORT)
         {
+            for (int i = 1; i < ircMessage.getParams().size() - 1; i++)
+            {
+                String token = ircMessage.getParams().get(i);
+                int index = token.indexOf('=');
+                String key = (i == -1) ? token : token.substring(0, index);
+                key = key.toUpperCase();
+                String value = (i == -1) ? null : token.substring(index + 1);
 
+                this.supported.put(key, value);
+
+                System.err.println("NETWORK MODE = " + token);
+
+                if (key.equals("CASEMAPPING"))
+                {
+                    this.caseMapping = value;
+                }
+                else if (key.equals("CHANTYPES"))
+                {
+                    this.channelTypes = value;
+                }
+                else if (key.equals("CHANNELLEN"))
+                {
+                    try
+                    {
+                        this.channelLength = Integer.valueOf(value);
+                    }
+                    catch (NumberFormatException e)
+                    {
+                    }
+                }
+                else if (key.equals("CHANMODES"))
+                {
+                    this.channelModes2 = value;
+                    // TODO: debug ...
+                    System.err.println("chanmodes1 = " + this.channelModes);
+                    System.err.println("chanmodes2 = " + this.channelModes2);
+                }
+                else if (key.equals("CHANLIMIT"))
+                {
+                    this.chanLimit = value;
+                }
+                else if (key.equals("ELIST"))
+                {
+                    this.eList = value;
+                }
+                else if (key.equals("EXCEPTS"))
+                {
+                    this.exceptBans = value;
+                }
+                // else if (key.equals("FNC"))
+                // {
+                // // TODO:
+                // }
+                else if (key.equals("INVEX"))
+                {
+                    this.exceptInvites = value;
+                }
+                else if (key.equals("KICKLEN"))
+                {
+                    try
+                    {
+                        this.kickLength = Integer.valueOf(value);
+                    }
+                    catch (NumberFormatException e)
+                    {
+                    }
+                }
+                else if (key.equals("KNOCK"))
+                {
+                    this.knockExists = true;
+                }
+                else if (key.equals("MAXCHANNELS"))
+                {
+                    try
+                    {
+                        this.maxChannels = Integer.valueOf(value);
+                    }
+                    catch (NumberFormatException e)
+                    {
+                    }
+                }
+                else if (key.equals("MAXLIST"))
+                {
+                    this.maxList = value;
+                }
+                else if (key.equals("MODES"))
+                {
+                    try
+                    {
+                        this.maxModes = Integer.valueOf(value);
+                    }
+                    catch (NumberFormatException e)
+                    {
+                    }
+                }
+                else if (key.equals("NETWORK"))
+                {
+                    this.network = value;
+                }
+                else if (key.equals("NICKLEN"))
+                {
+                    try
+                    {
+                        this.nickLength = Integer.valueOf(value);
+                    }
+                    catch (NumberFormatException e)
+                    {
+                    }
+                }
+                else if (key.equals("PREFIX"))
+                {
+                    this.prefixes = value;
+                }
+                else if (key.equals("RFC2812"))
+                {
+                    this.rfc2812 = true;
+                }
+                else if (key.equals("SAFELIST"))
+                {
+                    this.safeList = true;
+                }
+                // else if (key.equals("SILENCE"))
+                // {
+                // // TODO:
+                // }
+                else if (key.equals("STATUSMSG"))
+                {
+                    this.statusMessage = value;
+                }
+                else if (key.equals("STD"))
+                {
+                    this.standard = value;
+                }
+                else if (key.equals("TOPICLEN"))
+                {
+                    try
+                    {
+                        this.topicLength = Integer.valueOf(value);
+                    }
+                    catch (NumberFormatException e)
+                    {
+                    }
+                }
+                else if (key.equals("WALLCHOPS"))
+                {
+                    this.wallOps = true;
+                }
+                else if (key.equals("WALLVOICES"))
+                {
+                    this.wallVoices = true;
+                }
+                else if (key.equals("WATCH"))
+                {
+                    try
+                    {
+                        this.topicLength = Integer.valueOf(value);
+                    }
+                    catch (NumberFormatException e)
+                    {
+                    }
+                }
+                else
+                {
+                    // unknown - ignore
+                }
+            }
         }
 
         return this;
@@ -136,238 +314,246 @@ public class IRCNetworkInfo
 
     // --------------------------------------------------------------------
 
-    public IRCNetworkInfo setServerName(String serverName)
+    // --------------------------------------------------------------------
+
+    protected IRCNetworkInfo setServerName(String serverName)
     {
         this.serverName = serverName;
         return this;
     }
 
-    public IRCNetworkInfo setServerVersion(String serverVersion)
+    protected IRCNetworkInfo setServerVersion(String serverVersion)
     {
         this.serverVersion = serverVersion;
         return this;
     }
 
-    public IRCNetworkInfo setUserModes(String userModes)
+    protected IRCNetworkInfo setUserModes(String userModes)
     {
         this.userModes = userModes;
         return this;
     }
 
-    public IRCNetworkInfo setChannelModes(String channelModes)
+    protected IRCNetworkInfo setChannelModes(String channelModes)
     {
         this.channelModes = channelModes;
         return this;
     }
 
-    public IRCNetworkInfo setPrefixes(String prefixes)
+    protected IRCNetworkInfo setPrefixes(String prefixes)
     {
         this.prefixes = prefixes;
         return this;
     }
 
-    public IRCNetworkInfo setChannelTypes(String channelTypes)
+    protected IRCNetworkInfo setChannelTypes(String channelTypes)
     {
         this.channelTypes = channelTypes;
         return this;
     }
 
-    public IRCNetworkInfo setChannelModes2(String channelModes2)
+    protected IRCNetworkInfo setChannelModes2(String channelModes2)
     {
         // TODO: ?
         this.channelModes2 = channelModes2;
         return this;
     }
 
-    public IRCNetworkInfo setMaxModes(int maxModes)
+    protected IRCNetworkInfo setMaxModes(int maxModes)
     {
         this.maxModes = maxModes;
         return this;
     }
 
-    public IRCNetworkInfo setMaxChannels(int maxChannels)
+    protected IRCNetworkInfo setMaxChannels(int maxChannels)
     {
         this.maxChannels = maxChannels;
         return this;
     }
 
-    public IRCNetworkInfo setChanLimit(String chanLimit)
+    protected IRCNetworkInfo setChanLimit(String chanLimit)
     {
         this.chanLimit = chanLimit;
         return this;
     }
 
-    public IRCNetworkInfo setMaxNickLength(int maxNickLength)
+    protected IRCNetworkInfo setMaxNickLength(int maxNickLength)
     {
-        this.maxNickLength = maxNickLength;
+        this.nickLength = maxNickLength;
         return this;
     }
 
-    public IRCNetworkInfo setMaxBans(int maxBans)
+    protected IRCNetworkInfo setMaxBans(int maxBans)
     {
         this.maxBans = maxBans;
         return this;
     }
 
-    public IRCNetworkInfo setMaxList(String maxList)
+    protected IRCNetworkInfo setMaxList(String maxList)
     {
         this.maxList = maxList;
         return this;
     }
 
-    public IRCNetworkInfo setNetwork(String network)
+    protected IRCNetworkInfo setNetwork(String network)
     {
         this.network = network;
         return this;
     }
 
-    public IRCNetworkInfo setExceptBans(String exceptBans)
+    protected IRCNetworkInfo setExceptBans(String exceptBans)
     {
         this.exceptBans = exceptBans;
         return this;
     }
 
-    public IRCNetworkInfo setExceptInvites(String exceptInvites)
+    protected IRCNetworkInfo setExceptInvites(String exceptInvites)
     {
         this.exceptInvites = exceptInvites;
         return this;
     }
 
-    public IRCNetworkInfo setWallOps(boolean wallOps)
+    protected IRCNetworkInfo setWallOps(boolean wallOps)
     {
         this.wallOps = wallOps;
         return this;
     }
 
-    public IRCNetworkInfo setWallVoices(boolean wallVoices)
+    protected IRCNetworkInfo setWallVoices(boolean wallVoices)
     {
         this.wallVoices = wallVoices;
         return this;
     }
 
-    public IRCNetworkInfo setStatusMessage(String statusMessage)
+    protected IRCNetworkInfo setStatusMessage(String statusMessage)
     {
         this.statusMessage = statusMessage;
         return this;
     }
 
-    public IRCNetworkInfo setCaseMapping(String caseMapping)
+    protected IRCNetworkInfo setCaseMapping(String caseMapping)
     {
         this.caseMapping = caseMapping;
         return this;
     }
 
-    public IRCNetworkInfo setCharset(String charset)
+    protected IRCNetworkInfo setCharset(String charset)
     {
         this.charset = charset;
         return this;
     }
 
-    public IRCNetworkInfo seteList(String eList)
+    protected IRCNetworkInfo seteList(String eList)
     {
         this.eList = eList;
         return this;
     }
 
-    public IRCNetworkInfo setTopicLength(int topicLength)
+    protected IRCNetworkInfo setTopicLength(int topicLength)
     {
         this.topicLength = topicLength;
         return this;
     }
 
-    public IRCNetworkInfo setKickLength(int kickLength)
+    protected IRCNetworkInfo setKickLength(int kickLength)
     {
         this.kickLength = kickLength;
         return this;
     }
 
-    public IRCNetworkInfo setChannelLength(int channelLength)
+    protected IRCNetworkInfo setChannelLength(int channelLength)
     {
         this.channelLength = channelLength;
         return this;
     }
 
-    public IRCNetworkInfo setChannelIDLength(String channelIDLength)
+    protected IRCNetworkInfo setChannelIDLength(String channelIDLength)
     {
         this.channelIDLength = channelIDLength;
         return this;
     }
 
-    public IRCNetworkInfo setStandard(String standard)
+    protected IRCNetworkInfo setStandard(String standard)
     {
         this.standard = standard;
         return this;
     }
 
-    public IRCNetworkInfo setSilence(int silence)
+    protected IRCNetworkInfo setSilence(int silence)
     {
         this.silence = silence;
         return this;
     }
 
-    public IRCNetworkInfo setRfc2812(boolean rfc2812)
+    protected IRCNetworkInfo setRfc2812(boolean rfc2812)
     {
         this.rfc2812 = rfc2812;
         return this;
     }
 
-    public IRCNetworkInfo setPenalty(boolean penalty)
+    protected IRCNetworkInfo setPenalty(boolean penalty)
     {
         this.penalty = penalty;
         return this;
     }
 
-    public IRCNetworkInfo setcPrivMsgExists(boolean cPrivMsgExists)
+    protected IRCNetworkInfo setcPrivMsgExists(boolean cPrivMsgExists)
     {
         this.cPrivMsgExists = cPrivMsgExists;
         return this;
     }
 
-    public IRCNetworkInfo setcNoticeExists(boolean cNoticeExists)
+    protected IRCNetworkInfo setcNoticeExists(boolean cNoticeExists)
     {
         this.cNoticeExists = cNoticeExists;
         return this;
     }
 
-    public IRCNetworkInfo setSafeList(boolean safeList)
+    protected IRCNetworkInfo setSafeList(boolean safeList)
     {
         this.safeList = safeList;
         return this;
     }
 
-    public IRCNetworkInfo setKnockExists(boolean knockExists)
+    protected IRCNetworkInfo setKnockExists(boolean knockExists)
     {
         this.knockExists = knockExists;
         return this;
     }
 
-    public IRCNetworkInfo setWhoX(boolean whoX)
+    protected IRCNetworkInfo setWhoX(boolean whoX)
     {
         this.whoX = whoX;
         return this;
     }
 
-    public IRCNetworkInfo setCallerID(boolean callerID)
+    protected IRCNetworkInfo setCallerID(boolean callerID)
     {
         this.callerID = callerID;
         return this;
     }
 
-    public IRCNetworkInfo setUserIPExists(boolean userIPExists)
+    protected IRCNetworkInfo setUserIPExists(boolean userIPExists)
     {
         this.userIPExists = userIPExists;
         return this;
     }
 
+    protected IRCNetworkInfo setMaxWatch(int maxWatch)
+    {
+        this.maxWatch = maxWatch;
+        return this;
+    }
+
     // --------------------------------------------------------------------
 
-    public IRCNetworkInfo newMotd()
+    protected IRCNetworkInfo newMotd()
     {
         this.tempMotd = new ArrayList<>();
         return this;
     }
 
-    public IRCNetworkInfo addModtLine(String line)
+    protected IRCNetworkInfo addModtLine(String line)
     {
         if (line == null) return this;
 
@@ -375,7 +561,7 @@ public class IRCNetworkInfo
         return this;
     }
 
-    public IRCNetworkInfo finishNewMotd()
+    protected IRCNetworkInfo finishNewMotd()
     {
         this.motd = new ArrayList<>(this.tempMotd);
         this.tempMotd.clear();
@@ -437,7 +623,7 @@ public class IRCNetworkInfo
 
     public int getMaxNickLength()
     {
-        return maxNickLength;
+        return nickLength;
     }
 
     public int getMaxBans()
@@ -568,6 +754,11 @@ public class IRCNetworkInfo
     public boolean isUserIPExists()
     {
         return userIPExists;
+    }
+
+    public int getMaxWatch()
+    {
+        return this.maxWatch;
     }
 
     public List<String> getMotd()
