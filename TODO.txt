@@ -38,16 +38,21 @@ ToDo / ToThinkAbout:
     - store/order events in sub packages?
 
 
+- PlugIn-Manager (dynamic reloading)
+    - more efficient testing if working ... :)
+    - Groovy? [http://groovy.codehaus.org/Embedding+Groovy]
+    - JPF
+    - OSGi (too much)
+    - Bukkit-PlugIn-System (no unloading, only disabling)
+    - own class loader (unloading?)
+
+
 #####
 - IRCManager
     - how to connect to different networks? (same network multiple time)
     - reconnect ? (how)
     - store persistent information (channel, credentials (myIRCIdentity))
     - on disconnect create onConnect event handler for rejoining channels?
-
-
-- IRCServerInfo
-    - how to create / getter-setter (immutable?, builder?)
 
 
 - IRCConfiguration?
@@ -69,20 +74,16 @@ ToDo / ToThinkAbout:
     - store channels in User? (information hiding, functionality)
 
 
+- java nio.* ?
+
+
 - sort events in sub-packages?
     - user, channel, connection, message, ...
 
 
-- dcc message?
-
-
 #####
 - server reply codes
-    - store server reply codes in static final variables (constants) rather than enums?
-    - enum with double number code -> lookup conflict
-    - add all known numbers to enum -> no number lookup (how to do default with multiple?)
     - provide separate subclasses for server specific numbers
-    - use literal server commands from command classes or from enum
 
 
 - rename fields/methods(properties)?
