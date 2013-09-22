@@ -12,6 +12,7 @@ ToDo / ToThinkAbout:
     - dependency injection (guice?) !
     - project lombok?
     - logging framework (log4j2?)
+      - MongoDB (store), kibana (view) ...
 
 
 - define interfaces for all communications
@@ -61,6 +62,14 @@ ToDo / ToThinkAbout:
 
 - IRCUser/IRCChannel
     - store what?
+
+
+- IRCUserManager/IRCChannelManager
+    - as Inteface, implemented in IRCNetwork
+
+
+- Java 8 - Functional Interface
+    - IRCNetwork getIRCNetwork() - name?
 
 
 - IRCValidation?
