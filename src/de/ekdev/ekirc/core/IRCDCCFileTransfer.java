@@ -623,7 +623,7 @@ public class IRCDCCFileTransfer implements Runnable
         return this.status == IRCDCCFileTransfer.Status.FINISHED;
     }
 
-    private void send()
+    protected void send()
     {
         // TODO: implement
         throw new UnsupportedOperationException("Not yet implemented.");

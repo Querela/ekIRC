@@ -16,7 +16,7 @@ public abstract class Event
     {
         this.source = source;
     }
-    
+
     public Object getSource()
     {
         return this.source;

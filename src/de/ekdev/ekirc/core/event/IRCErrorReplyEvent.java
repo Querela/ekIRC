@@ -153,7 +153,7 @@ public class IRCErrorReplyEvent extends IRCNetworkInfoEvent
     {
         ALL, CHANNEL, USER, SERVER, COMMAND, REGISTRATION
     }
-    
+
     // public static enum Scope
     // {
     // ALL, CHANNEL

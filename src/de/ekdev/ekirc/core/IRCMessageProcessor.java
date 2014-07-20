@@ -698,7 +698,7 @@ public class IRCMessageProcessor
         }
         catch (Exception e)
         {
-            throw new IllegalArgumentException("IRCMessage has unknown command!");
+            throw new IllegalArgumentException("IRCMessage has unknown command!", e);
         }
 
         // check if message from user or server
@@ -804,7 +804,7 @@ public class IRCMessageProcessor
         }
         catch (Exception e)
         {
-            throw new IllegalArgumentException("IRCMessage has unknown command!");
+            throw new IllegalArgumentException("IRCMessage has unknown command!", e);
         }
 
         List<IRCExtendedDataMessage> le = this.extractCTCPDataMessages(middleLevelMessage);
@@ -980,10 +980,23 @@ public class IRCMessageProcessor
         StringBuilder sb = new StringBuilder(message);
 
         List<Integer> ints = this.getCTCPMessageIndizes(message);
-        for (int i = 0; i < ints.size(); i += 2)
+        // TODO: change to backwards, forward will result in wrong substitution if more than one CTCP msg
+        // Forwards
+        // for (int i = 0; i < ints.size(); i += 2)
+        // {
+        // sb.replace(ints.get(i), ints.get(i + 1) + 1, "");
+        // }
+        // Backwards
+        // for (int i = ints.size() - 1; i >= 0; i -= 2)
+        // {
+        // sb.replace(ints.get(i - 1), ints.get(i) + 1, "");
+        // }
+
+        while (ints.size() >= 2)
         {
-            sb.replace(ints.get(i), ints.get(i + 1) + 1, "");
-        }
+            sb.replace(ints.get(0), ints.get(1), "");
+            ints = this.getCTCPMessageIndizes(sb.toString());
+        } // while
 
         return sb.toString();
     }
