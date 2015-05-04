@@ -39,18 +39,19 @@ public class IRCConnectionLog
         // create a file output log
         Objects.requireNonNull(filename, "filename must not be null!");
 
-        file = new File(filename);
+        this.file = new File(filename);
 
-        boolean fileexists = file.exists();
+        boolean fileexists = this.file.exists();
 
-        if (fileexists && !file.isFile())
+        if (fileexists && !this.file.isFile())
         {
             throw new IllegalArgumentException("Argument filename specifies no file!");
         }
 
         this.writer = new PrintWriter(new BufferedWriter(
-                new OutputStreamWriter(new FileOutputStream(file, append), Charset.defaultCharset())));
+                new OutputStreamWriter(new FileOutputStream(this.file, append), Charset.defaultCharset())));
         this.canWrite = true;
+        this.createWriterCloseShutdownHandler();
 
         // append a empty line if file existed and probably had Content
         if (fileexists && append) this.line("");
@@ -64,8 +65,9 @@ public class IRCConnectionLog
         // this.file.deleteOnExit();
 
         this.writer = new PrintWriter(new BufferedWriter(
-                new OutputStreamWriter(new FileOutputStream(file, false), Charset.defaultCharset())));
+                new OutputStreamWriter(new FileOutputStream(this.file, false), Charset.defaultCharset())));
         this.canWrite = true;
+        this.createWriterCloseShutdownHandler();
     }
 
     public IRCConnectionLog(OutputStream os)
@@ -80,6 +82,18 @@ public class IRCConnectionLog
     }
 
     // ------------------------------------------------------------------------
+
+    protected void createWriterCloseShutdownHandler()
+    {
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                writer.close();
+            }
+        }, this.getClass().getCanonicalName() + "-ShutdownHook"));
+    }
 
     public void close()
     {
