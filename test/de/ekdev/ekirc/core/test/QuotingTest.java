@@ -24,7 +24,8 @@ public class QuotingTest
         IRCIdentity ircIdentity = new IRCIdentity("a", "a");
         IRCNetwork ircNetwork = new IRCNetwork(ircManager, ircIdentity, "", 0);
 
-        new IRCMessageProcessor(ircNetwork) {
+        new IRCMessageProcessor(ircNetwork)
+        {
             public void doSomething()
             {
                 String message1 = "\u0001ACTION :barfs on the floor\u0001";
@@ -34,7 +35,8 @@ public class QuotingTest
             }
         }.doSomething();
 
-        new IRCMessageProcessor(ircNetwork) {
+        new IRCMessageProcessor(ircNetwork)
+        {
             public void doSomething()
             {
                 // String message1 = "\\n\\t\\big\\020\\001\\000\\\\:";
@@ -45,7 +47,8 @@ public class QuotingTest
             }
         }.doSomething();
 
-        new IRCMessageProcessor(ircNetwork) {
+        new IRCMessageProcessor(ircNetwork)
+        {
             public void doSomething()
             {
                 String message1 = "PRIVMSG victim :\001SED \n\t\big\020\\a\000\\\\:\001";

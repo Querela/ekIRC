@@ -60,9 +60,9 @@ public class IRCExtendedDataMessage
     {
         // tag mustn't contain space or CTCP_XDELIM
         // extendedData mustn't contain CTCP_XDELIM
-        return IRCMessageProcessor.CTCP_XDELIM + tag + " "
-                + ((quoteCTCP) ? IRCMessageProcessor.quoteCTCP(extendedData) : extendedData)
-                + IRCMessageProcessor.CTCP_XDELIM;
+        return IRCMessageProcessor.CTCP_XDELIM + tag + " " + ((quoteCTCP) ?
+                IRCMessageProcessor.quoteCTCP(extendedData) :
+                extendedData) + IRCMessageProcessor.CTCP_XDELIM;
     }
 
     // ------------------------------------------------------------------------

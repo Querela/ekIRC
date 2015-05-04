@@ -17,11 +17,11 @@ public enum IRCDCCType
      */
     SEND,
     /**
-     * 
+     *
      */
     RESUME,
     /**
-     * 
+     *
      */
     ACCEPT
 }

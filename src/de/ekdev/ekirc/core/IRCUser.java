@@ -3,14 +3,10 @@
  */
 package de.ekdev.ekirc.core;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Set;
-
 import de.ekdev.ekirc.core.commands.message.IRCNoticeCommand;
 import de.ekdev.ekirc.core.commands.message.IRCPrivateMessageCommand;
+
+import java.util.*;
 
 /**
  * @author ekDev
@@ -38,7 +34,8 @@ public class IRCUser implements Comparable<IRCUser>
 
     // ------------------------------------------------------------------------
 
-    public IRCUser(IRCUserManager ircUserManager, String nickname) throws NullPointerException
+    public IRCUser(IRCUserManager ircUserManager, String nickname)
+            throws NullPointerException
     {
         Objects.requireNonNull(ircUserManager, "ircUserManager must not be null!");
         Objects.requireNonNull(nickname, "nickname must not be null!");
@@ -87,9 +84,10 @@ public class IRCUser implements Comparable<IRCUser>
 
     public String getPrefix()
     {
-        return this.nickname
-                + ((this.host != null) ? ((this.username != null) ? IRCUser.USER_EXCLAMATION_MARK + this.username : "")
-                        + IRCUser.USER_AT + this.host : "");
+        return this.nickname + ((this.host != null) ?
+                ((this.username != null) ? IRCUser.USER_EXCLAMATION_MARK + this.username : "") + IRCUser.USER_AT
+                        + this.host :
+                "");
     }
 
     protected void setNickname(String newNickname)
@@ -189,7 +187,8 @@ public class IRCUser implements Comparable<IRCUser>
     // ------------------------------------------------------------------------
     // Actions
 
-    public void sendPrivateMessage(String message) throws NullPointerException
+    public void sendPrivateMessage(String message)
+            throws NullPointerException
     {
         AsIRCMessage ircMessage = new IRCPrivateMessageCommand(this, message);
 
@@ -213,7 +212,8 @@ public class IRCUser implements Comparable<IRCUser>
         return ret;
     }
 
-    public void sendNotice(String message) throws NullPointerException
+    public void sendNotice(String message)
+            throws NullPointerException
     {
         AsIRCMessage ircMessage = new IRCNoticeCommand(this, message);
 
@@ -244,7 +244,8 @@ public class IRCUser implements Comparable<IRCUser>
 
     // ------------------------------------------------------------------------
 
-    public static String validateNickname(String nickname) throws NullPointerException, IRCNicknameFormatException
+    public static String validateNickname(String nickname)
+            throws NullPointerException, IRCNicknameFormatException
     {
         Objects.requireNonNull(nickname, "Invalid nickname format: nickname must not be null!");
         if (nickname.length() == 0)
@@ -265,28 +266,30 @@ public class IRCUser implements Comparable<IRCUser>
                     || (c >= 0x61 && c <= 0x7A) // letter: a-z
                     || (c >= 0x5B && c <= 0x60) // special: [\\]^_`
                     || (c >= 0x7B && c <= 0x7D) // special: {|}
-            )
+                    )
             {
                 continue;
             }
             else if ((i > 0) && // not the first
                     ((c >= 0x30 && c <= 0x39) // digit: 0-9
-                    || (c == 0x2d)) // hypen/minus: -
-            )
+                            || (c == 0x2d)) // hypen/minus: -
+                    )
             {
                 continue;
             }
             else
             {
-                throw new IRCNicknameFormatException("nickname contains an illegal character: "
-                        + ((c >= 0x20) ? "\"" + c + "\" " : "") + "[0x" + String.format("%02X", c) + "] at index " + i);
+                throw new IRCNicknameFormatException(
+                        "nickname contains an illegal character: " + ((c >= 0x20) ? "\"" + c + "\" " : "") + "[0x"
+                                + String.format("%02X", c) + "] at index " + i);
             }
         }
 
         return nickname;
     }
 
-    public static String validateUsername(String username) throws NullPointerException, IRCUsernameFormatException
+    public static String validateUsername(String username)
+            throws NullPointerException, IRCUsernameFormatException
     {
         Objects.requireNonNull(username, "Invalid username format: username must not be null!");
         if (username.length() == 0)
@@ -318,7 +321,8 @@ public class IRCUser implements Comparable<IRCUser>
         return username;
     }
 
-    public static String validateHost(String host) throws NullPointerException, IRCHostFormatException
+    public static String validateHost(String host)
+            throws NullPointerException, IRCHostFormatException
     {
         Objects.requireNonNull(host, "Invalid host format: host must not be null!");
 

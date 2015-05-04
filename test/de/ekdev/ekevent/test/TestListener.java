@@ -8,7 +8,6 @@ import de.ekdev.ekevent.EventListener;
 
 /**
  * @author ekDev
- * 
  */
 public class TestListener implements EventListener
 {

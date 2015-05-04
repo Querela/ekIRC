@@ -3,15 +3,11 @@
  */
 package de.ekdev.ekirc.core.commands.message;
 
+import de.ekdev.ekirc.core.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import de.ekdev.ekirc.core.AsIRCMessage;
-import de.ekdev.ekirc.core.IRCChannel;
-import de.ekdev.ekirc.core.IRCMessage;
-import de.ekdev.ekirc.core.IRCMessageProcessor;
-import de.ekdev.ekirc.core.IRCUser;
 
 /**
  * @author ekDev
@@ -41,12 +37,14 @@ public class IRCPrivateMessageCommand implements AsIRCMessage
         this.message = message;
     }
 
-    public IRCPrivateMessageCommand(IRCUser targetIRCUser, String message) throws NullPointerException
+    public IRCPrivateMessageCommand(IRCUser targetIRCUser, String message)
+            throws NullPointerException
     {
         this(Objects.requireNonNull(targetIRCUser, "targetIRCUser must not be null!").getNickname(), message, true);
     }
 
-    public IRCPrivateMessageCommand(IRCChannel targetIRCChannel, String message) throws NullPointerException
+    public IRCPrivateMessageCommand(IRCChannel targetIRCChannel, String message)
+            throws NullPointerException
     {
         this(Objects.requireNonNull(targetIRCChannel, "targetIRCChannel must not be null!").getName(), message, true);
     }

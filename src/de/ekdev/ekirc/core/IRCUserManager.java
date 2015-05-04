@@ -15,7 +15,8 @@ public class IRCUserManager
 
     private final ConcurrentHashMap<String, IRCUser> users;
 
-    public IRCUserManager(IRCNetwork ircNetwork) throws NullPointerException
+    public IRCUserManager(IRCNetwork ircNetwork)
+            throws NullPointerException
     {
         Objects.requireNonNull(ircNetwork, "ircNetwork must not be null!");
 

@@ -3,11 +3,7 @@
  */
 package de.ekdev.ekirc.core;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author ekDev
@@ -79,7 +75,8 @@ public class IRCNetworkInfo
         this.tempMotd = new ArrayList<>();
     }
 
-    public IRCNetworkInfo(IRCNetworkInfo ircNetworkInfo) throws NullPointerException
+    public IRCNetworkInfo(IRCNetworkInfo ircNetworkInfo)
+            throws NullPointerException
     {
         this();
         Objects.requireNonNull(ircNetworkInfo, "ircNetworkInfo must not be null!");

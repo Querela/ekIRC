@@ -3,21 +3,12 @@
  */
 package de.ekdev.ekirc.core;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
-import de.ekdev.ekirc.core.commands.channel.IRCChannelModeCommand;
-import de.ekdev.ekirc.core.commands.channel.IRCJoinCommand;
-import de.ekdev.ekirc.core.commands.channel.IRCNamesCommand;
-import de.ekdev.ekirc.core.commands.channel.IRCPartCommand;
-import de.ekdev.ekirc.core.commands.channel.IRCTopicCommand;
+import de.ekdev.ekirc.core.commands.channel.*;
 import de.ekdev.ekirc.core.commands.message.IRCNoticeCommand;
 import de.ekdev.ekirc.core.commands.message.IRCPrivateMessageCommand;
 import de.ekdev.ekirc.core.commands.user.IRCWhoCommand;
+
+import java.util.*;
 
 /**
  * @author ekDev
@@ -46,7 +37,8 @@ public class IRCChannel
 
     // ------------------------------------------------------------------------
 
-    public IRCChannel(IRCChannelManager ircChannelManager, String name, String topic) throws NullPointerException
+    public IRCChannel(IRCChannelManager ircChannelManager, String name, String topic)
+            throws NullPointerException
     {
         Objects.requireNonNull(ircChannelManager, "ircChannelManager must not be null!");
         Objects.requireNonNull(name, "name must not be null!");
@@ -61,7 +53,8 @@ public class IRCChannel
         this.ircChannelManager.addIRCChannel(this);
     }
 
-    public IRCChannel(IRCChannelManager ircChannelManager, String name) throws NullPointerException
+    public IRCChannel(IRCChannelManager ircChannelManager, String name)
+            throws NullPointerException
     {
         this(ircChannelManager, name, null);
     }
@@ -224,7 +217,8 @@ public class IRCChannel
     // ------------------------------------------------------------------------
     // Actions
 
-    public void sendPrivateMessage(String message) throws NullPointerException
+    public void sendPrivateMessage(String message)
+            throws NullPointerException
     {
         AsIRCMessage ircMessage = new IRCPrivateMessageCommand(this, message);
 
@@ -248,7 +242,8 @@ public class IRCChannel
         return ret;
     }
 
-    public void sendNotice(String message) throws NullPointerException
+    public void sendNotice(String message)
+            throws NullPointerException
     {
         AsIRCMessage ircMessage = new IRCNoticeCommand(this, message);
 
@@ -314,7 +309,8 @@ public class IRCChannel
         this.ircChannelManager.getIRCNetwork().send(new IRCTopicCommand(this));
     }
 
-    public void refreshIRCUserList() throws NullPointerException
+    public void refreshIRCUserList()
+            throws NullPointerException
     {
         // TODO: which one?
         this.ircChannelManager.getIRCNetwork().send(new IRCNamesCommand(this)); // short listing
@@ -341,8 +337,8 @@ public class IRCChannel
 
     // ------------------------------------------------------------------------
 
-    public static String validateChannelname(String channelname) throws NullPointerException,
-            IRCChannelNameFormatException
+    public static String validateChannelname(String channelname)
+            throws NullPointerException, IRCChannelNameFormatException
     {
         Objects.requireNonNull(channelname, "Invalid channelname format: channelname must not be null!");
         if (channelname.length() == 0)
@@ -393,8 +389,8 @@ public class IRCChannel
         return channelname;
     }
 
-    public static String validateChannelkey(String channelkey) throws NullPointerException,
-            IRCChannelKeyFormatException
+    public static String validateChannelkey(String channelkey)
+            throws NullPointerException, IRCChannelKeyFormatException
     {
         Objects.requireNonNull(channelkey, "Invalid channelname format: channelname must not be null!");
         if (channelkey.length() == 0)

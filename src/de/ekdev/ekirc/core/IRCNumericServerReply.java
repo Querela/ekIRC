@@ -5,13 +5,13 @@ package de.ekdev.ekirc.core;
 
 /**
  * Numeric reply constants for IRC server.
- * 
+ *
+ * @author ekDev
  * @see <a href="http://datatracker.ietf.org/doc/rfc1459/?include_text=1">RFC 1459</a>
  * @see <a href="http://datatracker.ietf.org/doc/rfc2812/?include_text=1">RFC 2812</a>
  * @see <a
- *      href="http://www.networksorcery.com/enp/protocol/irc.htm">http://www.networksorcery.com/enp/protocol/irc.htm</a>
+ * href="http://www.networksorcery.com/enp/protocol/irc.htm">http://www.networksorcery.com/enp/protocol/irc.htm</a>
  * @see <a href="https://www.alien.net.au/irc/irc2numerics.html">https://www.alien.net.au/irc/irc2numerics.html</a>
- * @author ekDev
  */
 public class IRCNumericServerReply
 {
@@ -36,14 +36,14 @@ public class IRCNumericServerReply
     public final static int RPL_MYINFO = 004;
     /**
      * http://www.irc.org/tech_docs/005.html<br />
-     * 
+     *
      * @see RPL_PROTOCTL
      */
     public final static int RPL_ISUPPORT = 005;
     /**
      * "Try server &lt;server name&gt;, port &lt;port number&gt;"<br />
      * never used like this?
-     * 
+     *
      * @see RPL_SLINE
      */
     public final static int RPL_BOUNCE = 005;
@@ -196,7 +196,7 @@ public class IRCNumericServerReply
      */
     public final static int ERR_YOUREBANNEDCREEP = 465;
     /**
-     * 
+     *
      */
     public final static int ERR_YOUWILLBEBANNED = 466;
     /**
@@ -357,7 +357,7 @@ public class IRCNumericServerReply
     public final static int RPL_TOPIC = 332;
     /**
      * "&lt;channel&gt; &lt;topic setter&gt; &lt;time&gt;"
-     * 
+     *
      * @see RPL_TOPICWHOTIME
      */
     public final static int RPL_TOPICINFO = 333;
@@ -606,102 +606,102 @@ public class IRCNumericServerReply
     // --------------------------------
     // Reserved numerics
     /**
-    * 
-    */
+     *
+     */
     public final static int RPL_SERVICEINFO = 231;
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_ENDOFSERVICES = 232;
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_SERVICE = 233;
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_NONE = 300;
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_WHOISCHANOP = 316;
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_KILLDONE = 361;
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_CLOSING = 362;
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_CLOSEEND = 363;
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_INFOSTART = 373;
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_MYPORTIS = 384;
 
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_STATSCLINE = 213;
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_STATSNLINE = 214;
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_STATSILINE = 215;
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_STATSKLINE = 216;
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_STATSQLINE = 217;
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_STATSYLINE = 218;
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_STATSVLINE = 240;
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_STATSLLINE = 241;
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_STATSHLINE = 244;
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_STATSSLINE = 244;
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_STATSPING = 246;
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_STATSBLINE = 247;
     /**
-        * 
-        */
+     *
+     */
     public final static int RPL_STATSDLINE = 250;
 
     /**
-        * 
-        */
+     *
+     */
     public final static int ERR_NOSERVICEHOST = 492;
 
     // ------------------------------------------------------------------------

@@ -47,8 +47,10 @@ public class IRCUtils
 
     public static String concatenateChannelNames(final Collection<IRCChannel> ircChannels)
     {
-        List<String> list = new ArrayList<String>() {
+        List<String> list = new ArrayList<String>()
+        {
             private static final long serialVersionUID = 1L;
+
             {
                 for (IRCChannel ircChannel : ircChannels)
                 {

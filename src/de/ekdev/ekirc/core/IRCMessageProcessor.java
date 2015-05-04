@@ -3,40 +3,13 @@
  */
 package de.ekdev.ekirc.core;
 
-import static de.ekdev.ekirc.core.IRCNumericServerReply.*;
+import de.ekdev.ekirc.core.event.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import de.ekdev.ekirc.core.event.ActionMessageToChannelEvent;
-import de.ekdev.ekirc.core.event.ActionMessageToUserEvent;
-import de.ekdev.ekirc.core.event.IRCChannelInfoEvent;
-import de.ekdev.ekirc.core.event.ChannelListUpdateEvent;
-import de.ekdev.ekirc.core.event.ChannelModeChangeEvent;
-import de.ekdev.ekirc.core.event.ChannelModeUpdateEvent;
-import de.ekdev.ekirc.core.event.ChannelTopicUpdateEvent;
-import de.ekdev.ekirc.core.event.IRCErrorReplyEvent;
-import de.ekdev.ekirc.core.event.IRCLoggedInEvent;
-import de.ekdev.ekirc.core.event.IRCNetworkInfoEvent;
-import de.ekdev.ekirc.core.event.JoinEvent;
-import de.ekdev.ekirc.core.event.KickEvent;
-import de.ekdev.ekirc.core.event.MotdUpdatedEvent;
-import de.ekdev.ekirc.core.event.MotdUpdatingEvent;
-import de.ekdev.ekirc.core.event.NickAlreadyInUseEvent;
-import de.ekdev.ekirc.core.event.NickChangeEvent;
-import de.ekdev.ekirc.core.event.NoticeToChannelEvent;
-import de.ekdev.ekirc.core.event.NoticeToUserEvent;
-import de.ekdev.ekirc.core.event.PartEvent;
-import de.ekdev.ekirc.core.event.PingEvent;
-import de.ekdev.ekirc.core.event.PrivateMessageToChannelEvent;
-import de.ekdev.ekirc.core.event.PrivateMessageToUserEvent;
-import de.ekdev.ekirc.core.event.QuitEvent;
-import de.ekdev.ekirc.core.event.UnknownCTCPCommandEvent;
-import de.ekdev.ekirc.core.event.UnknownDCCCommandEvent;
-import de.ekdev.ekirc.core.event.UnknownServerCommandEvent;
-import de.ekdev.ekirc.core.event.UserInfoUpdateEvent;
-import de.ekdev.ekirc.core.event.UserModeChangeEvent;
+import static de.ekdev.ekirc.core.IRCNumericServerReply.*;
 
 /**
  * @author ekDev
@@ -55,7 +28,8 @@ public class IRCMessageProcessor
 
     // ------------------------------------------------------------------------
 
-    public IRCMessageProcessor(IRCNetwork ircNetwork) throws NullPointerException
+    public IRCMessageProcessor(IRCNetwork ircNetwork)
+            throws NullPointerException
     {
         Objects.requireNonNull(ircNetwork, "ircNetwork must not be null!");
 
@@ -66,7 +40,8 @@ public class IRCMessageProcessor
 
     // ------------------------------------------------------------------------
 
-    protected IRCMessage parseRawLine(String line) throws IRCMessageFormatException
+    protected IRCMessage parseRawLine(String line)
+            throws IRCMessageFormatException
     {
         // throw more exceptions?
         if (line == null || line.length() == 0) return null;
@@ -236,8 +211,8 @@ public class IRCMessageProcessor
             case RPL_LUSERME:
             {
                 this.ircNetwork.raiseEvent(new IRCNetworkInfoEvent(this.ircNetwork, im));
-                this.ircNetwork.getIRCConnectionLog().message(
-                        im.getCommand() + "-Handler (LUSER-Info) not yet implemented.");
+                this.ircNetwork.getIRCConnectionLog()
+                        .message(im.getCommand() + "-Handler (LUSER-Info) not yet implemented.");
                 break; // -----------------------------------------------------
             }
             case ERR_NICKNAMEINUSE:
@@ -316,8 +291,8 @@ public class IRCMessageProcessor
                 IRCChannel ircChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(im.getParams().get(1));
                 ircChannel.setMode(im.getParams().get(2));
 
-                this.ircNetwork.raiseEvent(new ChannelModeUpdateEvent(this.ircNetwork, ircChannel, im.getParams()
-                        .get(2)));
+                this.ircNetwork
+                        .raiseEvent(new ChannelModeUpdateEvent(this.ircNetwork, ircChannel, im.getParams().get(2)));
                 break; // -----------------------------------------------------
             }
             case RPL_CREATIONTIME:
@@ -336,8 +311,8 @@ public class IRCMessageProcessor
                     break; // no update ...
                 }
 
-                this.ircNetwork.raiseEvent(new ChannelModeUpdateEvent(this.ircNetwork, ircChannel, im.getParams()
-                        .get(2)));
+                this.ircNetwork
+                        .raiseEvent(new ChannelModeUpdateEvent(this.ircNetwork, ircChannel, im.getParams().get(2)));
                 break; // -----------------------------------------------------
             }
 
@@ -512,8 +487,8 @@ public class IRCMessageProcessor
 
             case ERR_NOOPERHOST: // OPER failed, ?
             {
-                this.ircNetwork.raiseEvent(new IRCErrorReplyEvent(this.ircNetwork, im,
-                        IRCErrorReplyEvent.Usage.REGISTRATION));
+                this.ircNetwork
+                        .raiseEvent(new IRCErrorReplyEvent(this.ircNetwork, im, IRCErrorReplyEvent.Usage.REGISTRATION));
                 break; // -----------------------------------------------------
             }
             // Channel
@@ -623,8 +598,8 @@ public class IRCMessageProcessor
 
                 ircUser.setNickname(im.getParams().get(0));
 
-                this.ircNetwork.raiseEvent(new NickChangeEvent(this.ircNetwork, ircUser, sourceNick, im.getParams()
-                        .get(0)));
+                this.ircNetwork
+                        .raiseEvent(new NickChangeEvent(this.ircNetwork, ircUser, sourceNick, im.getParams().get(0)));
                 break; // -----------------------------------------------------
             }
             case KICK:
@@ -664,8 +639,8 @@ public class IRCMessageProcessor
             case ERROR:
             {
                 // TODO: something more to do?
-                this.ircNetwork.getIRCConnectionLog().message(
-                        im.getCommand() + " - reason: '" + im.getParams().get(0) + "'");
+                this.ircNetwork.getIRCConnectionLog()
+                        .message(im.getCommand() + " - reason: '" + im.getParams().get(0) + "'");
                 this.ircNetwork.disconnect(false);
                 break; // -----------------------------------------------------
             }
@@ -746,13 +721,13 @@ public class IRCMessageProcessor
                 IRCUser targetIRCUser = this.ircNetwork.getIRCUserManager().getIRCUser(target);
                 if (isNotice)
                 {
-                    this.ircNetwork.raiseEvent(new NoticeToUserEvent(this.ircNetwork, sourceIRCUser, targetIRCUser,
-                            message));
+                    this.ircNetwork
+                            .raiseEvent(new NoticeToUserEvent(this.ircNetwork, sourceIRCUser, targetIRCUser, message));
                 }
                 else
                 {
-                    this.ircNetwork.raiseEvent(new PrivateMessageToUserEvent(this.ircNetwork, sourceIRCUser,
-                            targetIRCUser, message));
+                    this.ircNetwork.raiseEvent(
+                            new PrivateMessageToUserEvent(this.ircNetwork, sourceIRCUser, targetIRCUser, message));
                 }
             }
             else
@@ -761,13 +736,14 @@ public class IRCMessageProcessor
                 IRCChannel targetIRCChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(target);
                 if (isNotice)
                 {
-                    this.ircNetwork.raiseEvent(new NoticeToChannelEvent(this.ircNetwork, sourceIRCUser,
-                            targetIRCChannel, message));
+                    this.ircNetwork.raiseEvent(
+                            new NoticeToChannelEvent(this.ircNetwork, sourceIRCUser, targetIRCChannel, message));
                 }
                 else
                 {
-                    this.ircNetwork.raiseEvent(new PrivateMessageToChannelEvent(this.ircNetwork, sourceIRCUser,
-                            targetIRCChannel, message));
+                    this.ircNetwork.raiseEvent(
+                            new PrivateMessageToChannelEvent(this.ircNetwork, sourceIRCUser, targetIRCChannel,
+                                    message));
                 }
             }
         }
@@ -842,15 +818,17 @@ public class IRCMessageProcessor
                 {
                     // message to user
                     IRCUser targetIRCUser = this.ircNetwork.getIRCUserManager().getIRCUser(target);
-                    this.ircNetwork.raiseEvent(new ActionMessageToUserEvent(this.ircNetwork, sourceIRCUser,
-                            targetIRCUser, edm.getExtendedData()));
+                    this.ircNetwork.raiseEvent(
+                            new ActionMessageToUserEvent(this.ircNetwork, sourceIRCUser, targetIRCUser,
+                                    edm.getExtendedData()));
                 }
                 else
                 {
                     // message to channel
                     IRCChannel targetIRCChannel = this.ircNetwork.getIRCChannelManager().getIRCChannel(target);
-                    this.ircNetwork.raiseEvent(new ActionMessageToChannelEvent(this.ircNetwork, sourceIRCUser,
-                            targetIRCChannel, edm.getExtendedData()));
+                    this.ircNetwork.raiseEvent(
+                            new ActionMessageToChannelEvent(this.ircNetwork, sourceIRCUser, targetIRCChannel,
+                                    edm.getExtendedData()));
                 }
                 break; // -----------------------------------------------------
             }
@@ -1151,7 +1129,8 @@ public class IRCMessageProcessor
 
     // --------------------------------
 
-    protected IRCDCCMessage parseDCCMessage(String message) throws NullPointerException, IRCDCCMessageFormatException
+    protected IRCDCCMessage parseDCCMessage(String message)
+            throws NullPointerException, IRCDCCMessageFormatException
     {
         Objects.requireNonNull(message, "message must not be null!");
 
@@ -1290,8 +1269,9 @@ public class IRCMessageProcessor
             // update channel mode
             targetIRCChannel.updateMode(mode, modeparams);
 
-            this.ircNetwork.raiseEvent(new ChannelModeChangeEvent(this.ircNetwork, sourceIRCUser, targetIRCChannel,
-                    oldMode, modeChange.toString()));
+            this.ircNetwork.raiseEvent(
+                    new ChannelModeChangeEvent(this.ircNetwork, sourceIRCUser, targetIRCChannel, oldMode,
+                            modeChange.toString()));
         }
     }
 

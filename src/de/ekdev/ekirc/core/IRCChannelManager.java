@@ -3,13 +3,13 @@
  */
 package de.ekdev.ekirc.core;
 
+import de.ekdev.ekirc.core.commands.channel.IRCListCommand;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import de.ekdev.ekirc.core.commands.channel.IRCListCommand;
 
 /**
  * @author ekDev
@@ -22,7 +22,8 @@ public class IRCChannelManager
 
     private IRCChannelList ircChannelList;
 
-    public IRCChannelManager(IRCNetwork ircNetwork) throws NullPointerException
+    public IRCChannelManager(IRCNetwork ircNetwork)
+            throws NullPointerException
     {
         Objects.requireNonNull(ircNetwork, "ircNetwork must not be null!");
 

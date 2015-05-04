@@ -3,11 +3,11 @@
  */
 package de.ekdev.ekirc.core.event;
 
-import java.io.File;
-
 import de.ekdev.ekevent.EventListenerList;
 import de.ekdev.ekirc.core.IRCDCCFileTransfer;
 import de.ekdev.ekirc.core.IRCNetwork;
+
+import java.io.File;
 
 /**
  * @author ekDev

@@ -3,24 +3,14 @@
  */
 package de.ekdev.ekirc.core;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
+import de.ekdev.ekirc.core.event.DCCFileTransferEndEvent;
+import de.ekdev.ekirc.core.event.DCCFileTransferStartEvent;
+
+import java.io.*;
+import java.net.*;
 import java.nio.channels.SocketChannel;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import de.ekdev.ekirc.core.event.DCCFileTransferEndEvent;
-import de.ekdev.ekirc.core.event.DCCFileTransferStartEvent;
 
 /**
  * @author ekDev
@@ -59,7 +49,8 @@ public class IRCDCCFileTransfer implements Runnable
     // Incoming file transfers
 
     public IRCDCCFileTransfer(IRCDCCManager ircDCCManager, IRCUser sourceIRCUser, String filename, String address,
-            int port, long size) throws NullPointerException, IllegalArgumentException
+            int port, long size)
+            throws NullPointerException, IllegalArgumentException
     {
         this.ircDCCManager = Objects.requireNonNull(ircDCCManager, "ircDCCManager must not be null!");
         this.ircUser = Objects.requireNonNull(sourceIRCUser, "sourceIRCUser must not be null!");
@@ -86,13 +77,15 @@ public class IRCDCCFileTransfer implements Runnable
     }
 
     public IRCDCCFileTransfer(IRCDCCManager ircDCCManager, IRCUser sourceIRCUser, String filename, String address,
-            int port) throws NullPointerException, IllegalArgumentException
+            int port)
+            throws NullPointerException, IllegalArgumentException
     {
         this(ircDCCManager, sourceIRCUser, filename, address, port, -1);
     }
 
     public static IRCDCCFileTransfer fromIRCDCCMessage(IRCDCCManager ircDCCManager, IRCUser sourceIRCUser,
-            IRCDCCMessage ircDCCMessage) throws NullPointerException, IllegalArgumentException
+            IRCDCCMessage ircDCCMessage)
+            throws NullPointerException, IllegalArgumentException
     {
         Objects.requireNonNull(ircDCCMessage, "ircDCCMessage must not be null!");
 
@@ -332,8 +325,8 @@ public class IRCDCCFileTransfer implements Runnable
             return;
 
         // start event
-        this.ircDCCManager.getIRCNetwork().raiseEvent(
-                new DCCFileTransferStartEvent(this.ircDCCManager.getIRCNetwork(), this));
+        this.ircDCCManager.getIRCNetwork()
+                .raiseEvent(new DCCFileTransferStartEvent(this.ircDCCManager.getIRCNetwork(), this));
 
         if (this.direction == IRCDCCFileTransfer.Direction.INCOMING)
         {
@@ -354,8 +347,8 @@ public class IRCDCCFileTransfer implements Runnable
         }
 
         // end event
-        this.ircDCCManager.getIRCNetwork().raiseEvent(
-                new DCCFileTransferEndEvent(this.ircDCCManager.getIRCNetwork(), this));
+        this.ircDCCManager.getIRCNetwork()
+                .raiseEvent(new DCCFileTransferEndEvent(this.ircDCCManager.getIRCNetwork(), this));
     }
 
     protected boolean checkFile()
@@ -366,12 +359,9 @@ public class IRCDCCFileTransfer implements Runnable
         if (this.size > this.totalSize)
         {
             // TODO: check ?
-            this.ircDCCManager
-                    .getIRCNetwork()
-                    .getIRCConnectionLog()
-                    .message(
-                            "Local file \"" + this.localFile.getAbsolutePath()
-                                    + "\" is larger than the receiving file. Aborting.");
+            this.ircDCCManager.getIRCNetwork().getIRCConnectionLog().message(
+                    "Local file \"" + this.localFile.getAbsolutePath()
+                            + "\" is larger than the receiving file. Aborting.");
             return false;
         }
         else if (this.size > 0)
@@ -379,13 +369,10 @@ public class IRCDCCFileTransfer implements Runnable
             // may be our file
             if (this.allowResume)
             {
-                this.ircDCCManager
-                        .getIRCNetwork()
-                        .getIRCConnectionLog()
-                        .message(
-                                "Try to resume transfer <\"" + this.getFilename() + "\"> from "
-                                        + this.ircUser.getNickname());
-                this.ircDCCManager.getIRCNetwork().send(new AsIRCMessage() {
+                this.ircDCCManager.getIRCNetwork().getIRCConnectionLog().message(
+                        "Try to resume transfer <\"" + this.getFilename() + "\"> from " + this.ircUser.getNickname());
+                this.ircDCCManager.getIRCNetwork().send(new AsIRCMessage()
+                {
                     @Override
                     public String asIRCMessageString()
                     {
@@ -489,14 +476,11 @@ public class IRCDCCFileTransfer implements Runnable
             // do action ...
 
             this.status = IRCDCCFileTransfer.Status.TRANSFERING;
-            this.ircDCCManager
-                    .getIRCNetwork()
-                    .getIRCConnectionLog()
-                    .message(
-                            "Start receiving file <\"" + this.getFilename() + "\"> from " + this.ircUser.getNickname()
-                                    + "[" + IRCDCCManager.ipToString(sock.getInetAddress().getAddress()) + ":"
-                                    + this.port + "]" + " (Storing in: \"" + this.localFile.getAbsolutePath()
-                                    + "\") ... [" + Thread.currentThread().getName() + "]");
+            this.ircDCCManager.getIRCNetwork().getIRCConnectionLog().message(
+                    "Start receiving file <\"" + this.getFilename() + "\"> from " + this.ircUser.getNickname() + "["
+                            + IRCDCCManager.ipToString(sock.getInetAddress().getAddress()) + ":" + this.port + "]"
+                            + " (Storing in: \"" + this.localFile.getAbsolutePath() + "\") ... [" + Thread
+                            .currentThread().getName() + "]");
 
             byte[] buffer = new byte[IRCDCCManager.BUFFER_SIZE];
             byte[] ack = new byte[4];
@@ -549,14 +533,10 @@ public class IRCDCCFileTransfer implements Runnable
                 this.transferRate = IRCDCCFileTransfer.alphaOld * this.transferRate + // old transferRate
                         IRCDCCFileTransfer.alphaNew * bytesRead / deltaTime * 1000.0f; // new transferRate
 
-                this.ircDCCManager
-                        .getIRCNetwork()
-                        .getIRCConnectionLog()
+                this.ircDCCManager.getIRCNetwork().getIRCConnectionLog()
                         .object("transferRate [" + Thread.currentThread().getName() + "] (Byte/sec)  ",
                                 this.transferRate);
-                this.ircDCCManager
-                        .getIRCNetwork()
-                        .getIRCConnectionLog()
+                this.ircDCCManager.getIRCNetwork().getIRCConnectionLog()
                         .object("progress     [" + Thread.currentThread().getName() + "] (percentage)",
                                 this.getProgress() * 100.0f);
             }
@@ -612,13 +592,10 @@ public class IRCDCCFileTransfer implements Runnable
             }
         }
 
-        this.ircDCCManager
-                .getIRCNetwork()
-                .getIRCConnectionLog()
-                .message(
-                        "Finished receiving file <\"" + this.getFilename() + "\"> from " + this.ircUser.getNickname()
-                                + "[" + IRCDCCManager.ipToString(sock.getInetAddress().getAddress()) + ":" + this.port
-                                + "]" + " with status: " + this.status.toString());
+        this.ircDCCManager.getIRCNetwork().getIRCConnectionLog().message(
+                "Finished receiving file <\"" + this.getFilename() + "\"> from " + this.ircUser.getNickname() + "["
+                        + IRCDCCManager.ipToString(sock.getInetAddress().getAddress()) + ":" + this.port + "]"
+                        + " with status: " + this.status.toString());
 
         return this.status == IRCDCCFileTransfer.Status.FINISHED;
     }
@@ -633,12 +610,18 @@ public class IRCDCCFileTransfer implements Runnable
 
     public static enum Direction
     {
-        INCOMING, OUTGOING
+        INCOMING,
+        OUTGOING
     }
 
     public static enum Status
     {
-        WAITING, RESUMING, TRANSFERING, FINISHED, ABORTED, FAILED // PAUSED/PAUSING
+        WAITING,
+        RESUMING,
+        TRANSFERING,
+        FINISHED,
+        ABORTED,
+        FAILED // PAUSED/PAUSING
     }
 
     // ------------------------------------------------------------------------

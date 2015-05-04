@@ -3,13 +3,13 @@
  */
 package de.ekdev.ekirc.core.commands.user;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import de.ekdev.ekirc.core.AsIRCMessage;
 import de.ekdev.ekirc.core.IRCChannel;
 import de.ekdev.ekirc.core.IRCMessage;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author ekDev
@@ -66,7 +66,8 @@ public class IRCWhoCommand implements AsIRCMessage
     @Override
     public String asIRCMessageString()
     {
-        return IRCWhoCommand.COMMAND
-                + ((this.mask != null) ? ' ' + this.mask + ((this.onlyOperators) ? " o" : "") : "");
+        return IRCWhoCommand.COMMAND + ((this.mask != null) ?
+                ' ' + this.mask + ((this.onlyOperators) ? " o" : "") :
+                "");
     }
 }

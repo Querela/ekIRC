@@ -3,10 +3,6 @@
  */
 package de.ekdev.ekirc.core;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import de.ekdev.ekevent.EventException;
 import de.ekdev.ekevent.EventHandler;
 import de.ekdev.ekevent.EventListener;
@@ -15,6 +11,10 @@ import de.ekdev.ekirc.core.event.PingEvent;
 import de.ekdev.ekirc.core.event.UnknownCTCPCommandEvent;
 import de.ekdev.ekirc.core.event.UnknownDCCCommandEvent;
 import de.ekdev.ekirc.core.event.UnknownServerCommandEvent;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author ekDev
@@ -70,7 +70,8 @@ public class IRCManager
 
     protected EventListener createDefaultPingEventListener()
     {
-        return new EventListener() {
+        return new EventListener()
+        {
             @EventHandler
             public void onPingEvent(PingEvent ipe)
             {
@@ -81,17 +82,16 @@ public class IRCManager
 
     protected EventListener createDefaultUnknownCommandEventListener()
     {
-        return new EventListener() {
+        return new EventListener()
+        {
             @EventHandler
             public void onUnknownCommandEvent(UnknownServerCommandEvent iusce)
             {
                 try
                 {
-                    iusce.getIRCNetwork()
-                            .getIRCConnectionLog()
-                            .message(
-                                    iusce.getUnknownCommand() + " - Unknown Server Reply code / command! [Network: "
-                                            + iusce.getIRCNetwork().getName() + "]");
+                    iusce.getIRCNetwork().getIRCConnectionLog().message(
+                            iusce.getUnknownCommand() + " - Unknown Server Reply code / command! [Network: " + iusce
+                                    .getIRCNetwork().getName() + "]");
                 }
                 catch (Exception e)
                 {
@@ -103,13 +103,10 @@ public class IRCManager
             {
                 try
                 {
-                    iucce.getIRCNetwork()
-                            .getIRCConnectionLog()
-                            .message(
-                                    iucce.getIRCMessage().getCommand() + " <~> " + iucce.getUnknownCommand()
-                                            + " - Unknown Server Command! [Network: " + iucce.getIRCNetwork().getName()
-                                            + "] [" + iucce.getIRCMessage() + "] [" + iucce.getIRCExtendedDataMessage()
-                                            + "]");
+                    iucce.getIRCNetwork().getIRCConnectionLog().message(
+                            iucce.getIRCMessage().getCommand() + " <~> " + iucce.getUnknownCommand()
+                                    + " - Unknown Server Command! [Network: " + iucce.getIRCNetwork().getName() + "] ["
+                                    + iucce.getIRCMessage() + "] [" + iucce.getIRCExtendedDataMessage() + "]");
                 }
                 catch (Exception e)
                 {
@@ -121,15 +118,11 @@ public class IRCManager
             {
                 try
                 {
-                    iudce.getIRCNetwork()
-                            .getIRCConnectionLog()
-                            .message(
-                                    iudce.getIRCMessage().getCommand() + " <~> "
-                                            + iudce.getIRCExtendedDataMessage().getTag() + " <~> "
-                                            + iudce.getUnknownCommand() + " - Unknown Server Command! [Network: "
-                                            + iudce.getIRCNetwork().getName() + "] [" + iudce.getIRCMessage() + "] ["
-                                            + iudce.getIRCExtendedDataMessage() + "] [" + iudce.getIRCDCCMessage()
-                                            + "]");
+                    iudce.getIRCNetwork().getIRCConnectionLog().message(
+                            iudce.getIRCMessage().getCommand() + " <~> " + iudce.getIRCExtendedDataMessage().getTag()
+                                    + " <~> " + iudce.getUnknownCommand() + " - Unknown Server Command! [Network: "
+                                    + iudce.getIRCNetwork().getName() + "] [" + iudce.getIRCMessage() + "] [" + iudce
+                                    .getIRCExtendedDataMessage() + "] [" + iudce.getIRCDCCMessage() + "]");
                 }
                 catch (Exception e)
                 {

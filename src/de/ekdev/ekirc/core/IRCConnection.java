@@ -43,7 +43,8 @@ public class IRCConnection
 
     // ------------------------------------------------------------------------
 
-    protected Socket getSocket(InetAddress host, int port) throws IOException
+    protected Socket getSocket(InetAddress host, int port)
+            throws IOException
     {
         // TODO: secure socket / socketFactory ?
         // TODO: http://docs.oracle.com/javase/6/docs/api/java/nio/channels/SocketChannel.html
@@ -143,7 +144,8 @@ public class IRCConnection
 
     // ------------------------------------------------------------------------
 
-    public boolean connect() throws UnknownHostException
+    public boolean connect()
+            throws UnknownHostException
     {
         // if already connected
         if (this.isConnected())
@@ -207,7 +209,8 @@ public class IRCConnection
     }
 
     @Override
-    protected void finalize() throws Throwable
+    protected void finalize()
+            throws Throwable
     {
         this.disconnect();
 

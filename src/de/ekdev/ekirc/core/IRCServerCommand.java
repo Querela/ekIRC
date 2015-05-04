@@ -8,16 +8,27 @@ package de.ekdev.ekirc.core;
  */
 public enum IRCServerCommand
 {
-    PING, //
-    ERROR, //
-    PRIVMSG, // User normal, USER CTCP, Channel
-    JOIN, //
-    PART, //
-    NICK, //
-    NOTICE, // CTCP responses
-    QUIT, //
-    KICK, //
-    MODE, //
-    TOPIC, //
+    PING,
+    //
+    ERROR,
+    //
+    PRIVMSG,
+    // User normal, USER CTCP, Channel
+    JOIN,
+    //
+    PART,
+    //
+    NICK,
+    //
+    NOTICE,
+    // CTCP responses
+    QUIT,
+    //
+    KICK,
+    //
+    MODE,
+    //
+    TOPIC,
+    //
     INVITE; //
 }

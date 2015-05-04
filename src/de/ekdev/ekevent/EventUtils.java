@@ -5,11 +5,7 @@ package de.ekdev.ekevent;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author ekDev
@@ -50,8 +46,8 @@ public class EventUtils
             if (eh == null) continue;
 
             final Class<?> checkClass;
-            if (method.getParameterTypes().length != 1
-                    || !Event.class.isAssignableFrom(checkClass = method.getParameterTypes()[0]))
+            if (method.getParameterTypes().length != 1 || !Event.class
+                    .isAssignableFrom(checkClass = method.getParameterTypes()[0]))
             {
                 // " Attempt to register an invalid EventHandler method signature \""
                 // + method.toGenericString() + "\" in " + listener.getClass());
@@ -69,8 +65,10 @@ public class EventUtils
                 ret.put(eventClass, eventSet);
             }
 
-            EventExecutor executor = new EventExecutor() {
-                public void execute(Event event, EventListener listener) throws EventException
+            EventExecutor executor = new EventExecutor()
+            {
+                public void execute(Event event, EventListener listener)
+                        throws EventException
                 {
                     try
                     {

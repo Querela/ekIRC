@@ -3,16 +3,16 @@
  */
 package de.ekdev.ekirc.core;
 
-import java.net.UnknownHostException;
-import java.util.List;
-import java.util.Objects;
-
 import de.ekdev.ekirc.core.commands.connection.IRCPassCommand;
 import de.ekdev.ekirc.core.commands.connection.IRCQuitCommand;
 import de.ekdev.ekirc.core.commands.misc.IRCPongCommand;
 import de.ekdev.ekirc.core.event.IRCConnectEvent;
 import de.ekdev.ekirc.core.event.IRCDisconnectEvent;
 import de.ekdev.ekirc.core.event.IRCEvent;
+
+import java.net.UnknownHostException;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author ekDev
@@ -382,7 +382,8 @@ public class IRCNetwork implements IRCIOInterface
     // --------------------------------
 
     @Override
-    protected void finalize() throws Throwable
+    protected void finalize()
+            throws Throwable
     {
         if (this.isConnected()) this.disconnect(false);
 

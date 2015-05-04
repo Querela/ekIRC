@@ -3,17 +3,7 @@
  */
 package de.ekdev.ekirc.core;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.FileAlreadyExistsException;
 import java.text.SimpleDateFormat;
@@ -43,8 +33,8 @@ public class IRCConnectionLog
     private boolean canWrite;
     protected Date startDate;
 
-    public IRCConnectionLog(String filename, boolean append) throws FileNotFoundException, IllegalArgumentException,
-            NullPointerException
+    public IRCConnectionLog(String filename, boolean append)
+            throws FileNotFoundException, IllegalArgumentException, NullPointerException
     {
         // create a file output log
         Objects.requireNonNull(filename, "filename must not be null!");
@@ -58,26 +48,28 @@ public class IRCConnectionLog
             throw new IllegalArgumentException("Argument filename specifies no file!");
         }
 
-        this.writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, append),
-                Charset.defaultCharset())));
+        this.writer = new PrintWriter(new BufferedWriter(
+                new OutputStreamWriter(new FileOutputStream(file, append), Charset.defaultCharset())));
         this.canWrite = true;
 
         // append a empty line if file existed and probably had Content
         if (fileexists && append) this.line("");
     }
 
-    public IRCConnectionLog() throws IOException
+    public IRCConnectionLog()
+            throws IOException
     {
         // create log with temp file
         this.file = File.createTempFile("IRCConnectionLog", ".temp.log");
         // this.file.deleteOnExit();
 
-        this.writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, false),
-                Charset.defaultCharset())));
+        this.writer = new PrintWriter(new BufferedWriter(
+                new OutputStreamWriter(new FileOutputStream(file, false), Charset.defaultCharset())));
         this.canWrite = true;
     }
 
-    public IRCConnectionLog(OutputStream os) throws NullPointerException
+    public IRCConnectionLog(OutputStream os)
+            throws NullPointerException
     {
         // Create a log with given output stream
         Objects.requireNonNull(os, "os must not be null!");
@@ -101,7 +93,8 @@ public class IRCConnectionLog
     }
 
     @Override
-    protected void finalize() throws Throwable
+    protected void finalize()
+            throws Throwable
     {
         this.close();
 
@@ -125,8 +118,8 @@ public class IRCConnectionLog
         return (this.file != null);
     }
 
-    public synchronized boolean moveLogFile(String newFilename) throws FileAlreadyExistsException,
-            UnsupportedOperationException
+    public synchronized boolean moveLogFile(String newFilename)
+            throws FileAlreadyExistsException, UnsupportedOperationException
     {
         if (!this.canMoveLogFile())
         {
@@ -162,8 +155,8 @@ public class IRCConnectionLog
 
         try
         {
-            this.writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(this.file,
-                    true), Charset.defaultCharset())));
+            this.writer = new PrintWriter(new BufferedWriter(
+                    new OutputStreamWriter(new FileOutputStream(this.file, true), Charset.defaultCharset())));
             this.canWrite = true;
 
             if (ret)
@@ -264,8 +257,7 @@ public class IRCConnectionLog
         List<String> lines = new ArrayList<>();
         try
         {
-            while ((line = br.readLine()) != null)
-                lines.add(IRCConnectionLog.PREFIX_MESSAGE + optPrefix + line);
+            while ((line = br.readLine()) != null) lines.add(IRCConnectionLog.PREFIX_MESSAGE + optPrefix + line);
         }
         catch (IOException ioe)
         {
@@ -297,8 +289,7 @@ public class IRCConnectionLog
         List<String> lines = new ArrayList<>();
         try
         {
-            while ((line = br.readLine()) != null)
-                lines.add(IRCConnectionLog.PREFIX_EXCEPTION + line);
+            while ((line = br.readLine()) != null) lines.add(IRCConnectionLog.PREFIX_EXCEPTION + line);
         }
         catch (IOException ioe)
         {

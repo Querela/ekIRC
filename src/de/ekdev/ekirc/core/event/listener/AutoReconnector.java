@@ -3,14 +3,14 @@
  */
 package de.ekdev.ekirc.core.event.listener;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import de.ekdev.ekevent.EventHandler;
 import de.ekdev.ekevent.EventListener;
 import de.ekdev.ekirc.core.IRCNetwork;
 import de.ekdev.ekirc.core.event.IRCDisconnectEvent;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author ekDev
@@ -45,7 +45,8 @@ public class AutoReconnector implements EventListener
 
         final IRCNetwork inet = ide.getIRCNetwork();
         final ScheduledExecutorService stp = Executors.newScheduledThreadPool(1);
-        final Runnable tr = new Runnable() {
+        final Runnable tr = new Runnable()
+        {
             private int tryCounter = 0;
 
             @Override

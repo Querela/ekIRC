@@ -3,11 +3,11 @@
  */
 package de.ekdev.ekirc.core.commands.misc;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import de.ekdev.ekirc.core.AsIRCMessage;
 import de.ekdev.ekirc.core.IRCMessage;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author ekDev

@@ -3,15 +3,11 @@
  */
 package de.ekdev.ekirc.core.commands.channel;
 
+import de.ekdev.ekirc.core.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import de.ekdev.ekirc.core.AsIRCMessage;
-import de.ekdev.ekirc.core.IRCChannel;
-import de.ekdev.ekirc.core.IRCChannelNameFormatException;
-import de.ekdev.ekirc.core.IRCMessage;
-import de.ekdev.ekirc.core.IRCUtils;
 
 /**
  * @author ekDev
@@ -25,19 +21,22 @@ public class IRCJoinCommand implements AsIRCMessage
     private final String channel;
     private final String key;
 
-    public IRCJoinCommand(String channel, String key) throws NullPointerException, IRCChannelNameFormatException
+    public IRCJoinCommand(String channel, String key)
+            throws NullPointerException, IRCChannelNameFormatException
     {
         this.channel = IRCChannel.validateChannelname(channel);
         // IRCChannel.validateChannelkey(key);
         this.key = IRCUtils.emptyToNull(key);
     }
 
-    public IRCJoinCommand(String channel) throws NullPointerException, IRCChannelNameFormatException
+    public IRCJoinCommand(String channel)
+            throws NullPointerException, IRCChannelNameFormatException
     {
         this(channel, null);
     }
 
-    public IRCJoinCommand(List<String> channellist) throws NullPointerException, IRCChannelNameFormatException
+    public IRCJoinCommand(List<String> channellist)
+            throws NullPointerException, IRCChannelNameFormatException
     {
         Objects.requireNonNull(channellist, "channellist must not be null!");
         if (channellist.size() == 0)

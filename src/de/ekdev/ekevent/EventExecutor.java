@@ -8,5 +8,6 @@ package de.ekdev.ekevent;
  */
 public interface EventExecutor
 {
-    public void execute(Event event, EventListener listener) throws EventException;
+    public void execute(Event event, EventListener listener)
+            throws EventException;
 }

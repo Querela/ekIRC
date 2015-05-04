@@ -3,13 +3,13 @@
  */
 package de.ekdev.ekirc.core.event;
 
-import java.lang.reflect.Field;
-
 import de.ekdev.ekevent.EventListenerList;
 import de.ekdev.ekirc.core.IRCMessage;
 import de.ekdev.ekirc.core.IRCNetwork;
 import de.ekdev.ekirc.core.IRCNumericServerReply;
 import de.ekdev.ekirc.core.IRCUtils;
+
+import java.lang.reflect.Field;
 
 /**
  * @author ekDev
@@ -151,7 +151,12 @@ public class IRCErrorReplyEvent extends IRCNetworkInfoEvent
 
     public static enum Usage
     {
-        ALL, CHANNEL, USER, SERVER, COMMAND, REGISTRATION
+        ALL,
+        CHANNEL,
+        USER,
+        SERVER,
+        COMMAND,
+        REGISTRATION
     }
 
     // public static enum Scope

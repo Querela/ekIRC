@@ -3,15 +3,15 @@
  */
 package de.ekdev.ekirc.core.commands.channel;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-
 import de.ekdev.ekirc.core.AsIRCMessage;
 import de.ekdev.ekirc.core.IRCChannel;
 import de.ekdev.ekirc.core.IRCMessage;
 import de.ekdev.ekirc.core.IRCUtils;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author ekDev
@@ -36,8 +36,8 @@ public class IRCPartCommand implements AsIRCMessage
 
     public IRCPartCommand(Collection<IRCChannel> ircChannels, String reason)
     {
-        this.channels = IRCUtils.concatenateChannelNames(Objects.requireNonNull(ircChannels,
-                "ircChannels must not be null!"));
+        this.channels = IRCUtils
+                .concatenateChannelNames(Objects.requireNonNull(ircChannels, "ircChannels must not be null!"));
         this.reason = IRCUtils.emptyToNull(reason);
     }
 

@@ -3,10 +3,10 @@
  */
 package de.ekdev.ekirc.core.test;
 
+import de.ekdev.ekirc.core.IRCDCCManager;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
-import de.ekdev.ekirc.core.IRCDCCManager;
 
 /**
  * @author ekDev
@@ -17,7 +17,8 @@ public class SomeTests
     {
     }
 
-    public static void main(String[] args) throws UnknownHostException
+    public static void main(String[] args)
+            throws UnknownHostException
     {
 
         long address = 1657180742;

@@ -12,12 +12,14 @@ import java.util.Set;
  */
 public class EventManager
 {
-    public void register(EventListener listener, Class<? extends Event> event) throws EventException
+    public void register(EventListener listener, Class<? extends Event> event)
+            throws EventException
     {
         this.getEventListeners(event).registerAll(EventUtils.createRegisteredEventListenerMapping(listener).get(event));
     }
 
-    public void register(EventListener listener) throws EventException
+    public void register(EventListener listener)
+            throws EventException
     {
         for (Map.Entry<Class<? extends Event>, Set<RegisteredEventListener>> entry : EventUtils
                 .createRegisteredEventListenerMapping(listener).entrySet())
@@ -26,7 +28,8 @@ public class EventManager
         }
     }
 
-    public void unregister(EventListener listener, Class<? extends Event> event) throws EventException
+    public void unregister(EventListener listener, Class<? extends Event> event)
+            throws EventException
     {
         this.getEventListeners(event).unregister(listener);
 
@@ -76,7 +79,8 @@ public class EventManager
 
     // ------------------------------------------------------------------------
 
-    private EventListenerList getEventListeners(Class<? extends Event> type) throws EventException
+    private EventListenerList getEventListeners(Class<? extends Event> type)
+            throws EventException
     {
         try
         {
@@ -91,7 +95,8 @@ public class EventManager
         }
     }
 
-    private Class<? extends Event> getRegistrationClass(Class<? extends Event> clazz) throws EventException
+    private Class<? extends Event> getRegistrationClass(Class<? extends Event> clazz)
+            throws EventException
     {
         try
         {
@@ -100,8 +105,8 @@ public class EventManager
         }
         catch (NoSuchMethodException e)
         {
-            if (clazz.getSuperclass() != null && !clazz.getSuperclass().equals(Event.class)
-                    && Event.class.isAssignableFrom(clazz.getSuperclass()))
+            if (clazz.getSuperclass() != null && !clazz.getSuperclass().equals(Event.class) && Event.class
+                    .isAssignableFrom(clazz.getSuperclass()))
             {
                 return getRegistrationClass(clazz.getSuperclass().asSubclass(Event.class));
             }

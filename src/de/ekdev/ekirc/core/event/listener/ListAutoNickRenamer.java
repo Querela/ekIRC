@@ -3,15 +3,15 @@
  */
 package de.ekdev.ekirc.core.event.listener;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import de.ekdev.ekevent.EventHandler;
 import de.ekdev.ekevent.EventListener;
 import de.ekdev.ekirc.core.IRCNetwork;
 import de.ekdev.ekirc.core.commands.connection.IRCNickCommand;
 import de.ekdev.ekirc.core.event.NickAlreadyInUseEvent;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author ekDev
@@ -52,7 +52,7 @@ public class ListAutoNickRenamer implements EventListener
         }
 
         // if invalid nickname skip to next one ...
-        for (; this.index < this.nicknames.size();)
+        for (; this.index < this.nicknames.size(); )
         {
             try
             {

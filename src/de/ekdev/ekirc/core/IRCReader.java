@@ -22,7 +22,8 @@ public class IRCReader implements Runnable
     private Thread thread;
     private final static AtomicInteger threadCount = new AtomicInteger();
 
-    public IRCReader(IRCIOInterface ircInterface) throws NullPointerException
+    public IRCReader(IRCIOInterface ircInterface)
+            throws NullPointerException
     {
         Objects.requireNonNull(ircInterface, "ircInterface must not be null!");
 
@@ -50,8 +51,9 @@ public class IRCReader implements Runnable
         }
 
         // init reader
-        this.reader = new BufferedReader(new InputStreamReader(new DataInputStream(this.ircInterface.getIRCConnection()
-                .getInputStream()), this.ircInterface.getIRCConnection().getCharset()));
+        this.reader = new BufferedReader(
+                new InputStreamReader(new DataInputStream(this.ircInterface.getIRCConnection().getInputStream()),
+                        this.ircInterface.getIRCConnection().getCharset()));
 
         // run asynchronously
         this.thread = new Thread(this);

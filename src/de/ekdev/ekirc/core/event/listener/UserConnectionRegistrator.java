@@ -3,8 +3,6 @@
  */
 package de.ekdev.ekirc.core.event.listener;
 
-import java.util.Objects;
-
 import de.ekdev.ekevent.EventException;
 import de.ekdev.ekevent.EventHandler;
 import de.ekdev.ekevent.EventListener;
@@ -15,6 +13,8 @@ import de.ekdev.ekirc.core.IRCUsernameFormatException;
 import de.ekdev.ekirc.core.commands.connection.IRCNickCommand;
 import de.ekdev.ekirc.core.commands.connection.IRCUserCommand;
 import de.ekdev.ekirc.core.event.IRCConnectEvent;
+
+import java.util.Objects;
 
 /**
  * @author ekDev
@@ -67,8 +67,8 @@ public class UserConnectionRegistrator implements EventListener
 
         try
         {
-            this.ircNetwork.send(new IRCNickCommand(this.nickname), new IRCUserCommand(this.username, this.invisible,
-                    this.realname));
+            this.ircNetwork.send(new IRCNickCommand(this.nickname),
+                    new IRCUserCommand(this.username, this.invisible, this.realname));
         }
         catch (Exception e)
         {

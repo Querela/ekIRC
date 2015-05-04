@@ -18,7 +18,8 @@ public class PrivateMessageToUserEvent extends IRCMessageEvent
     private final IRCUser targetIRCUser;
     private final String message;
 
-    public PrivateMessageToUserEvent(IRCNetwork ircNetwork, IRCUser sourceIRCUser, IRCUser targetIRCUser, String message)
+    public PrivateMessageToUserEvent(IRCNetwork ircNetwork, IRCUser sourceIRCUser, IRCUser targetIRCUser,
+            String message)
     {
         super(ircNetwork);
 

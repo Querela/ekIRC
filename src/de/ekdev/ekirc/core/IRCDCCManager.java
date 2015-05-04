@@ -3,12 +3,12 @@
  */
 package de.ekdev.ekirc.core;
 
+import de.ekdev.ekirc.core.event.DCCFileTransferEvent;
+
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
-
-import de.ekdev.ekirc.core.event.DCCFileTransferEvent;
 
 /**
  * @author ekDev

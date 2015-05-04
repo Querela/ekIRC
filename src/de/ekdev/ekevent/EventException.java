@@ -5,7 +5,6 @@ package de.ekdev.ekevent;
 
 /**
  * @author ekDev
- * 
  */
 public class EventException extends Exception
 {

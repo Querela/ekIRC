@@ -23,7 +23,8 @@ public class IRCWriter implements Runnable
     private LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>(); // TODO: add limit?
     private final static AtomicInteger threadCount = new AtomicInteger();
 
-    public IRCWriter(IRCIOInterface ircInterface) throws NullPointerException
+    public IRCWriter(IRCIOInterface ircInterface)
+            throws NullPointerException
     {
         Objects.requireNonNull(ircInterface, "ircInterface must not be null!");
 
@@ -50,8 +51,9 @@ public class IRCWriter implements Runnable
         }
 
         // init writer
-        this.writer = new BufferedWriter(new OutputStreamWriter(new DataOutputStream(this.ircInterface
-                .getIRCConnection().getOutputStream()), this.ircInterface.getIRCConnection().getCharset()));
+        this.writer = new BufferedWriter(
+                new OutputStreamWriter(new DataOutputStream(this.ircInterface.getIRCConnection().getOutputStream()),
+                        this.ircInterface.getIRCConnection().getCharset()));
 
         // run asynchronously
         this.thread = new Thread(this);

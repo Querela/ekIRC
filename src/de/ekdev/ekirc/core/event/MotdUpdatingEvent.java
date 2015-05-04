@@ -3,13 +3,13 @@
  */
 package de.ekdev.ekirc.core.event;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import de.ekdev.ekevent.EventListenerList;
 import de.ekdev.ekirc.core.IRCNetwork;
 import de.ekdev.ekirc.core.IRCNetworkInfo;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author ekDev

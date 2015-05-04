@@ -3,12 +3,7 @@
  */
 package de.ekdev.ekirc.core;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author ekDev
@@ -45,7 +40,8 @@ public class IRCChannelList implements Iterable<IRCChannelList.Entry>
         return this.channels.size();
     }
 
-    public boolean contains(Object o) throws ClassCastException, NullPointerException
+    public boolean contains(Object o)
+            throws ClassCastException, NullPointerException
     {
         return this.channels.contains(o);
     }
@@ -79,12 +75,11 @@ public class IRCChannelList implements Iterable<IRCChannelList.Entry>
         private final int users;
         private final String topic;
 
-        public Entry(String name, int numberOfUsers, String topic) throws NullPointerException,
-                IllegalArgumentException
+        public Entry(String name, int numberOfUsers, String topic)
+                throws NullPointerException, IllegalArgumentException
         {
             Objects.requireNonNull(name, "name must not be null!");
-            if (numberOfUsers < 1)
-                throw new IllegalArgumentException("numberOfUsers must not be lower or equal zero!");
+            if (numberOfUsers < 1) throw new IllegalArgumentException("numberOfUsers must not be lower or equal zero!");
             if (topic != null && topic.trim().length() == 0) topic = null;
 
             this.name = name;

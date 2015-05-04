@@ -21,7 +21,8 @@ public class IRCDCCMessage
     private final int port;
     private final long size;
 
-    public IRCDCCMessage(String type, String argument, String address, int port, long size) throws NullPointerException
+    public IRCDCCMessage(String type, String argument, String address, int port, long size)
+            throws NullPointerException
     {
         Objects.requireNonNull(type, "type must not be null!");
         Objects.requireNonNull(argument, "argument must not be null!");
@@ -50,8 +51,8 @@ public class IRCDCCMessage
         this(type, argument, address, port, IRCDCCMessage.INVALID_SIZE_ARGUMENT);
     }
 
-    public static IRCDCCMessage createIRCDCCMessageFromTokens(String[] tokens) throws NullPointerException,
-            IRCDCCMessageFormatException
+    public static IRCDCCMessage createIRCDCCMessageFromTokens(String[] tokens)
+            throws NullPointerException, IRCDCCMessageFormatException
     {
         Objects.requireNonNull(tokens, "tokens must not be null!");
 
@@ -85,7 +86,8 @@ public class IRCDCCMessage
         return this.address;
     }
 
-    public InetAddress getInetAddress() throws UnknownHostException
+    public InetAddress getInetAddress()
+            throws UnknownHostException
     {
         return InetAddress.getByName("" + this.address);
     }

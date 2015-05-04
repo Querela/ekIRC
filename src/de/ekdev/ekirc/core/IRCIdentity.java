@@ -3,9 +3,9 @@
  */
 package de.ekdev.ekirc.core;
 
-import java.util.Objects;
-
 import de.ekdev.ekirc.core.commands.connection.IRCNickCommand;
+
+import java.util.Objects;
 
 /**
  * @author ekDev
@@ -20,7 +20,8 @@ public class IRCIdentity
 
     // ------------------------------------------------------------------------
 
-    public IRCIdentity(String realname, String password) throws NullPointerException
+    public IRCIdentity(String realname, String password)
+            throws NullPointerException
     {
         Objects.requireNonNull(realname, "realname must not be null!");
         IRCIdentity.validatePassword(password);
@@ -46,7 +47,8 @@ public class IRCIdentity
         return this.myIRCUser;
     }
 
-    protected void setIRCUser(IRCUser ircUser) throws NullPointerException
+    protected void setIRCUser(IRCUser ircUser)
+            throws NullPointerException
     {
         Objects.requireNonNull(ircUser, "ircUser must not be null!");
         // TODO: allow only one time? dependency inject?
@@ -55,7 +57,8 @@ public class IRCIdentity
 
     // ------------------------------------------------------------------------
 
-    public void changeNick(String newNickname) throws NullPointerException, IRCNicknameFormatException
+    public void changeNick(String newNickname)
+            throws NullPointerException, IRCNicknameFormatException
     {
         IRCNickCommand ircNickCommand = new IRCNickCommand(newNickname);
 
@@ -66,7 +69,8 @@ public class IRCIdentity
 
     // ------------------------------------------------------------------------
 
-    public static String validatePassword(String password) throws NullPointerException, IllegalArgumentException
+    public static String validatePassword(String password)
+            throws NullPointerException, IllegalArgumentException
     {
         Objects.requireNonNull(password, "Invalid password format: password must not be null!");
         if (password.length() == 0)

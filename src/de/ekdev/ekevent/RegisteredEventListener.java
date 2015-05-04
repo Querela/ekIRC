@@ -22,7 +22,8 @@ public class RegisteredEventListener
         return this.listener;
     }
 
-    public void callEvent(final Event event) throws EventException
+    public void callEvent(final Event event)
+            throws EventException
     {
         executor.execute(event, listener);
     }

@@ -3,15 +3,11 @@
  */
 package de.ekdev.ekirc.core.commands.message;
 
+import de.ekdev.ekirc.core.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import de.ekdev.ekirc.core.AsIRCMessage;
-import de.ekdev.ekirc.core.IRCChannel;
-import de.ekdev.ekirc.core.IRCMessage;
-import de.ekdev.ekirc.core.IRCMessageProcessor;
-import de.ekdev.ekirc.core.IRCUser;
 
 /**
  * @author ekDev
@@ -22,7 +18,8 @@ public class IRCNoticeCommand implements AsIRCMessage
     private final String target;
     private final String message;
 
-    protected IRCNoticeCommand(String target, String message, boolean quoteToLowLevel) throws NullPointerException
+    protected IRCNoticeCommand(String target, String message, boolean quoteToLowLevel)
+            throws NullPointerException
     {
         // TODO: validate target (servermask, hostmask, channel, user)
         Objects.requireNonNull(target, "target must not be null!");
@@ -40,12 +37,14 @@ public class IRCNoticeCommand implements AsIRCMessage
         this.message = message;
     }
 
-    public IRCNoticeCommand(IRCUser targetIRCUser, String message) throws NullPointerException
+    public IRCNoticeCommand(IRCUser targetIRCUser, String message)
+            throws NullPointerException
     {
         this(Objects.requireNonNull(targetIRCUser, "targetIRCUser must not be null!").getNickname(), message, true);
     }
 
-    public IRCNoticeCommand(IRCChannel targetIRCChannel, String message) throws NullPointerException
+    public IRCNoticeCommand(IRCChannel targetIRCChannel, String message)
+            throws NullPointerException
     {
         this(Objects.requireNonNull(targetIRCChannel, "targetIRCChannel must not be null!").getName(), message, true);
     }
